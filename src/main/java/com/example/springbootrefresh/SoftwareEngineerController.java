@@ -36,4 +36,10 @@ public class SoftwareEngineerController {
                 .toUri();
         return ResponseEntity.created(location).body(createdEngineer);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteSoftwareEngineer(@PathVariable Integer id) {
+        softwareEngineerService.deleteSoftwareEngineer(id);
+        return ResponseEntity.noContent().build();
+    }
 }

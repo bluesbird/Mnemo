@@ -1,8 +1,6 @@
 package com.example.springbootrefresh;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -31,13 +29,17 @@ public class SoftwareEngineerService {
     }
 
     public SoftwareEngineerDto getSoftwareEngineerById(Integer id) {
-        SoftwareEngineer softwareEngineer = softwareEngineerRepository.findById(id).orElseThrow(
-                () -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Software Engineer with id " + id + " does not exist"
-                )
+        return toDto(findSoftwareEngineer(id));
+    }
+
+    public void deleteSoftwareEngineer(Integer id) {
+        softwareEngineerRepository.delete(findSoftwareEngineer(id));
+    }
+
+    private SoftwareEngineer findSoftwareEngineer(Integer id) {
+        return softwareEngineerRepository.findById(id).orElseThrow(
+                () -> new SoftwareEngineerNotFoundException(id)
         );
-        return toDto(softwareEngineer);
     }
 
     private SoftwareEngineerDto toDto(SoftwareEngineer softwareEngineer) {
