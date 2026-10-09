@@ -5,12 +5,16 @@ import com.example.springbootrefresh.softwareengineer.api.SoftwareEngineerRespon
 import com.example.springbootrefresh.softwareengineer.domain.SoftwareEngineer;
 import com.example.springbootrefresh.softwareengineer.domain.SoftwareEngineerNotFoundException;
 import com.example.springbootrefresh.softwareengineer.persistence.SoftwareEngineerRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public class SoftwareEngineerService {
+
+    private static final Logger logger = LoggerFactory.getLogger(SoftwareEngineerService.class);
 
     private final SoftwareEngineerRepository softwareEngineerRepository;
 
@@ -19,9 +23,11 @@ public class SoftwareEngineerService {
     }
 
     public List<SoftwareEngineerResponseDto> getAllSoftwareEngineers() {
-        return softwareEngineerRepository.findAll().stream()
+        List<SoftwareEngineerResponseDto> engineers = softwareEngineerRepository.findAll().stream()
                 .map(this::toDto)
                 .toList();
+        logger.debug("Retrieved {} software engineers", engineers.size());
+        return engineers;
     }
 
     public SoftwareEngineerResponseDto addSoftwareEngineer(CreateSoftwareEngineerRequestDto request) {
@@ -30,20 +36,27 @@ public class SoftwareEngineerService {
                 request.name(),
                 request.techStack()
         );
-        return toDto(softwareEngineerRepository.save(softwareEngineer));
+        SoftwareEngineer savedEngineer = softwareEngineerRepository.save(softwareEngineer);
+        logger.info("Created software engineer with id {}", savedEngineer.getId());
+        return toDto(savedEngineer);
     }
 
     public SoftwareEngineerResponseDto getSoftwareEngineerById(Integer id) {
+        logger.debug("Retrieving software engineer with id {}", id);
         return toDto(findSoftwareEngineer(id));
     }
 
     public void deleteSoftwareEngineer(Integer id) {
         softwareEngineerRepository.delete(findSoftwareEngineer(id));
+        logger.info("Deleted software engineer with id {}", id);
     }
 
     private SoftwareEngineer findSoftwareEngineer(Integer id) {
         return softwareEngineerRepository.findById(id).orElseThrow(
-                () -> new SoftwareEngineerNotFoundException(id)
+                () -> {
+                    logger.warn("Software engineer with id {} was not found", id);
+                    return new SoftwareEngineerNotFoundException(id);
+                }
         );
     }
 
