@@ -1,6 +1,6 @@
-package com.example.springbootrefresh.common;
+package com.example.springbootrefresh.common.web;
 
-import com.example.springbootrefresh.softwareengineer.SoftwareEngineerNotFoundException;
+import com.example.springbootrefresh.softwareengineer.domain.SoftwareEngineerNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;

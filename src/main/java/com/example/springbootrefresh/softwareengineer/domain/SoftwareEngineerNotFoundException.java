@@ -1,4 +1,4 @@
-package com.example.springbootrefresh.softwareengineer;
+package com.example.springbootrefresh.softwareengineer.domain;
 
 public class SoftwareEngineerNotFoundException extends RuntimeException {
 

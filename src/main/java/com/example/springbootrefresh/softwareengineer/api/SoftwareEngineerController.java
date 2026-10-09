@@ -1,5 +1,6 @@
-package com.example.springbootrefresh.softwareengineer;
+package com.example.springbootrefresh.softwareengineer.api;
 
+import com.example.springbootrefresh.softwareengineer.application.SoftwareEngineerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.bind.annotation.*;

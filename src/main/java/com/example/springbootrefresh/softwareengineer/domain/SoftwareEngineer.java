@@ -1,4 +1,4 @@
-package com.example.springbootrefresh.softwareengineer;
+package com.example.springbootrefresh.softwareengineer.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
