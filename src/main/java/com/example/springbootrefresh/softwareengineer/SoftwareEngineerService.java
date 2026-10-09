@@ -1,4 +1,4 @@
-package com.example.springbootrefresh;
+package com.example.springbootrefresh.softwareengineer;
 
 import org.springframework.stereotype.Service;
 
