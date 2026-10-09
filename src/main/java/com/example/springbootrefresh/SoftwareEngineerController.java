@@ -1,7 +1,10 @@
 package com.example.springbootrefresh;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -25,7 +28,12 @@ public class SoftwareEngineerController {
     }
 
     @PostMapping
-    public void addSoftwareEngineer(@RequestBody SoftwareEngineerDto softwareEngineer) {
-        softwareEngineerService.addSoftwareEngineer(softwareEngineer);
+    public ResponseEntity<SoftwareEngineerDto> addSoftwareEngineer(@RequestBody SoftwareEngineerDto softwareEngineer) {
+        SoftwareEngineerDto createdEngineer = softwareEngineerService.addSoftwareEngineer(softwareEngineer);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(createdEngineer.id())
+                .toUri();
+        return ResponseEntity.created(location).body(createdEngineer);
     }
 }

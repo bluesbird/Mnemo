@@ -1,6 +1,8 @@
 package com.example.springbootrefresh;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -19,18 +21,21 @@ public class SoftwareEngineerService {
                 .toList();
     }
 
-    public void addSoftwareEngineer(SoftwareEngineerDto softwareEngineerDto) {
+    public SoftwareEngineerDto addSoftwareEngineer(SoftwareEngineerDto softwareEngineerDto) {
         SoftwareEngineer softwareEngineer = new SoftwareEngineer(
                 null,
                 softwareEngineerDto.name(),
                 softwareEngineerDto.techStack()
         );
-        softwareEngineerRepository.save(softwareEngineer);
+        return toDto(softwareEngineerRepository.save(softwareEngineer));
     }
 
     public SoftwareEngineerDto getSoftwareEngineerById(Integer id) {
         SoftwareEngineer softwareEngineer = softwareEngineerRepository.findById(id).orElseThrow(
-                () -> new IllegalStateException("Software Engineer with id " + id + " does not exist")
+                () -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Software Engineer with id " + id + " does not exist"
+                )
         );
         return toDto(softwareEngineer);
     }
