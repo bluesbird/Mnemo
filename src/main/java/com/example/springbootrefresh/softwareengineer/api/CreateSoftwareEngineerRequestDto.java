@@ -1,4 +1,6 @@
 package com.example.springbootrefresh.softwareengineer.api;
 
-public record CreateSoftwareEngineerRequestDto(String name, String techStack) {
+import java.util.List;
+
+public record CreateSoftwareEngineerRequestDto(String name, List<String> techStack) {
 }
