@@ -14,9 +14,9 @@ services:
       - db
     restart: unless-stopped
 
-  networks:
-    db:
-      driver: bridge
+networks:
+  db:
+    driver: bridge
 
-  volumes:
-    db:
+volumes:
+  db:
