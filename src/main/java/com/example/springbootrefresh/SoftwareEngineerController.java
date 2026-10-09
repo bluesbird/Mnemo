@@ -15,17 +15,17 @@ public class SoftwareEngineerController {
     }
 
     @GetMapping
-    public List<SoftwareEngineer> getAllEngineers() {
+    public List<SoftwareEngineerDto> getAllEngineers() {
         return softwareEngineerService.getAllSoftwareEngineers();
     }
 
     @GetMapping("/{id}")
-    public SoftwareEngineer getEngineerById(@PathVariable Integer id) { // TODO: @PathVariable vs @RequestParam?
+    public SoftwareEngineerDto getEngineerById(@PathVariable Integer id) {
         return softwareEngineerService.getSoftwareEngineerById(id);
     }
 
     @PostMapping
-    public void addSoftwareEngineer(@RequestBody SoftwareEngineer softwareEngineer) {
+    public void addSoftwareEngineer(@RequestBody SoftwareEngineerDto softwareEngineer) {
         softwareEngineerService.addSoftwareEngineer(softwareEngineer);
     }
 }

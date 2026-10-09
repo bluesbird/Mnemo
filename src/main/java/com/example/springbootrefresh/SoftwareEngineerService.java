@@ -13,17 +13,33 @@ public class SoftwareEngineerService {
         this.softwareEngineerRepository = softwareEngineerRepository;
     }
 
-    public List<SoftwareEngineer> getAllSoftwareEngineers(){ // TODO: create DTO for SoftwareEngineer to avoid exposing entity directly
-        return softwareEngineerRepository.findAll();
+    public List<SoftwareEngineerDto> getAllSoftwareEngineers() {
+        return softwareEngineerRepository.findAll().stream()
+                .map(this::toDto)
+                .toList();
     }
 
-    public void addSoftwareEngineer(SoftwareEngineer softwareEngineer) {
-        softwareEngineerRepository.save(softwareEngineer); // TODO: also use DTO for SoftwareEngineer to avoid exposing entity directly
+    public void addSoftwareEngineer(SoftwareEngineerDto softwareEngineerDto) {
+        SoftwareEngineer softwareEngineer = new SoftwareEngineer(
+                null,
+                softwareEngineerDto.name(),
+                softwareEngineerDto.techStack()
+        );
+        softwareEngineerRepository.save(softwareEngineer);
     }
 
-    public SoftwareEngineer getSoftwareEngineerById(Integer id) {
-        return softwareEngineerRepository.findById(id).orElseThrow(
+    public SoftwareEngineerDto getSoftwareEngineerById(Integer id) {
+        SoftwareEngineer softwareEngineer = softwareEngineerRepository.findById(id).orElseThrow(
                 () -> new IllegalStateException("Software Engineer with id " + id + " does not exist")
+        );
+        return toDto(softwareEngineer);
+    }
+
+    private SoftwareEngineerDto toDto(SoftwareEngineer softwareEngineer) {
+        return new SoftwareEngineerDto(
+                softwareEngineer.getId(),
+                softwareEngineer.getName(),
+                softwareEngineer.getTechStack()
         );
     }
 }
