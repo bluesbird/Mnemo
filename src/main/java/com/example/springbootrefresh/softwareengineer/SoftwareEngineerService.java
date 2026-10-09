@@ -13,22 +13,22 @@ public class SoftwareEngineerService {
         this.softwareEngineerRepository = softwareEngineerRepository;
     }
 
-    public List<SoftwareEngineerDto> getAllSoftwareEngineers() {
+    public List<SoftwareEngineerResponseDto> getAllSoftwareEngineers() {
         return softwareEngineerRepository.findAll().stream()
                 .map(this::toDto)
                 .toList();
     }
 
-    public SoftwareEngineerDto addSoftwareEngineer(SoftwareEngineerDto softwareEngineerDto) {
+    public SoftwareEngineerResponseDto addSoftwareEngineer(CreateSoftwareEngineerRequestDto request) {
         SoftwareEngineer softwareEngineer = new SoftwareEngineer(
                 null,
-                softwareEngineerDto.name(),
-                softwareEngineerDto.techStack()
+                request.name(),
+                request.techStack()
         );
         return toDto(softwareEngineerRepository.save(softwareEngineer));
     }
 
-    public SoftwareEngineerDto getSoftwareEngineerById(Integer id) {
+    public SoftwareEngineerResponseDto getSoftwareEngineerById(Integer id) {
         return toDto(findSoftwareEngineer(id));
     }
 
@@ -42,8 +42,8 @@ public class SoftwareEngineerService {
         );
     }
 
-    private SoftwareEngineerDto toDto(SoftwareEngineer softwareEngineer) {
-        return new SoftwareEngineerDto(
+    private SoftwareEngineerResponseDto toDto(SoftwareEngineer softwareEngineer) {
+        return new SoftwareEngineerResponseDto(
                 softwareEngineer.getId(),
                 softwareEngineer.getName(),
                 softwareEngineer.getTechStack()

@@ -18,18 +18,20 @@ public class SoftwareEngineerController {
     }
 
     @GetMapping
-    public List<SoftwareEngineerDto> getAllEngineers() {
+    public List<SoftwareEngineerResponseDto> getAllEngineers() {
         return softwareEngineerService.getAllSoftwareEngineers();
     }
 
     @GetMapping("/{id}")
-    public SoftwareEngineerDto getEngineerById(@PathVariable Integer id) {
+    public SoftwareEngineerResponseDto getEngineerById(@PathVariable Integer id) {
         return softwareEngineerService.getSoftwareEngineerById(id);
     }
 
     @PostMapping
-    public ResponseEntity<SoftwareEngineerDto> addSoftwareEngineer(@RequestBody SoftwareEngineerDto softwareEngineer) {
-        SoftwareEngineerDto createdEngineer = softwareEngineerService.addSoftwareEngineer(softwareEngineer);
+    public ResponseEntity<SoftwareEngineerResponseDto> addSoftwareEngineer(
+            @RequestBody CreateSoftwareEngineerRequestDto softwareEngineer
+    ) {
+        SoftwareEngineerResponseDto createdEngineer = softwareEngineerService.addSoftwareEngineer(softwareEngineer);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(createdEngineer.id())
