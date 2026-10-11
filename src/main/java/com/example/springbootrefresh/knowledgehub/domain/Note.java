@@ -50,11 +50,13 @@ public class Note {
     private LocalDateTime updatedAt;
 
     public Note(String title, String content) {
+        final LocalDateTime now = LocalDateTime.now();
+
         this.title = title;
         this.content = content;
         this.summary = null;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
     }
 
     public void setTitle(String title) {
