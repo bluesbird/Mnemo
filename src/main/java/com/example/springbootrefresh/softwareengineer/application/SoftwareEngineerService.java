@@ -26,7 +26,7 @@ public class SoftwareEngineerService {
         List<SoftwareEngineerResponseDto> engineers = softwareEngineerRepository.findAll().stream()
                 .map(this::toDto)
                 .toList();
-        logger.debug("Retrieved {} software engineers", engineers.size());
+        logger.info("Retrieved {} software engineers", engineers.size());
         return engineers;
     }
 
@@ -42,7 +42,7 @@ public class SoftwareEngineerService {
     }
 
     public SoftwareEngineerResponseDto getSoftwareEngineerById(Integer id) {
-        logger.debug("Retrieving software engineer with id {}", id);
+        logger.info("Retrieving software engineer with id {}", id);
         return toDto(findSoftwareEngineer(id));
     }
 
