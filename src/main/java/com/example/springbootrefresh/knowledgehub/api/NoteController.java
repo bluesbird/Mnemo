@@ -1,6 +1,7 @@
 package com.example.springbootrefresh.knowledgehub.api;
 
 import com.example.springbootrefresh.knowledgehub.application.NoteService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +31,7 @@ public class NoteController {
 
     @PostMapping
     public ResponseEntity<NoteResponseDto> addNote(
-            @RequestBody CreateNoteRequestDto note
+            @Valid @RequestBody CreateNoteRequestDto note
     ) {
         NoteResponseDto createdNote = noteService.addNote(note);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -38,6 +39,15 @@ public class NoteController {
                 .buildAndExpand(createdNote.id())
                 .toUri();
         return ResponseEntity.created(location).body(createdNote);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<NoteResponseDto> updateNote(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateNoteRequestDto note
+    ) {
+        NoteResponseDto updatedNote = noteService.updateNote(id, note);
+        return ResponseEntity.ok(updatedNote);
     }
 
     @DeleteMapping("/{id}")
