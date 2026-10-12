@@ -7,65 +7,54 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 public class OllamaAiService {
 
     private static final Logger logger = LoggerFactory.getLogger(OllamaAiService.class);
-    private static final Pattern WORD_PATTERN = Pattern.compile("[A-Za-z][A-Za-z0-9-]*");
-    private static final Set<String> STOP_WORDS = Set.of(
-            "the", "and", "for", "with", "this", "that", "from", "into", "your", "have", "has",
-            "are", "was", "were", "not", "but", "you", "our", "their", "will", "can", "use"
-    );
 
     private final ChatClient chatClient;
     private final boolean enabled;
-    private final boolean stubFallbackEnabled;
 
     public OllamaAiService(
             ChatClient.Builder chatClientBuilder,
-            @Value("${ai.ollama.enabled:true}") boolean enabled,
-            @Value("${ai.ollama.stub-fallback-enabled:true}") boolean stubFallbackEnabled
+            @Value("${ai.ollama.enabled:true}") boolean enabled
     ) {
         this.chatClient = chatClientBuilder.build();
         this.enabled = enabled;
-        this.stubFallbackEnabled = stubFallbackEnabled;
     }
 
     public AiNoteEnrichment enrichNote(String title, String content) {
         if (!enabled) {
-            return stubFallbackEnabled ? stubEnrichment(content) : new AiNoteEnrichment("", List.of());
+            return new AiNoteEnrichment(null, List.of());
         }
 
         try {
-            String summaryPrompt = "Summarize the note in 2 concise sentences.\n\n"
+            String summaryPrompt = "Create a short summary of this note.\n"
+                    + "Rules:\n"
+                    + "- Start with \"This note ...\"\n"
+                    + "- Keep it shorter than the original note\n"
+                    + "- Maximum 1 sentence\n"
+                    + "- Do not copy or repeat full phrases from the note\n"
+                    + "- Return only the summary sentence\n\n"
                     + "Title: " + title + "\n"
                     + "Content: " + content;
 
-            String tagsPrompt = "Generate up to 5 short lowercase tags for this note. "
+            String tagsPrompt = "Generate up to 3 short lowercase tags for this note. "
                     + "Return ONLY comma-separated tags, no explanation.\n\n"
                     + "Title: " + title + "\n"
                     + "Content: " + content;
 
-            String summary = callModel(summaryPrompt);
+            String summary = toSummaryOrNull(callModel(summaryPrompt));
             String rawTags = callModel(tagsPrompt);
             List<String> parsedTags = parseTags(rawTags);
 
-            if (summary == null || summary.isBlank() || parsedTags.isEmpty()) {
-                logger.warn("Ollama response incomplete; using fallback enrichment");
-                return stubFallbackEnabled ? stubEnrichment(content) : new AiNoteEnrichment("", List.of());
-            }
-
-            return new AiNoteEnrichment(summary.trim(), parsedTags);
+            return new AiNoteEnrichment(summary, parsedTags);
         } catch (RuntimeException ex) {
-            logger.warn("Spring AI Ollama call failed ({}). Falling back to enrichment stub", ex.getMessage());
-            return stubFallbackEnabled ? stubEnrichment(content) : new AiNoteEnrichment("", List.of());
+            logger.warn("Spring AI Ollama call failed ({}). Leaving summary and tags empty", ex.getMessage());
+            return new AiNoteEnrichment(null, List.of());
         }
     }
 
@@ -74,32 +63,21 @@ public class OllamaAiService {
         return response == null ? "" : response;
     }
 
-    private AiNoteEnrichment stubEnrichment(String content) {
-        String collapsed = content == null ? "" : content.replaceAll("\\s+", " ").trim();
-        String summary;
-        if (collapsed.length() <= 200) {
-            summary = collapsed;
-        } else {
-            summary = collapsed.substring(0, 200) + "...";
+    private String toSummaryOrNull(String rawSummary) {
+        if (rawSummary == null) {
+            return null;
         }
 
-        List<String> tags = extractKeywordTags(collapsed);
-        return new AiNoteEnrichment(summary, tags);
-    }
-
-    private List<String> extractKeywordTags(String content) {
-        Matcher matcher = WORD_PATTERN.matcher(content.toLowerCase(Locale.ROOT));
-        LinkedHashSet<String> tags = new LinkedHashSet<>();
-
-        while (matcher.find() && tags.size() < 5) {
-            String word = matcher.group();
-            if (word.length() < 4 || STOP_WORDS.contains(word)) {
-                continue;
-            }
-            tags.add(word);
+        String summary = rawSummary.replaceAll("\\s+", " ").trim();
+        if (summary.isBlank()) {
+            return null;
         }
 
-        return tags.stream().toList();
+        if (!summary.toLowerCase(Locale.ROOT).startsWith("this note")) {
+            summary = "This note " + summary;
+        }
+
+        return summary;
     }
 
     private List<String> parseTags(String rawTags) {
@@ -113,7 +91,7 @@ public class OllamaAiService {
                 .map(tag -> tag.trim().toLowerCase(Locale.ROOT))
                 .filter(tag -> !tag.isBlank())
                 .distinct()
-                .limit(5)
+                .limit(3)
                 .toList();
     }
 
