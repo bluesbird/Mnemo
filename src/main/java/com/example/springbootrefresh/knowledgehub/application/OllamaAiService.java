@@ -1,12 +1,10 @@
 package com.example.springbootrefresh.knowledgehub.application;
 
+import org.springframework.ai.chat.client.ChatClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -26,19 +24,16 @@ public class OllamaAiService {
             "are", "was", "were", "not", "but", "you", "our", "their", "will", "can", "use"
     );
 
-    private final RestClient restClient;
-    private final String model;
+    private final ChatClient chatClient;
     private final boolean enabled;
     private final boolean stubFallbackEnabled;
 
     public OllamaAiService(
-            @Value("${ai.ollama.base-url:http://localhost:11434}") String baseUrl,
-            @Value("${ai.ollama.model:qwen3:1.7b}") String model,
+            ChatClient.Builder chatClientBuilder,
             @Value("${ai.ollama.enabled:true}") boolean enabled,
             @Value("${ai.ollama.stub-fallback-enabled:true}") boolean stubFallbackEnabled
     ) {
-        this.restClient = RestClient.builder().baseUrl(baseUrl).build();
-        this.model = model;
+        this.chatClient = chatClientBuilder.build();
         this.enabled = enabled;
         this.stubFallbackEnabled = stubFallbackEnabled;
     }
@@ -68,24 +63,15 @@ public class OllamaAiService {
             }
 
             return new AiNoteEnrichment(summary.trim(), parsedTags);
-        } catch (RestClientException ex) {
-            logger.warn("Ollama unavailable ({}). Falling back to enrichment stub", ex.getMessage());
+        } catch (RuntimeException ex) {
+            logger.warn("Spring AI Ollama call failed ({}). Falling back to enrichment stub", ex.getMessage());
             return stubFallbackEnabled ? stubEnrichment(content) : new AiNoteEnrichment("", List.of());
         }
     }
 
     private String callModel(String prompt) {
-        GenerateResponse response = restClient.post()
-                .uri("/api/generate")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(new GenerateRequest(model, prompt, false))
-                .retrieve()
-                .body(GenerateResponse.class);
-
-        if (response == null) {
-            return "";
-        }
-        return response.response() == null ? "" : response.response();
+        String response = chatClient.prompt(prompt).call().content();
+        return response == null ? "" : response;
     }
 
     private AiNoteEnrichment stubEnrichment(String content) {
@@ -132,11 +118,5 @@ public class OllamaAiService {
     }
 
     public record AiNoteEnrichment(String summary, List<String> tagNames) {
-    }
-
-    private record GenerateRequest(String model, String prompt, boolean stream) {
-    }
-
-    private record GenerateResponse(String response) {
     }
 }
