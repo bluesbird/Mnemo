@@ -13,9 +13,9 @@ public class KnowledgeServiceApplication {
         SpringApplication.run(KnowledgeServiceApplication.class, args);
     }
 
-    @GetMapping
-    public String helloWorld() {
-        return "Hello World!";
+    @GetMapping("/health")
+    public String health() {
+        return "PersonalKnowledgeHub up and running!";
     }
 
 }
