@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -25,10 +25,16 @@ public class NoteService {
 
     private final NoteRepository noteRepository;
     private final TagRepository tagRepository;
+    private final OllamaAiService ollamaAiService;
 
-    public NoteService(NoteRepository noteRepository, TagRepository tagRepository) {
+    public NoteService(
+            NoteRepository noteRepository,
+            TagRepository tagRepository,
+            OllamaAiService ollamaAiService
+    ) {
         this.noteRepository = noteRepository;
         this.tagRepository = tagRepository;
+        this.ollamaAiService = ollamaAiService;
     }
 
     public List<NoteResponseDto> getAllNotes() {
@@ -41,15 +47,9 @@ public class NoteService {
 
     public NoteResponseDto addNote(CreateNoteRequestDto request) {
         Note note = new Note(request.title(), request.content());
-        
-        Set<Tag> tags = request.tagNames().stream()
-                .map(tagName -> tagRepository.findByName(tagName)
-                        .orElseGet(() -> tagRepository.save(new Tag(tagName))))
-                .collect(Collectors.toSet());
-        
-        note.setTags(tags);
+        note.setTags(new LinkedHashSet<>());
         note.setSummary(null);
-        
+
         Note savedNote = noteRepository.save(note);
         logger.info("Created note with id {}", savedNote.getId());
         return toDto(savedNote);
@@ -62,21 +62,32 @@ public class NoteService {
 
     public NoteResponseDto updateNote(Long id, UpdateNoteRequestDto request) {
         Note note = findNote(id);
-        
+
         note.setTitle(request.title());
         note.setContent(request.content());
+        note.setSummary(null);
+        note.setTags(new LinkedHashSet<>());
         note.setUpdatedAt(LocalDateTime.now());
-        
-        if (request.tagNames() != null && !request.tagNames().isEmpty()) {
-            Set<Tag> tags = request.tagNames().stream()
-                    .map(tagName -> tagRepository.findByName(tagName)
-                            .orElseGet(() -> tagRepository.save(new Tag(tagName))))
-                    .collect(Collectors.toSet());
-            note.setTags(tags);
-        }
-        
+
         Note updatedNote = noteRepository.save(note);
         logger.info("Updated note with id {}", id);
+        return toDto(updatedNote);
+    }
+
+    public NoteResponseDto enrichNoteWithAi(Long id) {
+        Note note = findNote(id);
+
+        OllamaAiService.AiNoteEnrichment enrichment = ollamaAiService.enrichNote(
+                note.getTitle(),
+                note.getContent()
+        );
+
+        note.setSummary(enrichment.summary());
+        note.setTags(resolveTags(enrichment.tagNames()));
+        note.setUpdatedAt(LocalDateTime.now());
+
+        Note updatedNote = noteRepository.save(note);
+        logger.info("AI-enriched note with id {}", id);
         return toDto(updatedNote);
     }
 
@@ -94,11 +105,25 @@ public class NoteService {
         );
     }
 
+    private Set<Tag> resolveTags(List<String> tagNames) {
+        if (tagNames == null || tagNames.isEmpty()) {
+            return new LinkedHashSet<>();
+        }
+
+        return tagNames.stream()
+                .map(tagName -> tagName == null ? "" : tagName.trim().toLowerCase())
+                .filter(tagName -> !tagName.isBlank())
+                .map(tagName -> tagRepository.findByName(tagName)
+                        .orElseGet(() -> tagRepository.save(new Tag(tagName))))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
     private NoteResponseDto toDto(Note note) {
         List<String> tagNames = note.getTags().stream()
                 .map(Tag::getName)
-                .collect(Collectors.toList());
-        
+                .sorted()
+                .toList();
+
         return new NoteResponseDto(
                 note.getId(),
                 note.getTitle(),

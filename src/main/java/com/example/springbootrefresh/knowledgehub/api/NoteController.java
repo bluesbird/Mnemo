@@ -3,8 +3,8 @@ package com.example.springbootrefresh.knowledgehub.api;
 import com.example.springbootrefresh.knowledgehub.application.NoteService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
@@ -48,6 +48,12 @@ public class NoteController {
     ) {
         NoteResponseDto updatedNote = noteService.updateNote(id, note);
         return ResponseEntity.ok(updatedNote);
+    }
+
+    @PostMapping("/{id}/ai-enrich")
+    public ResponseEntity<NoteResponseDto> enrichNoteWithAi(@PathVariable Long id) {
+        NoteResponseDto enrichedNote = noteService.enrichNoteWithAi(id);
+        return ResponseEntity.ok(enrichedNote);
     }
 
     @DeleteMapping("/{id}")
