@@ -1,6 +1,9 @@
 package com.example.springbootrefresh.knowledgehub.api;
 
 import com.example.springbootrefresh.knowledgehub.application.NoteService;
+import com.example.springbootrefresh.knowledgehub.api.dto.CreateNoteRequestDto;
+import com.example.springbootrefresh.knowledgehub.api.dto.NoteResponseDto;
+import com.example.springbootrefresh.knowledgehub.api.dto.UpdateNoteRequestDto;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

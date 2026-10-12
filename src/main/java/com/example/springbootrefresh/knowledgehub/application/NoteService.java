@@ -1,8 +1,8 @@
 package com.example.springbootrefresh.knowledgehub.application;
 
-import com.example.springbootrefresh.knowledgehub.api.CreateNoteRequestDto;
-import com.example.springbootrefresh.knowledgehub.api.NoteResponseDto;
-import com.example.springbootrefresh.knowledgehub.api.UpdateNoteRequestDto;
+import com.example.springbootrefresh.knowledgehub.api.dto.CreateNoteRequestDto;
+import com.example.springbootrefresh.knowledgehub.api.dto.NoteResponseDto;
+import com.example.springbootrefresh.knowledgehub.api.dto.UpdateNoteRequestDto;
 import com.example.springbootrefresh.knowledgehub.domain.Note;
 import com.example.springbootrefresh.knowledgehub.domain.NoteNotFoundException;
 import com.example.springbootrefresh.knowledgehub.domain.Tag;

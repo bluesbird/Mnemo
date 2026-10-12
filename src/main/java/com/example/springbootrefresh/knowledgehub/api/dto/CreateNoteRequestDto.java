@@ -1,8 +1,8 @@
-package com.example.springbootrefresh.knowledgehub.api;
+package com.example.springbootrefresh.knowledgehub.api.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record UpdateNoteRequestDto(
+public record CreateNoteRequestDto(
         @NotBlank(message = "Title cannot be blank")
         String title,
 

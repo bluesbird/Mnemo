@@ -1,4 +1,4 @@
-package com.example.springbootrefresh.knowledgehub.api;
+package com.example.springbootrefresh.knowledgehub.api.dto;
 
 import java.time.LocalDateTime;
 import java.util.List;
