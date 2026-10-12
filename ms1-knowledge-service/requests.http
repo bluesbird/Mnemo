@@ -1,0 +1,42 @@
+### Health Check
+GET http://localhost:8080
+
+###
+### Get all notes
+GET http://localhost:8080/api/v1/notes
+
+###
+### Create a note
+POST http://localhost:8080/api/v1/notes
+Content-Type: application/json
+
+{
+  "title": "Spring Boot Basics",
+  "content": "Spring Boot is a framework for building stand-alone, production-grade Spring-based applications with minimal configuration."
+}
+
+###
+### AI enrich note (sets summary + tags)
+POST http://localhost:8080/api/v1/notes/1/ai-enrich
+
+###
+### Get note by ID
+GET http://localhost:8080/api/v1/notes/1
+
+###
+### Update note content/title (resets summary + tags)
+PUT http://localhost:8080/api/v1/notes/1
+Content-Type: application/json
+
+{
+  "title": "Spring Boot Advanced Concepts",
+  "content": "Deep dive into Spring Boot with advanced configuration, dependency injection, and testing strategies."
+}
+
+###
+### Re-run AI enrich after update
+POST http://localhost:8080/api/v1/notes/1/ai-enrich
+
+###
+### Delete a note
+DELETE http://localhost:8080/api/v1/notes/1
