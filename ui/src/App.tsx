@@ -172,7 +172,8 @@ function App() {
     draft.title.trim().length > 0 && draft.content.trim().length > 0;
   const hasUnsavedChanges =
     selectedNote !== null &&
-    (draft.title !== selectedNote.title || draft.content !== selectedNote.content);
+    (draft.title !== selectedNote.title ||
+      draft.content !== selectedNote.content);
 
   return (
     <main className="app-shell">
