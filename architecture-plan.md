@@ -24,23 +24,32 @@ Build a compact portfolio project demonstrating full-stack development, polyglot
 ```
 
 ## 1. Frontend
-- React + TypeScript.
-- One shared UI for note management and the RAG chatbot.
-- Calls both microservices through REST.
+
+- [x] React + TypeScript UI.
+- [x] Note management UI: list, search note title/content/tags, create, edit, and delete notes through MS1.
+- [x] Display summaries and tags already stored on a note.
+- [ ] Trigger AI enrichment from the UI.
+- [ ] RAG chatbot UI (planned for phase 5).
+- [x] Calls MS1 through REST; local development uses the Vite proxy, with direct CORS access configurable.
+- [ ] Calls MS2 through REST.
 
 ## 2. MS1 — Knowledge Service (done for now)
+
 - **Stack:** Java 25, Spring Boot 4, Spring Data JPA / Hibernate.
 - **Database:** PostgreSQL; source of truth for notes and tags.
 - **Responsibilities:**
-  - Note and tag CRUD.
-  - Input validation and centralized exception handling.
-  - AI enrichment: generate summaries and suggest tags; persist results.
-  - Publish events when notes are created, updated, or deleted.
-  - Structured application logging.
-  - OpenAPI / Swagger API documentation.
-  - Optional: Pagination, basic text search, and tag filtering.
+  - [x] Note CRUD API (list, read, create, update, delete).
+  - [x] Persisted tags and note-tag associations, including tags created by enrichment; standalone tag CRUD API is not implemented.
+  - [x] Input validation and centralized exception handling.
+  - [x] AI enrichment through Ollama: generate summaries and suggest tags; persist results.
+  - [ ] Publish events when notes are created, updated, or deleted.
+  - [ ] Structured application logging (basic SLF4J application logs are present).
+  - [x] OpenAPI / Swagger API documentation.
+  - [ ] Optional API pagination, server-side text search, and tag filtering (the UI currently searches its loaded notes locally).
 
 ## 3. MS2 — RAG Service
+
+- **Status:** Stub; implementation is planned.
 - **Stack:** Python, FastAPI.
 - **Database:** ChromaDB for embeddings and vector-index data.
 - **Responsibilities:**
@@ -54,34 +63,38 @@ Build a compact portfolio project demonstrating full-stack development, polyglot
 - **RAG pipeline:** Embeddings, vector search, context construction, and LLM generation.
 
 ## 4. Communication
-- **UI ↔ MS1:** REST for notes, tags, filtering, and enrichment.
-- **UI ↔ MS2:** REST for chat requests.
-- **MS1 → MS2:** RabbitMQ events (`NoteCreated`, `NoteUpdated`, `NoteDeleted`).
-- **MS2 → MS1:** REST for initial indexing and full reindexing.
+
+- **UI ↔ MS1:** [x] REST note CRUD. [ ] UI-triggered enrichment and tag filtering.
+- **UI ↔ MS2:** [ ] REST for chat requests.
+- **MS1 → MS2:** [ ] RabbitMQ events (`NoteCreated`, `NoteUpdated`, `NoteDeleted`).
+- **MS2 → MS1:** [ ] REST for initial indexing and full reindexing.
 - The vector index is derived data; MS1 remains the source of truth.
 - Index updates are eventually consistent with PostgreSQL.
 
 ## 5. Infrastructure and Quality
-- Docker Compose for local development and deployment.
-- Separate Docker images for MS1 and MS2; optionally containerize the UI.
-- GitHub Actions CI for builds and tests.
-- Integration tests.
-- OpenAPI / Swagger documentation for API exploration.
-- Structured logs for debugging and operations.
-- Persistent volumes and backups for stateful services.
-- HTTPS and secrets supplied through environment variables in production.
-- Consider the Transactional Outbox Pattern later for reliable event publishing.
+
+- [x] Docker Compose for local development with PostgreSQL and MS1.
+- [ ] Separate Docker images for MS1 and MS2; optionally containerize the UI.
+- [ ] GitHub Actions CI for builds and tests.
+- [x] MS1 persistence integration tests; cross-service integration tests remain planned.
+- [x] OpenAPI / Swagger documentation for API exploration.
+- [ ] Structured logs for debugging and operations (basic SLF4J logs are present).
+- [x] PostgreSQL persistent volume in Docker Compose; backup procedure is not set up.
+- [ ] HTTPS and production secret management.
+- [ ] Consider the Transactional Outbox Pattern later for reliable event publishing.
 
 ## Design Principles
+
 - Clear domain boundaries and independent deployability.
 - Each service owns its data; no direct cross-service database access.
 - Keep the initial RAG implementation simple.
 - Defer advanced RAG, Kubernetes, and additional infrastructure until needed.
 
 ## Phases of Implementation
-1. MS1 — Knowledge Service (done - for now)
-2. UI for note management
-3. MS2 — RAG Service
-4. MS1 ↔ MS2 integration via RabbitMQ
-5. UI for RAG chatbot
-6. Integration tests and CI/CD setup
+
+1. [x] MS1 — Knowledge Service (done for now)
+2. [x] UI for note management
+3. [ ] MS2 — RAG Service
+4. [ ] MS1 ↔ MS2 integration via RabbitMQ
+5. [ ] UI for RAG chatbot
+6. [ ] Integration tests and CI/CD setup (MS1 persistence tests exist; cross-service tests and CI/CD remain)
