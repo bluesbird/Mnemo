@@ -278,6 +278,10 @@ kbd {
   cursor: pointer;
   font-size: 12px;
 }
+.text-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
 .delete-button:hover {
   color: #a4453d;
 }

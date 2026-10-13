@@ -28,7 +28,7 @@ Build a compact portfolio project demonstrating full-stack development, polyglot
 - [x] React + TypeScript UI.
 - [x] Note management UI: list, search note title/content/tags, create, edit, and delete notes through MS1.
 - [x] Display summaries and tags already stored on a note.
-- [ ] Trigger AI enrichment from the UI.
+- [x] Trigger AI enrichment from the UI for a saved note.
 - [ ] RAG chatbot UI (planned for phase 5).
 - [x] Calls MS1 through REST; local development uses the Vite proxy, with direct CORS access configurable.
 - [ ] Calls MS2 through REST.
@@ -64,7 +64,7 @@ Build a compact portfolio project demonstrating full-stack development, polyglot
 
 ## 4. Communication
 
-- **UI ↔ MS1:** [x] REST note CRUD. [ ] UI-triggered enrichment and tag filtering.
+- **UI ↔ MS1:** [x] REST note CRUD and UI-triggered enrichment. [ ] UI tag filtering.
 - **UI ↔ MS2:** [ ] REST for chat requests.
 - **MS1 → MS2:** [ ] RabbitMQ events (`NoteCreated`, `NoteUpdated`, `NoteDeleted`).
 - **MS2 → MS1:** [ ] REST for initial indexing and full reindexing.

@@ -40,6 +40,7 @@ function App() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [enriching, setEnriching] = useState(false);
   const [error, setError] = useState("");
 
   const selectedNote = notes.find((note) => note.id === selectedId) ?? null;
@@ -123,7 +124,12 @@ function App() {
   }
 
   async function deleteNote() {
-    if (!selectedNote || !window.confirm(`Delete “${selectedNote.title}”?`))
+    if (
+      !selectedNote ||
+      saving ||
+      enriching ||
+      !window.confirm(`Delete “${selectedNote.title}”?`)
+    )
       return;
     setError("");
     try {
@@ -141,9 +147,32 @@ function App() {
     }
   }
 
+  async function enrichNote() {
+    if (!selectedNote || saving || enriching) return;
+    setEnriching(true);
+    setError("");
+    try {
+      const enriched = await request<Note>(`/${selectedNote.id}/ai-enrich`, {
+        method: "POST",
+      });
+      setNotes((current) =>
+        current.map((note) => (note.id === enriched.id ? enriched : note)),
+      );
+    } catch (cause) {
+      setError(
+        cause instanceof Error ? cause.message : "Could not enrich note.",
+      );
+    } finally {
+      setEnriching(false);
+    }
+  }
+
   const hasEditor = isNew || selectedNote !== null;
   const canSave =
     draft.title.trim().length > 0 && draft.content.trim().length > 0;
+  const hasUnsavedChanges =
+    selectedNote !== null &&
+    (draft.title !== selectedNote.title || draft.content !== selectedNote.content);
 
   return (
     <main className="app-shell">
@@ -234,19 +263,35 @@ function App() {
                 </span>
                 <div className="toolbar-actions">
                   {selectedNote && (
-                    <button
-                      className="text-button delete-button"
-                      type="button"
-                      onClick={() => void deleteNote()}
-                    >
-                      Delete
-                    </button>
+                    <>
+                      <button
+                        className="text-button enrich-button"
+                        type="button"
+                        onClick={() => void enrichNote()}
+                        disabled={saving || enriching || hasUnsavedChanges}
+                        title={
+                          hasUnsavedChanges
+                            ? "Save your changes before enriching"
+                            : "Generate a summary and suggested tags"
+                        }
+                      >
+                        {enriching ? "Enriching…" : "Enrich with AI"}
+                      </button>
+                      <button
+                        className="text-button delete-button"
+                        type="button"
+                        onClick={() => void deleteNote()}
+                        disabled={saving || enriching}
+                      >
+                        Delete
+                      </button>
+                    </>
                   )}
                   <button
                     className="save-button"
                     type="submit"
                     form="note-form"
-                    disabled={!canSave || saving}
+                    disabled={!canSave || saving || enriching}
                   >
                     {saving ? "Saving…" : "Save note"}
                   </button>
