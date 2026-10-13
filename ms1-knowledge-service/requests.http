@@ -16,6 +16,16 @@ Content-Type: application/json
 }
 
 ###
+### Create a note 2
+POST http://localhost:8080/api/v1/notes
+Content-Type: application/json
+
+{
+  "title": "Attention Is All You Need",
+  "content": "It is a 2017 research paper on machine learning authored by eight scientists and engineers working at Google. The paper introduced a new deep learning architecture known as the transformer, based on the attention mechanism proposed in 2014 by Bahdanau et al. The transformer approach it describes has become the main architecture of a wide variety of artificial intelligence systems, including large language models. At the time, the focus of the research was on improving Seq2seq techniques for machine translation, but the authors went further in the paper, foreseeing the technique's potential for other tasks like question answering and what is now known as multimodal generative AI."
+}
+
+###
 ### AI enrich note (sets summary + tags)
 POST http://localhost:8080/api/v1/notes/1/ai-enrich
 
