@@ -28,7 +28,7 @@ Build a compact portfolio project demonstrating full-stack development, polyglot
 - One shared UI for note management and the RAG chatbot.
 - Calls both microservices through REST.
 
-## 2. MS1 — Knowledge Service
+## 2. MS1 — Knowledge Service (done for now)
 - **Stack:** Java 25, Spring Boot 4, Spring Data JPA / Hibernate.
 - **Database:** PostgreSQL; source of truth for notes and tags.
 - **Responsibilities:**
@@ -78,8 +78,8 @@ Build a compact portfolio project demonstrating full-stack development, polyglot
 - Keep the initial RAG implementation simple.
 - Defer advanced RAG, Kubernetes, and additional infrastructure until needed.
 
-## Order of Implementation
-1. MS1 — Knowledge Service
+## Phases of Implementation
+1. MS1 — Knowledge Service (done - for now)
 2. UI for note management
 3. MS2 — RAG Service
 4. MS1 ↔ MS2 integration via RabbitMQ
