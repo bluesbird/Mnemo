@@ -15,6 +15,21 @@ Build a Python-based RAG service that indexes notes from MS1 and answers questio
 
 No LangChain, separate chunk database, or sparse retrieval in V1.
 
+## Model Stack (V1)
+
+- **Embedding model:** `qwen3-embedding:0.6b` via Ollama (multilingual, long context, small enough for local CPU/GPU).
+- **RAG LLM:** `qwen3:1.7b` via Ollama.
+- **Tokenizer:** `Qwen/Qwen3-Embedding-0.6B` from Hugging Face, used only to count tokens for chunking (use the lightweight `tokenizers` package, not full `transformers`). Only the tokenizer files are downloaded; the model weights come from Ollama.
+- Pin the tokenizer to a specific Hugging Face revision and cache the files locally (also in the Docker image) so chunking is reproducible and works offline. Include the tokenizer revision in `indexing_version`.
+- Token counts are an approximation for the quantized Ollama model; keep headroom below the embedding context limit.
+- Model names, `num_ctx`, and generation settings are configuration (environment variables), not hard-coded.
+- Embedding model name and dimension are part of `indexing_version`; switching models requires a full rebuild because vectors from different models are not comparable.
+- Qwen3-Embedding is instruction-aware: embed queries with a task instruction prefix and documents without one; keep this consistent between indexing and querying.
+- Set `num_ctx` explicitly for the chat model (Ollama's default is small and silently truncates context) and size it for the retrieved chunks plus question plus answer.
+- Disable Qwen3 "thinking" mode for answer generation (e.g. `think: false`) to reduce latency and avoid reasoning text leaking into answers.
+- The 1.7B model is weak at faithfulness: use a strict prompt ("answer only from the context; say you don't know otherwise"), low temperature, and a small top-k (e.g. 3-5 chunks).
+- Upgrade path if quality is insufficient: a larger chat model such as `qwen3:4b` or `qwen3:8b`, changed through configuration only.
+
 ## Responsibilities
 
 - Consume `NoteCreated`, `NoteUpdated`, and `NoteDeleted` events from MS1.
@@ -33,11 +48,16 @@ No LangChain, separate chunk database, or sparse retrieval in V1.
 - Event payload should include at minimum: `event_id`, `event_type`, `occurred_at`, `note_id`, and `source_hash`.
 - Include a monotonic freshness signal (`note_version` or `updated_at`) to handle retries and out-of-order delivery safely.
 - Define explicit MS1 endpoints used by MS2 for note fetch and index metadata reconciliation.
+- **Required MS1 changes (prerequisite for MS2 sync, tracked in `architecture-plan.md`):**
+  - Add `source_hash` (from title and content) and a monotonic `note_version` to notes.
+  - Add an index-metadata endpoint returning `note_id`, `source_hash`, and `note_version` for all notes.
+  - Add a note-fetch endpoint usable by MS2 (existing `GET` note endpoints may suffice).
+  - Publish versioned events through RabbitMQ.
 - Keep event schema versioned to allow backward-compatible evolution.
 
 ## Chunking and Indexing
 
-- Chunk size: approximately 400 tokens.
+- Chunk size: approximately 400 tokens (counted with the Qwen3-Embedding tokenizer).
 - Overlap: approximately 50 tokens.
 - Respect paragraph boundaries where practical.
 - Avoid unnecessary chunking of short notes.
@@ -54,7 +74,7 @@ No LangChain, separate chunk database, or sparse retrieval in V1.
 - `POST /api/v1/admin/index/rebuild` — rebuild the entire vector index.
 - `POST /api/v1/chat/query` — retrieve relevant chunks, generate an answer, and return source references.
 - `GET /api/v1/health` — health check.
-- Admin endpoints should be protected (at least simple service-level auth in V1).
+- Admin endpoints are protected in V1 by a static API key sent in an `X-API-Key` header and read from an environment variable (never committed). Chat and health endpoints stay open.
 
 These are proposed endpoint names, not yet implemented.
 
@@ -80,6 +100,7 @@ These are proposed endpoint names, not yet implemented.
 
 ## Implementation Phases
 
+0. [ ] MS1 prerequisites: `source_hash`, `note_version`, and index-metadata endpoint (event publishing follows in step 6).
 1. [ ] Set up Python project, FastAPI, and configuration.
 2. [ ] Integrate Ollama embeddings and ChromaDB.
 3. [ ] Implement chunking and indexing for a small set of notes.
