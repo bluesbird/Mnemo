@@ -23,8 +23,7 @@ personal-knowledge-hub/
    - `docker compose up -d db`
 2. Run MS1:
    - `cd ms1-knowledge-service`
-   - `./mvnw spring-boot:run` (Linux/macOS)
-   - `mvnw.cmd spring-boot:run` (Windows)
+   - `.\mvnw.cmd spring-boot:run` (Windows)
 
 ## UI quick start
 
