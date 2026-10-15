@@ -60,3 +60,12 @@ Content-Type: application/json
 {
   "question": "What does xd mean?"
 }
+
+###
+### Ask a question
+POST http://localhost:8000/api/v1/chat/query
+Content-Type: application/json
+
+{
+  "question": "What number is light gray? why?"
+}
