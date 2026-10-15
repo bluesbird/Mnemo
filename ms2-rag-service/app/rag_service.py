@@ -166,6 +166,8 @@ class RagService:
             chunk_index = int(metadata.get("chunk_index", index))
             source_hash = str(metadata.get("source_hash", ""))
             score = max(0.0, 1.0 - float(distance))
+            if score < self._settings.retrieval_min_score:
+                continue
             excerpt = document[:300].strip()
 
             context_parts.append(f"[Note {note_id} | chunk {chunk_index}]\n{document}")
@@ -179,6 +181,10 @@ class RagService:
                     excerpt=excerpt,
                 )
             )
+
+        if not sources:
+            logger.info("No chunks above min score %s; skipping LLM call", self._settings.retrieval_min_score)
+            return ChatQueryResponse(answer="I don't know based on the provided notes.", sources=[])
 
         context = "\n\n".join(context_parts)
         answer = self._ollama_client.chat_answer(question, context)

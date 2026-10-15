@@ -4,21 +4,22 @@ from contextlib import asynccontextmanager
 from functools import lru_cache
 from typing import Annotated
 
-from fastapi import Depends, FastAPI
+import httpx
+from fastapi import Depends, FastAPI, Request
+from fastapi.responses import JSONResponse
 
 from app.chunker import NoteChunker
 from app.config import Settings, get_settings
 from app.events import NoteEventConsumer
+from app.logging_config import configure_logging
 from app.ms1_client import Ms1Client
 from app.ollama_client import OllamaClient
 from app.rag_service import RagService
 from app.schemas import ChatQueryRequest, ChatQueryResponse, HealthResponse, IndexOperationResponse
 from app.security import require_admin_api_key
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s %(name)s - %(message)s",
-)
+configure_logging(get_settings().log_format)
+logger = logging.getLogger(__name__)
 
 
 @lru_cache
@@ -50,6 +51,18 @@ app = FastAPI(
     description="RAG service for indexing MS1 notes and answering questions with references.",
     lifespan=lifespan,
 )
+
+
+@app.exception_handler(httpx.HTTPError)
+def upstream_error_handler(_: Request, exc: httpx.HTTPError) -> JSONResponse:
+    logger.error("Upstream call failed: %s", exc)
+    return JSONResponse(status_code=502, content={"detail": "An upstream dependency (MS1 or Ollama) failed or is unavailable."})
+
+
+@app.exception_handler(Exception)
+def unhandled_error_handler(_: Request, exc: Exception) -> JSONResponse:
+    logger.exception("Unhandled error", exc_info=exc)
+    return JSONResponse(status_code=500, content={"detail": "Internal server error."})
 
 
 @app.get("/api/v1/health", response_model=HealthResponse)

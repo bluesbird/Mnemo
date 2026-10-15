@@ -33,8 +33,11 @@ class Settings(BaseSettings):
     chunk_size_tokens: int = 400
     chunk_overlap_tokens: int = 50
     tokenizer_name: str = "Qwen/Qwen3-Embedding-0.6B"
-    tokenizer_revision: str = "main"
+    tokenizer_revision: str = "97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3"
     retrieval_top_k_default: int = 4
+    retrieval_min_score: float = 0.45
+
+    log_format: str = "text"  # "text" or "json"
 
     rabbitmq_enabled: bool = True
     rabbitmq_host: str = "localhost"
