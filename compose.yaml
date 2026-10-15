@@ -39,6 +39,8 @@ services:
       retries: 10
 
   ms1-knowledge-service:
+    build:
+      context: ./ms1-knowledge-service
     image: ms1-knowledge-service:0.0.1-SNAPSHOT
     ports:
       - "8080:8080"
@@ -47,6 +49,9 @@ services:
       SPRING_DATASOURCE_USERNAME: bluesbird
       SPRING_DATASOURCE_PASSWORD: password
       SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_AI_OLLAMA_BASE_URL: http://host.docker.internal:11434
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       db:
         condition: service_healthy

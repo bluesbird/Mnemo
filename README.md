@@ -49,9 +49,9 @@ MS2 options (env vars, prefix `MS2_`): `RABBITMQ_ENABLED=false` runs without the
 - MS2: `cd ms2-rag-service; .\.venv\Scripts\python.exe -m pytest`
 ## Run everything in Docker
 
-Ollama must run on the host. MS1 image: `cd ms1-knowledge-service; .\mvnw.cmd spring-boot:build-image`
+Ollama must run on the host (reached via `host.docker.internal`).
 
-`docker compose up -d --build` starts PostgreSQL, RabbitMQ, MS1 and MS2 (admin key `MS2_ADMIN_API_KEY`, default `dev-admin-key`). Stop host-run MS1/MS2 first to free ports 8080/8000.
+`docker compose up -d --build` builds and starts PostgreSQL, RabbitMQ, MS1 and MS2 (admin key `MS2_ADMIN_API_KEY`, default `dev-admin-key`). Stop host-run MS1/MS2 first to free ports 8080/8000.
 
 ## UI quick start
 
