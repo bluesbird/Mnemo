@@ -1,0 +1,61 @@
+import logging
+
+import httpx
+
+from app.config import Settings
+
+logger = logging.getLogger(__name__)
+
+
+class OllamaClient:
+    def __init__(self, settings: Settings) -> None:
+        self._settings = settings
+        self._base_url = settings.ollama_base_url.rstrip("/")
+        self._client = httpx.Client(timeout=60.0)
+
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
+        if not texts:
+            return []
+        payload = {"model": self._settings.embedding_model, "input": texts}
+        response = self._client.post(f"{self._base_url}/api/embed", json=payload)
+        response.raise_for_status()
+        data = response.json()
+        embeddings = data.get("embeddings")
+        if not isinstance(embeddings, list) or len(embeddings) != len(texts):
+            raise RuntimeError("Invalid embedding response from Ollama.")
+        return embeddings
+
+    def embed_query(self, question: str) -> list[float]:
+        prompt = f"{self._settings.query_instruction_prefix}{question}"
+        embeddings = self.embed_documents([prompt])
+        return embeddings[0]
+
+    def chat_answer(self, question: str, context: str) -> str:
+        if context.strip() == "":
+            return "I don't know based on the provided notes."
+
+        system_prompt = (
+            "You are a knowledge assistant. Answer only using the provided context. "
+            "If the context is insufficient, say you don't know."
+        )
+        user_prompt = f"Question:\n{question}\n\nContext:\n{context}"
+        payload = {
+            "model": self._settings.chat_model,
+            "stream": False,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            "options": {
+                "temperature": self._settings.chat_temperature,
+                "num_ctx": self._settings.chat_num_ctx,
+                "think": self._settings.chat_think,
+            },
+        }
+        response = self._client.post(f"{self._base_url}/api/chat", json=payload)
+        response.raise_for_status()
+        data = response.json()
+        content = data.get("message", {}).get("content")
+        if not isinstance(content, str) or content.strip() == "":
+            raise RuntimeError("Invalid chat response from Ollama.")
+        return content.strip()

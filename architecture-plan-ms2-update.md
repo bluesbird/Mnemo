@@ -101,11 +101,11 @@ These are proposed endpoint names, not yet implemented.
 ## Implementation Phases
 
 0. [x] MS1 prerequisites: `source_hash` and index-metadata endpoint (implemented as `GET /api/v1/notes/index-metadata`; event publishing follows in step 6).
-1. [ ] Set up Python project, FastAPI, and configuration.
-2. [ ] Integrate Ollama embeddings and ChromaDB.
-3. [ ] Implement chunking and indexing for a small set of notes.
-4. [ ] Implement admin reconcile/rebuild and note-fetch contracts for manual/scheduled sync.
-5. [ ] Implement semantic retrieval and RAG answers with source references.
+1. [x] Set up Python project, FastAPI, and configuration.
+2. [x] Integrate Ollama embeddings and ChromaDB.
+3. [x] Implement chunking and indexing for a small set of notes.
+4. [x] Implement admin reconcile/rebuild and note-fetch contracts for manual/scheduled sync.
+5. [x] Implement semantic retrieval and RAG answers with source references.
 6. [ ] Integrate RabbitMQ events from MS1 for incremental updates.
 7. [ ] Add error handling, structured logging, and tests.
 8. [ ] Containerize MS2 and integrate it into Docker Compose.

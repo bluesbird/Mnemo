@@ -107,7 +107,7 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
 1. [x] MS1 — Knowledge Service (core done)
 2. [x] UI for note management
 3. [x] MS1 prerequisites for MS2 (`source_hash`, index-metadata endpoint)
-4. [ ] MS2 — RAG Service (manual/scheduled reconcile + query first)
+4. [x] MS2 — RAG Service (manual/scheduled reconcile + query first)
 5. [ ] MS1 ↔ MS2 integration via RabbitMQ incremental events
 6. [ ] UI for RAG chatbot
 7. [ ] Integration tests and CI/CD setup (MS1 persistence tests exist; cross-service tests and CI/CD remain)

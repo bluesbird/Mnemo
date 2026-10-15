@@ -1,0 +1,49 @@
+from functools import lru_cache
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_prefix="MS2_",
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
+
+    app_name: str = "ms2-rag-service"
+    app_env: str = "dev"
+
+    ms1_base_url: str = "http://localhost:8080"
+    ms1_timeout_seconds: float = 10.0
+
+    admin_api_key: str | None = None
+
+    ollama_base_url: str = "http://localhost:11434"
+    embedding_model: str = "qwen3-embedding:0.6b"
+    chat_model: str = "qwen3:1.7b"
+    chat_num_ctx: int = 4096
+    chat_temperature: float = 0.1
+    chat_think: bool = False
+    query_instruction_prefix: str = "Represent this query for searching relevant passages: "
+
+    chroma_path: str = "./data/chroma"
+    chroma_collection_name: str = "notes"
+
+    chunk_size_tokens: int = 400
+    chunk_overlap_tokens: int = 50
+    tokenizer_name: str = "Qwen/Qwen3-Embedding-0.6B"
+    tokenizer_revision: str = "main"
+    retrieval_top_k_default: int = 4
+
+    @property
+    def indexing_version(self) -> str:
+        return (
+            f"v1|chunk={self.chunk_size_tokens}|overlap={self.chunk_overlap_tokens}"
+            f"|embed={self.embedding_model}|tokenizer={self.tokenizer_name}@{self.tokenizer_revision}"
+        )
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()

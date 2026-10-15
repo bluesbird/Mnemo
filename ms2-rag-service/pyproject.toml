@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ms2-rag-service"
+version = "0.1.0"
+description = "RAG service stub for Personal Knowledge Hub"
+requires-python = ">=3.12"
+dependencies = [
+    "chromadb==1.1.1",
+    "fastapi==0.116.1",
+    "httpx==0.28.1",
+    "pydantic-settings==2.10.1",
+    "tokenizers==0.22.1",
+    "uvicorn[standard]==0.35.0",
+]
