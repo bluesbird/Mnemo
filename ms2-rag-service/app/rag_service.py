@@ -1,4 +1,5 @@
 import logging
+import threading
 from dataclasses import dataclass
 
 import chromadb
@@ -8,7 +9,7 @@ from app.chunker import NoteChunker
 from app.config import Settings
 from app.ms1_client import Ms1Client
 from app.ollama_client import OllamaClient
-from app.schemas import ChatQueryResponse, ChatSourceReference, IndexOperationResponse
+from app.schemas import ChatQueryResponse, ChatSourceReference, IndexOperationResponse, NoteSyncResult
 
 logger = logging.getLogger(__name__)
 
@@ -32,8 +33,39 @@ class RagService:
         self._ollama_client = ollama_client
         self._chunker = chunker
         self._chroma_client = chromadb.PersistentClient(path=settings.chroma_path)
+        # Serializes index writes between the event consumer thread and admin endpoints.
+        self._index_lock = threading.Lock()
+
+    def sync_note(self, note_id: int) -> NoteSyncResult:
+        with self._index_lock:
+            collection = self._get_or_create_collection()
+            note = self._ms1_client.fetch_note(note_id)
+            if note is None:
+                self._delete_note_chunks(collection, note_id)
+                logger.info("Note %s deleted in MS1; removed from index", note_id)
+                return NoteSyncResult(note_id=note_id, action="deleted")
+
+            current_state = self._read_note_state(collection, note_id)
+            if (
+                current_state is not None
+                and current_state.source_hash == note.source_hash
+                and current_state.indexing_version == self._settings.indexing_version
+            ):
+                logger.info("Note %s already up to date; skipping", note_id)
+                return NoteSyncResult(note_id=note_id, action="skipped")
+
+            self._index_note(collection, note.id, note.title, note.content, note.source_hash)
+            return NoteSyncResult(note_id=note_id, action="indexed")
 
     def reconcile_index(self) -> IndexOperationResponse:
+        with self._index_lock:
+            return self._reconcile_index_locked()
+
+    def rebuild_index(self) -> IndexOperationResponse:
+        with self._index_lock:
+            return self._rebuild_index_locked()
+
+    def _reconcile_index_locked(self) -> IndexOperationResponse:
         collection = self._get_or_create_collection()
         metadata_items = self._ms1_client.fetch_index_metadata()
         index_state = self._read_index_state(collection)
@@ -61,7 +93,7 @@ class RagService:
                 deleted_note_ids.append(item.note_id)
                 continue
 
-            self._index_note(collection, note.id, note.title, note.content, item.source_hash)
+            self._index_note(collection, note.id, note.title, note.content, note.source_hash)
             indexed_note_ids.append(item.note_id)
 
         for indexed_note_id in index_state:
@@ -83,7 +115,7 @@ class RagService:
             total_ms1_notes=len(metadata_items),
         )
 
-    def rebuild_index(self) -> IndexOperationResponse:
+    def _rebuild_index_locked(self) -> IndexOperationResponse:
         metadata_items = self._ms1_client.fetch_index_metadata()
         self._reset_collection()
         collection = self._get_or_create_collection()
@@ -97,7 +129,7 @@ class RagService:
             if note is None:
                 deleted_note_ids.append(item.note_id)
                 continue
-            self._index_note(collection, note.id, note.title, note.content, item.source_hash)
+            self._index_note(collection, note.id, note.title, note.content, note.source_hash)
             indexed_note_ids.append(item.note_id)
 
         logger.info("Rebuild complete: indexed=%s", len(indexed_note_ids))
@@ -191,6 +223,17 @@ class RagService:
 
     def _delete_note_chunks(self, collection: Collection, note_id: int) -> None:
         collection.delete(where={"note_id": str(note_id)})
+
+    def _read_note_state(self, collection: Collection, note_id: int) -> IndexedNoteState | None:
+        page = collection.get(where={"note_id": str(note_id)}, limit=1, include=["metadatas"])
+        metadatas = page.get("metadatas") or []
+        if not metadatas:
+            return None
+        source_hash = metadatas[0].get("source_hash")
+        indexing_version = metadatas[0].get("indexing_version")
+        if isinstance(source_hash, str) and isinstance(indexing_version, str):
+            return IndexedNoteState(source_hash=source_hash, indexing_version=indexing_version)
+        return None
 
     def _read_index_state(self, collection: Collection) -> dict[str, IndexedNoteState]:
         state: dict[str, IndexedNoteState] = {}

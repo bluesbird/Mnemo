@@ -36,6 +36,19 @@ class Settings(BaseSettings):
     tokenizer_revision: str = "main"
     retrieval_top_k_default: int = 4
 
+    rabbitmq_enabled: bool = True
+    rabbitmq_host: str = "localhost"
+    rabbitmq_port: int = 5672
+    rabbitmq_username: str = "bluesbird"
+    rabbitmq_password: str = "password"
+    rabbitmq_heartbeat_seconds: int = 300
+    events_exchange: str = "notes.events"
+    events_queue: str = "ms2.note-events"
+    events_dead_letter_exchange: str = "notes.events.dlx"
+    events_dead_letter_queue: str = "ms2.note-events.dlq"
+    events_max_attempts: int = 3
+    events_retry_backoff_seconds: float = 2.0
+
     @property
     def indexing_version(self) -> str:
         return (

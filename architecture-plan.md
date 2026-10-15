@@ -48,7 +48,7 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
   - [x] AI enrichment through Ollama: generate summaries and suggest tags; persist results.
   - [x] Add a persisted `source_hash` (title + content), recomputed whenever title or content changes.
   - [x] Index-metadata endpoint (`note_id`, `source_hash`) for MS2 reconciliation (`GET /api/v1/notes/index-metadata`).
-  - [ ] Publish versioned events when notes are created, updated, or deleted.
+  - [x] Publish versioned events when notes are created, updated, or deleted.
   - [ ] Structured application logging (basic SLF4J application logs are present).
   - [x] OpenAPI / Swagger API documentation.
   - [ ] Optional API pagination, server-side text search, and tag filtering (the UI currently searches its loaded notes locally).
@@ -75,7 +75,7 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
 
 - **UI ↔ MS1:** [x] REST note CRUD and UI-triggered enrichment. [ ] UI tag filtering.
 - **UI ↔ MS2:** [ ] REST for chat requests.
-- **MS1 → MS2:** [ ] RabbitMQ events (`NoteCreated`, `NoteUpdated`, `NoteDeleted`).
+- **MS1 → MS2:** [x] RabbitMQ events (`NoteCreated`, `NoteUpdated`, `NoteDeleted`).
 - **MS2 → MS1:** [ ] REST for initial indexing and full reindexing.
 - **MS2 → Ollama:** [ ] REST for embeddings and answer generation.
 - **Event contract:** Define a versioned payload with `event_id`, `event_type`, `occurred_at`, and `note_id`. The event is only a change trigger; MS2 fetches the current note state from MS1.
@@ -90,7 +90,7 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
 - [x] MS1 persistence integration tests; cross-service integration tests remain planned.
 - [x] OpenAPI / Swagger documentation for API exploration.
 - [ ] Structured logs for debugging and operations (basic SLF4J logs are present).
-- [ ] Retry and dead-letter handling for RabbitMQ consumers in MS2.
+- [x] Retry and dead-letter handling for RabbitMQ consumers in MS2.
 - [x] PostgreSQL persistent volume in Docker Compose; backup procedure is not set up.
 - [ ] HTTPS and production secret management.
 - [ ] Consider the Transactional Outbox Pattern later for reliable event publishing.

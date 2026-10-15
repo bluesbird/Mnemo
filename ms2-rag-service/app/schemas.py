@@ -16,6 +16,20 @@ class NoteForIndex(BaseModel):
     id: int
     title: str
     content: str
+    source_hash: str = Field(alias="sourceHash")
+
+
+class NoteEvent(BaseModel):
+    schema_version: int = 1
+    event_id: str
+    event_type: str
+    occurred_at: str
+    note_id: int
+
+
+class NoteSyncResult(BaseModel):
+    note_id: int
+    action: str
 
 
 class IndexOperationResponse(BaseModel):

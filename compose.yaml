@@ -20,6 +20,24 @@ services:
       timeout: 5s
       retries: 10
 
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:4-management
+    environment:
+      RABBITMQ_DEFAULT_USER: bluesbird
+      RABBITMQ_DEFAULT_PASS: password
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - messaging
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
   ms1-knowledge-service:
     image: ms1-knowledge-service:0.0.1-SNAPSHOT
     ports:
@@ -28,15 +46,21 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/spring_boot_refresh
       SPRING_DATASOURCE_USERNAME: bluesbird
       SPRING_DATASOURCE_PASSWORD: password
+      SPRING_RABBITMQ_HOST: rabbitmq
     depends_on:
       db:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     networks:
       - db
+      - messaging
     restart: unless-stopped
 
 networks:
   db:
+    driver: bridge
+  messaging:
     driver: bridge
 
 volumes:

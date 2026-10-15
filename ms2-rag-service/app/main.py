@@ -1,4 +1,6 @@
 import logging
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from functools import lru_cache
 from typing import Annotated
 
@@ -6,6 +8,7 @@ from fastapi import Depends, FastAPI
 
 from app.chunker import NoteChunker
 from app.config import Settings, get_settings
+from app.events import NoteEventConsumer
 from app.ms1_client import Ms1Client
 from app.ollama_client import OllamaClient
 from app.rag_service import RagService
@@ -15,12 +18,6 @@ from app.security import require_admin_api_key
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s - %(message)s",
-)
-
-app = FastAPI(
-    title="MS2 RAG Service",
-    version="0.1.0",
-    description="RAG service for indexing MS1 notes and answering questions with references.",
 )
 
 
@@ -33,6 +30,26 @@ def get_rag_service() -> RagService:
         ollama_client=OllamaClient(settings),
         chunker=NoteChunker(settings),
     )
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    settings = get_settings()
+    consumer: NoteEventConsumer | None = None
+    if settings.rabbitmq_enabled:
+        consumer = NoteEventConsumer(settings, get_rag_service().sync_note)
+        consumer.start()
+    yield
+    if consumer is not None:
+        consumer.stop()
+
+
+app = FastAPI(
+    title="MS2 RAG Service",
+    version="0.1.0",
+    description="RAG service for indexing MS1 notes and answering questions with references.",
+    lifespan=lifespan,
+)
 
 
 @app.get("/api/v1/health", response_model=HealthResponse)

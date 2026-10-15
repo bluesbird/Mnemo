@@ -7,6 +7,8 @@ import com.personalknowledgehub.knowledgeservice.knowledgehub.api.dto.UpdateNote
 import com.personalknowledgehub.knowledgeservice.knowledgehub.domain.Note;
 import com.personalknowledgehub.knowledgeservice.knowledgehub.domain.NoteNotFoundException;
 import com.personalknowledgehub.knowledgeservice.knowledgehub.domain.Tag;
+import com.personalknowledgehub.knowledgeservice.knowledgehub.messaging.NoteEventPublisher;
+import com.personalknowledgehub.knowledgeservice.knowledgehub.messaging.NoteEventType;
 import com.personalknowledgehub.knowledgeservice.knowledgehub.persistence.NoteRepository;
 import com.personalknowledgehub.knowledgeservice.knowledgehub.persistence.TagRepository;
 import org.slf4j.Logger;
@@ -28,15 +30,18 @@ public class NoteService {
     private final NoteRepository noteRepository;
     private final TagRepository tagRepository;
     private final OllamaAiService ollamaAiService;
+    private final NoteEventPublisher noteEventPublisher;
 
     public NoteService(
             NoteRepository noteRepository,
             TagRepository tagRepository,
-            OllamaAiService ollamaAiService
+            OllamaAiService ollamaAiService,
+            NoteEventPublisher noteEventPublisher
     ) {
         this.noteRepository = noteRepository;
         this.tagRepository = tagRepository;
         this.ollamaAiService = ollamaAiService;
+        this.noteEventPublisher = noteEventPublisher;
     }
 
     public List<NoteResponseDto> getAllNotes() {
@@ -54,6 +59,7 @@ public class NoteService {
 
         Note savedNote = noteRepository.save(note);
         logger.info("Created note with id {}", savedNote.getId());
+        noteEventPublisher.publish(NoteEventType.CREATED, savedNote.getId());
         return toDto(savedNote);
     }
 
@@ -86,6 +92,7 @@ public class NoteService {
 
         Note updatedNote = noteRepository.save(note);
         logger.info("Updated note with id {}", id);
+        noteEventPublisher.publish(NoteEventType.UPDATED, id);
         return toDto(updatedNote);
     }
 
@@ -109,6 +116,7 @@ public class NoteService {
     public void deleteNote(Long id) {
         noteRepository.delete(findNote(id));
         logger.info("Deleted note with id {}", id);
+        noteEventPublisher.publish(NoteEventType.DELETED, id);
     }
 
     private Note findNote(Long id) {
@@ -145,6 +153,7 @@ public class NoteService {
                 note.getContent(),
                 note.getSummary(),
                 tagNames,
+                note.getSourceHash(),
                 note.getCreatedAt(),
                 note.getUpdatedAt()
         );

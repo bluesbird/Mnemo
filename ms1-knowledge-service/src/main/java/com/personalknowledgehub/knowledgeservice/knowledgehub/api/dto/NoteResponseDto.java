@@ -9,6 +9,7 @@ public record NoteResponseDto(
         String content,
         String summary,
         List<String> tags,
+        String sourceHash,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {}

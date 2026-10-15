@@ -106,7 +106,9 @@ These are proposed endpoint names, not yet implemented.
 3. [x] Implement chunking and indexing for a small set of notes.
 4. [x] Implement admin reconcile/rebuild and note-fetch contracts for manual/scheduled sync.
 5. [x] Implement semantic retrieval and RAG answers with source references.
-6. [ ] Integrate RabbitMQ events from MS1 for incremental updates.
+6. [x] Integrate RabbitMQ events from MS1 for incremental updates.
+   - Exchange `notes.events` (topic), routing keys `note.created|updated|deleted`; MS2 queue `ms2.note-events` with DLX `notes.events.dlx` and DLQ `ms2.note-events.dlq`.
+   - MS2 disable switch: `MS2_RABBITMQ_ENABLED=false`. Local broker: `docker compose up -d rabbitmq`.
 7. [ ] Add error handling, structured logging, and tests.
 8. [ ] Containerize MS2 and integrate it into Docker Compose.
 9. [ ] Connect the frontend chatbot to MS2.
