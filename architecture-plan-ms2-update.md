@@ -45,12 +45,12 @@ No LangChain, separate chunk database, or sparse retrieval in V1.
 ## Contracts and Versioning
 
 - Define and version the MS1 → MS2 event contract from the start.
-- Event payload should include at minimum: `event_id`, `event_type`, `occurred_at`, `note_id`, and `source_hash`.
-- Include a monotonic freshness signal (`note_version` or `updated_at`) to handle retries and out-of-order delivery safely.
+- Event payload should include at minimum: `event_id`, `event_type`, `occurred_at`, and `note_id`. Events are change triggers only; MS2 always fetches the current note state from MS1.
+- No version or timestamp freshness field is needed: because MS2 compares the fetched note's `source_hash` with the indexed one, duplicate and out-of-order events converge to the same result.
 - Define explicit MS1 endpoints used by MS2 for note fetch and index metadata reconciliation.
 - **Required MS1 changes (prerequisite for MS2 sync, tracked in `architecture-plan.md`):**
-  - Add `source_hash` (from title and content) and a monotonic `note_version` to notes.
-  - Add an index-metadata endpoint returning `note_id`, `source_hash`, and `note_version` for all notes.
+  - Add a persisted `source_hash` (from title and content), recomputed whenever title or content changes.
+  - Add an index-metadata endpoint returning `note_id` and `source_hash` for all notes.
   - Add a note-fetch endpoint usable by MS2 (existing `GET` note endpoints may suffice).
   - Publish versioned events through RabbitMQ.
 - Keep event schema versioned to allow backward-compatible evolution.
@@ -93,14 +93,14 @@ These are proposed endpoint names, not yet implemented.
 - Fetch the current note from MS1 when processing an event.
 - Make event processing idempotent.
 - Use retry with bounded attempts and a dead-letter queue for poison messages.
-- Treat events as at-least-once and potentially out-of-order; ignore stale updates using `note_version`/`updated_at`.
+- Treat events as at-least-once and potentially out-of-order; this is safe because each event triggers a fetch of the current note and a `source_hash` comparison. A deleted note (404 from MS1) removes its chunks. Process events for the same note serially (e.g. a single consumer).
 - Reconcile provides a recovery mechanism for missed events and stale index entries.
 - Rebuild recreates the index from scratch.
 - Keep MS1 as the source of truth; ChromaDB contains derived data.
 
 ## Implementation Phases
 
-0. [ ] MS1 prerequisites: `source_hash`, `note_version`, and index-metadata endpoint (event publishing follows in step 6).
+0. [x] MS1 prerequisites: `source_hash` and index-metadata endpoint (implemented as `GET /api/v1/notes/index-metadata`; event publishing follows in step 6).
 1. [ ] Set up Python project, FastAPI, and configuration.
 2. [ ] Integrate Ollama embeddings and ChromaDB.
 3. [ ] Implement chunking and indexing for a small set of notes.

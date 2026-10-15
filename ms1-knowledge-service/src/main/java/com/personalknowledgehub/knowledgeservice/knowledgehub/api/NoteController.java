@@ -2,6 +2,7 @@ package com.personalknowledgehub.knowledgeservice.knowledgehub.api;
 
 import com.personalknowledgehub.knowledgeservice.knowledgehub.application.NoteService;
 import com.personalknowledgehub.knowledgeservice.knowledgehub.api.dto.CreateNoteRequestDto;
+import com.personalknowledgehub.knowledgeservice.knowledgehub.api.dto.NoteIndexMetadataDto;
 import com.personalknowledgehub.knowledgeservice.knowledgehub.api.dto.NoteResponseDto;
 import com.personalknowledgehub.knowledgeservice.knowledgehub.api.dto.UpdateNoteRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,6 +31,12 @@ public class NoteController {
     @Operation(summary = "List all notes")
     public List<NoteResponseDto> getAllNotes() {
         return noteService.getAllNotes();
+    }
+
+    @GetMapping("/index-metadata")
+    @Operation(summary = "List note index metadata for MS2 reconciliation")
+    public List<NoteIndexMetadataDto> getAllIndexMetadata() {
+        return noteService.getAllIndexMetadata();
     }
 
     @GetMapping("/{id}")

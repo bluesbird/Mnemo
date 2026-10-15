@@ -1,6 +1,7 @@
 package com.personalknowledgehub.knowledgeservice.knowledgehub.application;
 
 import com.personalknowledgehub.knowledgeservice.knowledgehub.api.dto.CreateNoteRequestDto;
+import com.personalknowledgehub.knowledgeservice.knowledgehub.api.dto.NoteIndexMetadataDto;
 import com.personalknowledgehub.knowledgeservice.knowledgehub.api.dto.NoteResponseDto;
 import com.personalknowledgehub.knowledgeservice.knowledgehub.api.dto.UpdateNoteRequestDto;
 import com.personalknowledgehub.knowledgeservice.knowledgehub.domain.Note;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -60,11 +62,24 @@ public class NoteService {
         return toDto(findNote(id));
     }
 
+    public List<NoteIndexMetadataDto> getAllIndexMetadata() {
+        List<Note> notes = noteRepository.findAllByOrderByIdAsc();
+        backfillMissingIndexMetadata(notes);
+
+        List<NoteIndexMetadataDto> metadata = notes.stream()
+                .map(note -> new NoteIndexMetadataDto(
+                        note.getId(),
+                        note.getSourceHash()
+                ))
+                .toList();
+        logger.info("Retrieved index metadata for {} notes", metadata.size());
+        return metadata;
+    }
+
     public NoteResponseDto updateNote(Long id, UpdateNoteRequestDto request) {
         Note note = findNote(id);
 
-        note.setTitle(request.title());
-        note.setContent(request.content());
+        note.updateCoreContent(request.title(), request.content());
         note.setSummary(null);
         note.setTags(new LinkedHashSet<>());
         note.setUpdatedAt(LocalDateTime.now());
@@ -133,5 +148,18 @@ public class NoteService {
                 note.getCreatedAt(),
                 note.getUpdatedAt()
         );
+    }
+
+    private void backfillMissingIndexMetadata(List<Note> notes) {
+        List<Note> notesToBackfill = new ArrayList<>();
+        for (Note note : notes) {
+            if (note.initializeIndexMetadataIfMissing()) {
+                notesToBackfill.add(note);
+            }
+        }
+        if (!notesToBackfill.isEmpty()) {
+            noteRepository.saveAll(notesToBackfill);
+            logger.info("Backfilled index metadata for {} notes", notesToBackfill.size());
+        }
     }
 }

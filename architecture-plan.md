@@ -46,8 +46,8 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
   - [x] Persisted tags and note-tag associations, including tags created by enrichment; standalone tag CRUD API is not implemented.
   - [x] Input validation and centralized exception handling.
   - [x] AI enrichment through Ollama: generate summaries and suggest tags; persist results.
-  - [ ] Add `source_hash` (title + content) and a monotonic `note_version` to notes.
-  - [ ] Index-metadata endpoint (`note_id`, `source_hash`, `note_version`) for MS2 reconciliation.
+  - [x] Add a persisted `source_hash` (title + content), recomputed whenever title or content changes.
+  - [x] Index-metadata endpoint (`note_id`, `source_hash`) for MS2 reconciliation (`GET /api/v1/notes/index-metadata`).
   - [ ] Publish versioned events when notes are created, updated, or deleted.
   - [ ] Structured application logging (basic SLF4J application logs are present).
   - [x] OpenAPI / Swagger API documentation.
@@ -65,7 +65,7 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
   - Return answers with references to source notes.
   - Structured application logging.
   - OpenAPI documentation through FastAPI's built-in support.
-  - Handle at-least-once and out-of-order events idempotently using note freshness metadata (`note_version` or `updated_at`).
+  - Process events idempotently: always fetch the current note from MS1 and compare `source_hash`, so duplicate or out-of-order events are harmless.
 - **Indexing scope:** Use note `title` and `content`; exclude summaries and tags initially.
 - **Indexing versioning:** Reindex when note `source_hash` changes or when indexing configuration changes (chunk size, overlap, splitter strategy, embedding model).
 - **RAG pipeline:** Embeddings, vector search, context construction, and LLM generation.
@@ -78,7 +78,7 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
 - **MS1 → MS2:** [ ] RabbitMQ events (`NoteCreated`, `NoteUpdated`, `NoteDeleted`).
 - **MS2 → MS1:** [ ] REST for initial indexing and full reindexing.
 - **MS2 → Ollama:** [ ] REST for embeddings and answer generation.
-- **Event contract:** Define a versioned payload with `event_id`, `event_type`, `occurred_at`, `note_id`, `source_hash`, and freshness (`note_version` or `updated_at`).
+- **Event contract:** Define a versioned payload with `event_id`, `event_type`, `occurred_at`, and `note_id`. The event is only a change trigger; MS2 fetches the current note state from MS1.
 - The vector index is derived data; MS1 remains the source of truth.
 - Index updates are eventually consistent with PostgreSQL.
 
@@ -106,7 +106,7 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
 
 1. [x] MS1 — Knowledge Service (core done)
 2. [x] UI for note management
-3. [ ] MS1 prerequisites for MS2 (`source_hash`, `note_version`, index-metadata endpoint)
+3. [x] MS1 prerequisites for MS2 (`source_hash`, index-metadata endpoint)
 4. [ ] MS2 — RAG Service (manual/scheduled reconcile + query first)
 5. [ ] MS1 ↔ MS2 integration via RabbitMQ incremental events
 6. [ ] UI for RAG chatbot

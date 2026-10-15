@@ -11,6 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -56,6 +59,7 @@ class KnowledgeServiceApplicationTests {
         assertEquals(2, loaded.getTags().size());
         assertTrue(loaded.getTags().stream().anyMatch(t -> t.getName().equals("spring")));
         assertTrue(loaded.getTags().stream().anyMatch(t -> t.getName().equals("java")));
+        assertEquals(computeExpectedSourceHash("Learning Spring", "Spring Boot fundamentals"), loaded.getSourceHash());
     }
 
     @Test
@@ -76,5 +80,43 @@ class KnowledgeServiceApplicationTests {
 
         Tag loaded = tagRepository.findByName("ai").orElseThrow();
         assertEquals(2, loaded.getNotes().size());
+    }
+
+    @Test
+    @Transactional
+    void sourceHashUpdatesWhenTitleOrContentChanges() {
+        Note note = noteRepository.save(new Note("Original title", "Original content"));
+        entityManager.flush();
+        entityManager.clear();
+
+        Note created = noteRepository.findById(note.getId()).orElseThrow();
+        String initialHash = created.getSourceHash();
+        assertEquals(computeExpectedSourceHash("Original title", "Original content"), initialHash);
+
+        created.updateCoreContent("Updated title", "Updated content");
+        noteRepository.save(created);
+        entityManager.flush();
+        entityManager.clear();
+
+        Note updated = noteRepository.findById(note.getId()).orElseThrow();
+        assertEquals(computeExpectedSourceHash("Updated title", "Updated content"), updated.getSourceHash());
+    }
+
+    private String computeExpectedSourceHash(String title, String content) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            digest.update("v1\0".getBytes(StandardCharsets.UTF_8));
+            digest.update(title.getBytes(StandardCharsets.UTF_8));
+            digest.update("\0".getBytes(StandardCharsets.UTF_8));
+            digest.update(content.getBytes(StandardCharsets.UTF_8));
+            byte[] hashBytes = digest.digest();
+            StringBuilder hex = new StringBuilder(hashBytes.length * 2);
+            for (byte hashByte : hashBytes) {
+                hex.append(String.format("%02x", hashByte));
+            }
+            return hex.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 is not available", e);
+        }
     }
 }
