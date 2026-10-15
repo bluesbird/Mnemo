@@ -59,8 +59,11 @@ Build a compact portfolio project demonstrating full-stack development, polyglot
   - Return answers with references to source notes.
   - Structured application logging.
   - OpenAPI documentation through FastAPI's built-in support.
+  - Handle at-least-once and out-of-order events idempotently using note freshness metadata (`note_version` or `updated_at`).
 - **Indexing scope:** Use note `title` and `content`; exclude summaries and tags initially.
+- **Indexing versioning:** Reindex when note `source_hash` changes or when indexing configuration changes (chunk size, overlap, splitter strategy, embedding model).
 - **RAG pipeline:** Embeddings, vector search, context construction, and LLM generation.
+- **API scope:** Keep chat endpoint user-facing; place index rebuild/reconcile under admin endpoints with service-level protection.
 
 ## 4. Communication
 
@@ -68,6 +71,7 @@ Build a compact portfolio project demonstrating full-stack development, polyglot
 - **UI ↔ MS2:** [ ] REST for chat requests.
 - **MS1 → MS2:** [ ] RabbitMQ events (`NoteCreated`, `NoteUpdated`, `NoteDeleted`).
 - **MS2 → MS1:** [ ] REST for initial indexing and full reindexing.
+- **Event contract:** Define a versioned payload with `event_id`, `event_type`, `occurred_at`, `note_id`, `source_hash`, and freshness (`note_version` or `updated_at`).
 - The vector index is derived data; MS1 remains the source of truth.
 - Index updates are eventually consistent with PostgreSQL.
 
@@ -79,6 +83,7 @@ Build a compact portfolio project demonstrating full-stack development, polyglot
 - [x] MS1 persistence integration tests; cross-service integration tests remain planned.
 - [x] OpenAPI / Swagger documentation for API exploration.
 - [ ] Structured logs for debugging and operations (basic SLF4J logs are present).
+- [ ] Retry and dead-letter handling for RabbitMQ consumers in MS2.
 - [x] PostgreSQL persistent volume in Docker Compose; backup procedure is not set up.
 - [ ] HTTPS and production secret management.
 - [ ] Consider the Transactional Outbox Pattern later for reliable event publishing.
@@ -94,7 +99,7 @@ Build a compact portfolio project demonstrating full-stack development, polyglot
 
 1. [x] MS1 — Knowledge Service (done for now)
 2. [x] UI for note management
-3. [ ] MS2 — RAG Service
-4. [ ] MS1 ↔ MS2 integration via RabbitMQ
+3. [ ] MS2 — RAG Service (manual/scheduled reconcile + query first)
+4. [ ] MS1 ↔ MS2 integration via RabbitMQ incremental events
 5. [ ] UI for RAG chatbot
 6. [ ] Integration tests and CI/CD setup (MS1 persistence tests exist; cross-service tests and CI/CD remain)
