@@ -55,6 +55,35 @@ services:
     networks:
       - db
       - messaging
+      - services
+    restart: unless-stopped
+
+  ms2-rag-service:
+    build:
+      context: ./ms2-rag-service
+    image: ms2-rag-service:0.1.0
+    ports:
+      - "8000:8000"
+    environment:
+      # Local development values only; override via environment or an untracked .env file.
+      MS2_ADMIN_API_KEY: ${MS2_ADMIN_API_KEY:-dev-admin-key}
+      MS2_MS1_BASE_URL: http://ms1-knowledge-service:8080
+      MS2_OLLAMA_BASE_URL: http://host.docker.internal:11434
+      MS2_RABBITMQ_HOST: rabbitmq
+      MS2_LOG_FORMAT: json
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ms2-data:/app/data
+      - ms2-hf-cache:/app/.cache
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      ms1-knowledge-service:
+        condition: service_started
+    networks:
+      - messaging
+      - services
     restart: unless-stopped
 
 networks:
@@ -62,6 +91,10 @@ networks:
     driver: bridge
   messaging:
     driver: bridge
+  services:
+    driver: bridge
 
 volumes:
   db:
+  ms2-data:
+  ms2-hf-cache:

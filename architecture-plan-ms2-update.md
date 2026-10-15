@@ -114,7 +114,9 @@ These are proposed endpoint names, not yet implemented.
    - `MS2_RETRIEVAL_MIN_SCORE` (default 0.45): chunks below it are dropped; with none left the LLM is skipped and the answer is "I don't know".
    - Tokenizer revision pinned to a commit hash (changing it triggers a reindex via `indexing_version`).
    - pytest suite in `ms2-rag-service/tests` (chunker, sync/reconcile/rebuild, threshold, API errors).
-8. [ ] Containerize MS2 and integrate it into Docker Compose.
+8. [x] Containerize MS2 and integrate it into Docker Compose.
+   - Non-root image with healthcheck; `docker compose up -d --build ms2-rag-service`. Chroma data and the HF tokenizer cache live in named volumes.
+   - Ollama is expected on the host (`host.docker.internal:11434`); admin key via `MS2_ADMIN_API_KEY` (default `dev-admin-key`, local only).
 9. [ ] Connect the frontend chatbot to MS2.
 
 ## Deferred

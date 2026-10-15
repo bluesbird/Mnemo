@@ -84,8 +84,8 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
 
 ## 5. Infrastructure and Quality
 
-- [x] Docker Compose for local development with PostgreSQL and MS1.
-- [ ] Separate Docker images for MS1 and MS2; optionally containerize the UI.
+- [x] Docker Compose for local development with PostgreSQL, RabbitMQ, MS1, and MS2.
+- [ ] Separate Docker images for MS1 and MS2 (MS2 image and Compose service done; MS1 image is built via Spring Boot, not in Compose build); optionally containerize the UI.
 - [ ] GitHub Actions CI for builds and tests.
 - [x] MS1 persistence integration tests; cross-service integration tests remain planned.
 - [x] OpenAPI / Swagger documentation for API exploration.
