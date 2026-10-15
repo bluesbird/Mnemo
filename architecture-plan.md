@@ -55,21 +55,21 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
 
 ## 3. MS2 — RAG Service
 
-- **Status:** Implemented (indexing, RabbitMQ events, reconcile/rebuild, chat query); containerization and UI integration pending.
+- **Status:** Implemented (indexing, RabbitMQ events, reconcile/rebuild, chat query); containerized in Compose; UI integration pending.
 - **Stack:** Python, FastAPI, Ollama (`qwen3-embedding:0.6b` embeddings, `qwen3:1.7b` answers), Qwen3-Embedding tokenizer (`tokenizers`) for chunking.
 - **Database:** ChromaDB for embeddings and vector-index data.
 - **Responsibilities:**
-  - Consume note events and update the vector index.
-  - Fetch notes from MS1 through REST for initial indexing and full reindexing.
-  - Run retrieval and answer generation for the chatbot.
-  - Return answers with references to source notes.
-  - Structured application logging.
-  - OpenAPI documentation through FastAPI's built-in support.
-  - Process events idempotently: always fetch the current note from MS1 and compare `source_hash`, so duplicate or out-of-order events are harmless.
-- **Indexing scope:** Use note `title` and `content`; exclude summaries and tags initially.
-- **Indexing versioning:** Reindex when note `source_hash` changes or when indexing configuration changes (chunk size, overlap, splitter strategy, embedding model).
-- **RAG pipeline:** Embeddings, vector search, context construction, and LLM generation.
-- **API scope:** Keep chat endpoint user-facing; place index rebuild/reconcile under admin endpoints with a static API key from an environment variable.
+  - [x] Consume note events and update the vector index.
+  - [x] Fetch notes from MS1 through REST for initial indexing and full reindexing.
+  - [x] Run retrieval and answer generation for the chatbot.
+  - [x] Return answers with references to source notes.
+  - [x] Structured application logging.
+  - [x] OpenAPI documentation through FastAPI's built-in support.
+  - [x] Process events idempotently: always fetch the current note from MS1 and compare `source_hash`, so duplicate or out-of-order events are harmless.
+- [x] **Indexing scope:** Use note `title` and `content`; exclude summaries and tags initially.
+- [x] **Indexing versioning:** Reindex when note `source_hash` changes or when indexing configuration changes (chunk size, overlap, splitter strategy, embedding model).
+- [x] **RAG pipeline:** Embeddings, vector search, context construction, and LLM generation.
+- [x] **API scope:** Keep chat endpoint user-facing; place index rebuild/reconcile under admin endpoints with a static API key from an environment variable.
 
 ## 4. Communication
 
@@ -87,9 +87,9 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
 - [x] Docker Compose for local development with PostgreSQL, RabbitMQ, MS1, and MS2.
 - [x] Separate Docker images for MS1 and MS2 (multi-stage Dockerfiles, built by Compose); UI containerization optional.
 - [ ] GitHub Actions CI for builds and tests.
-- [x] MS1 persistence integration tests; cross-service integration tests remain planned.
+- [x] MS1 persistence integration tests and MS2 unit/API tests (pytest); cross-service integration tests remain planned.
 - [x] OpenAPI / Swagger documentation for API exploration.
-- [ ] Structured logs for debugging and operations (basic SLF4J logs are present).
+- [ ] Structured logs for debugging and operations (MS2 supports JSON logs; MS1 has basic SLF4J logs only).
 - [x] Retry and dead-letter handling for RabbitMQ consumers in MS2.
 - [x] PostgreSQL persistent volume in Docker Compose; backup procedure is not set up.
 - [ ] HTTPS and production secret management.
