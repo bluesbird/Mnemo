@@ -225,5 +225,5 @@ class RagService:
     def _get_or_create_collection(self) -> Collection:
         return self._chroma_client.get_or_create_collection(
             name=self._settings.chroma_collection_name,
-            metadata={"distance": "cosine"},
+            metadata={"hnsw:space": "cosine"},
         )

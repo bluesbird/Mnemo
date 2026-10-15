@@ -42,6 +42,7 @@ class OllamaClient:
         payload = {
             "model": self._settings.chat_model,
             "stream": False,
+            "think": self._settings.chat_think,
             "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
@@ -49,7 +50,6 @@ class OllamaClient:
             "options": {
                 "temperature": self._settings.chat_temperature,
                 "num_ctx": self._settings.chat_num_ctx,
-                "think": self._settings.chat_think,
             },
         }
         response = self._client.post(f"{self._base_url}/api/chat", json=payload)
