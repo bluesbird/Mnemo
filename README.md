@@ -70,6 +70,8 @@ through MS1, waits for event-driven chat retrieval with its source/hash, updates
 and checks the new content/hash replaces the old one, then deletes it and verifies
 there are no stale chat sources. It never calls reconcile/rebuild. Consumer readiness,
 event acknowledgements and an empty dead-letter queue are also checked.
+The runner also verifies MS1's emitted JSON logs contain timestamp, severity, logger,
+message and service name.
 Polling is deadline-bounded and reports the last failed observation.
 
 Each run has a unique Compose project, private network and disposable data volumes,
@@ -82,7 +84,7 @@ The runner always attempts teardown (including volumes) and writes service logs,
 scenario output, container status and queue diagnostics to ignored `tests\e2e\artifacts`.
 Project-built images are removed; shared base images/build cache are retained. CI runs it
 as an independent job and uploads those diagnostics, with a final cleanup step.
-Fast fake/polling checks: `python -m unittest discover -s tests\e2e -p test_harness.py`.
+Fast fake/polling/log-format checks: `python -m unittest discover -s tests\e2e -p test_harness.py`.
 After a forcibly terminated local run, use the project name printed by Compose:
 `docker compose -p <mnemo-e2e-ID> --env-file .\tests\e2e\e2e.env -f .\tests\e2e\compose.yaml down -v --remove-orphans --rmi local`.
 
@@ -91,6 +93,21 @@ After a forcibly terminated local run, use the project name printed by Compose:
 Ollama must run on the host (reached via `host.docker.internal`).
 
 `docker compose up -d --build` builds and starts PostgreSQL, RabbitMQ, MS1 and MS2 (admin key `MS2_ADMIN_API_KEY`, default `dev-admin-key`). Stop host-run MS1/MS2 first to free ports 8080/8000.
+
+## Application logs
+
+Docker Compose enables Spring Boot's built-in ECS JSON console logging for MS1
+(`LOGGING_STRUCTURED_FORMAT_CONSOLE=ecs`) and JSON logging for MS2 (`MS2_LOG_FORMAT=json`).
+MS1 records include timestamp, severity, logger, message and `service.name`, taken
+from `spring.application.name`. Existing SLF4J calls and log levels are unchanged;
+the services do not use the same JSON schema and cross-service tracing is not added.
+The MS1 startup banner is disabled in Compose so it does not mix with application logs.
+
+Host-run MS1 keeps Spring Boot's default readable text output. To opt into JSON in
+PowerShell, set `$env:LOGGING_STRUCTURED_FORMAT_CONSOLE = "ecs"` before starting MS1;
+`Remove-Item Env:LOGGING_STRUCTURED_FORMAT_CONSOLE` restores the default for future starts.
+Host-run MS2 similarly defaults to text unless `MS2_LOG_FORMAT=json` is set.
+No additional dependencies or log-collection service are required.
 
 ## UI quick start
 

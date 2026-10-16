@@ -49,7 +49,7 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
   - [x] Add a persisted `source_hash` (title + content), recomputed whenever title or content changes.
   - [x] Index-metadata endpoint (`note_id`, `source_hash`) for MS2 reconciliation (`GET /api/v1/notes/index-metadata`).
   - [x] Publish versioned events when notes are created, updated, or deleted.
-  - [ ] Structured application logging (basic SLF4J application logs are present).
+  - [x] Structured application logging (Spring Boot ECS JSON output in Compose; readable text for host-run development).
   - [x] OpenAPI / Swagger API documentation.
   - [ ] Optional API pagination, server-side text search, and tag filtering (the UI currently searches its loaded notes locally).
 
@@ -89,7 +89,7 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
 - [x] GitHub Actions CI for builds and tests (`.github/workflows/ci.yml`: MS1, MS2, and UI jobs on push to `main` and on PRs).
 - [x] MS1 persistence integration tests, MS2 unit/API tests (pytest), and isolated cross-service integration tests (`tests/e2e`, also run in CI).
 - [x] OpenAPI / Swagger documentation for API exploration.
-- [ ] Structured logs for debugging and operations (MS2 supports JSON logs; MS1 has basic SLF4J logs only).
+- [x] Structured logs for debugging and operations (MS1 ECS JSON and MS2 JSON enabled in Compose; no centralized collection or cross-service tracing).
 - [x] Retry and dead-letter handling for RabbitMQ consumers in MS2.
 - [x] PostgreSQL persistent volume in Docker Compose; backup procedure is not set up.
 - [ ] HTTPS and production secret management.
@@ -112,6 +112,6 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
 6. [x] UI for RAG chatbot
 7. [x] CI setup (GitHub Actions builds and tests all three services)
 8. [x] Cross-service integration tests (MS1 → RabbitMQ → MS2 → chat), run in CI
-9. [ ] MS1 structured (JSON) logging
+9. [x] MS1 structured (JSON) logging
 10. [ ] Optional: MS1 pagination, server-side search, and tag filtering, plus UI tag filtering
 11. [ ] Optional: CD (publish Docker images), HTTPS and production secret management, Transactional Outbox, PostgreSQL backup procedure

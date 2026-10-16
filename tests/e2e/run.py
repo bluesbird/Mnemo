@@ -1,5 +1,6 @@
 """Cross-platform entry point: isolated project, bounded commands, diagnostics, teardown."""
 
+import json
 import os
 from pathlib import Path
 import subprocess
@@ -7,6 +8,29 @@ import sys
 import uuid
 
 HERE = Path(__file__).resolve().parent
+
+
+def verify_ms1_json_logs(output):
+    records = []
+    for line in output.splitlines():
+        if not line.startswith("{"):
+            continue
+        try:
+            record = json.loads(line)
+        except json.JSONDecodeError as exc:
+            raise AssertionError(f"Invalid MS1 JSON log: {line}") from exc
+        for field in ("@timestamp", "message"):
+            assert isinstance(record.get(field), str) and record[field], (field, record)
+        log = record.get("log")
+        assert isinstance(log, dict), record
+        for field in ("level", "logger"):
+            assert isinstance(log.get(field), str) and log[field], (field, record)
+        service = record.get("service")
+        assert isinstance(service, dict), record
+        assert service.get("name") == "ms1-knowledge-service", record
+        records.append(record)
+    assert any("Started KnowledgeServiceApplication" in record["message"]
+               for record in records), "Missing MS1 structured startup log"
 
 
 def main():
@@ -29,8 +53,15 @@ def main():
         with scenario_log.open("w", encoding="utf-8") as log:
             subprocess.run(command + ["run", "--rm", "-T", "tests"], env=env,
                            stdout=log, stderr=subprocess.STDOUT, check=True, timeout=420)
+        logs = subprocess.run(command + ["logs", "--no-color", "--no-log-prefix", "ms1"],
+                              env=env, capture_output=True, text=True, errors="replace",
+                              check=True, timeout=30)
+        (artifacts / "ms1-json.log").write_text(logs.stdout, encoding="utf-8")
+        verify_ms1_json_logs(logs.stdout)
+        print("PASS: MS1 ECS JSON logs include timestamp, level, logger, message and service",
+              flush=True)
         status = 0
-    except (subprocess.SubprocessError, OSError) as exc:
+    except (subprocess.SubprocessError, OSError, AssertionError) as exc:
         print(f"E2E failed: {exc}", file=sys.stderr)
     finally:
         print(scenario_log.read_text(encoding="utf-8", errors="replace"), flush=True)

@@ -42,6 +42,8 @@ services:
       SPRING_RABBITMQ_USERNAME: e2e
       SPRING_RABBITMQ_PASSWORD: e2e-only
       SPRING_AI_OLLAMA_BASE_URL: http://ollama:11434
+      LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
+      SPRING_MAIN_BANNER_MODE: "off"
     depends_on:
       db:
         condition: service_healthy
