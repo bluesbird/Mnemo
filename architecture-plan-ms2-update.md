@@ -109,7 +109,7 @@ No LangChain, separate chunk database, or sparse retrieval in V1.
    - MS2 disable switch: `MS2_RABBITMQ_ENABLED=false`. Local broker: `docker compose up -d rabbitmq`.
 7. [x] Add error handling, structured logging, and tests.
    - Upstream (MS1/Ollama) failures return 502, unhandled errors 500 as JSON; `MS2_LOG_FORMAT=json` for structured logs.
-   - `MS2_RETRIEVAL_MIN_SCORE` (default 0.45): chunks below it are dropped; with none left the LLM is skipped and the answer is "I don't know".
+   - `MS2_RETRIEVAL_MIN_SCORE` (default 0.4): retrieval is hybrid — vector search plus a keyword match over all chunks, merged with reciprocal rank fusion. A chunk is kept if it contains a question keyword or its vector score reaches this value; trailing `?` is stripped from the query. With no chunks left the LLM is skipped and the answer is "I don't know"; "I don't know" answers return no sources.
    - Tokenizer revision pinned to a commit hash (changing it triggers a reindex via `indexing_version`).
    - pytest suite in `ms2-rag-service/tests` (chunker, sync/reconcile/rebuild, threshold, API errors).
 8. [x] Containerize MS2 and integrate it into Docker Compose.

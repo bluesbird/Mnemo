@@ -35,10 +35,14 @@ class OllamaClient:
             return "I don't know based on the provided notes."
 
         system_prompt = (
-            "You are a knowledge assistant. Answer only using the provided context. "
-            "If the context is insufficient, say you don't know."
+            "You answer questions about the user's personal notes. "
+            "Use only facts from the NOTES section; some notes may be irrelevant, so ignore those. "
+            "Answer directly in one to three complete sentences of plain text, in the language of the question. "
+            "Never mention the notes, the context or the note numbers in your answer. "
+            "If the notes do not contain the answer, reply exactly: "
+            "I don't know based on the provided notes."
         )
-        user_prompt = f"Question:\n{question}\n\nContext:\n{context}"
+        user_prompt = f"NOTES:\n{context}\n\nQUESTION: {question}"
         payload = {
             "model": self._settings.chat_model,
             "stream": False,
@@ -56,6 +60,9 @@ class OllamaClient:
         response.raise_for_status()
         data = response.json()
         content = data.get("message", {}).get("content")
+        if isinstance(content, str) and "</think>" in content:
+            # Some Qwen3 builds ignore think=false and emit reasoning before a closing tag.
+            content = content.rsplit("</think>", 1)[1]
         if not isinstance(content, str) or content.strip() == "":
             raise RuntimeError("Invalid chat response from Ollama.")
         return content.strip()

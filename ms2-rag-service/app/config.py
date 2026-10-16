@@ -25,7 +25,9 @@ class Settings(BaseSettings):
     chat_num_ctx: int = 4096
     chat_temperature: float = 0.1
     chat_think: bool = False
-    query_instruction_prefix: str = "Represent this query for searching relevant passages: "
+    query_instruction_prefix: str = (
+        "Instruct: Given a question, retrieve notes that answer it\nQuery:"
+    )
 
     chroma_path: str = "./data/chroma"
     chroma_collection_name: str = "notes"
@@ -35,7 +37,7 @@ class Settings(BaseSettings):
     tokenizer_name: str = "Qwen/Qwen3-Embedding-0.6B"
     tokenizer_revision: str = "97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3"
     retrieval_top_k_default: int = 4
-    retrieval_min_score: float = 0.45
+    retrieval_min_score: float = 0.4  # only for chunks without a keyword match
 
     log_format: str = "text"  # "text" or "json"
 
