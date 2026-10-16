@@ -6,11 +6,18 @@ import {
   listNotes,
   updateNote,
 } from "./api/notes";
-import { NoteEditor } from "./components/NoteEditor";
-import { NoteList } from "./components/NoteList";
+import { ChatWorkspace } from "./components/ChatWorkspace";
+import { NotesWorkspace } from "./components/NotesWorkspace";
 import type { Note, NoteDraft } from "./types/note";
 
+type AppView = "notes" | "chat";
+
+function parseViewFromHash(): AppView {
+  return window.location.hash === "#/chat" ? "chat" : "notes";
+}
+
 function App() {
+  const [view, setView] = useState<AppView>(() => parseViewFromHash());
   const [notes, setNotes] = useState<Note[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [draft, setDraft] = useState<NoteDraft>({ title: "", content: "" });
@@ -56,6 +63,21 @@ function App() {
 
   useEffect(() => {
     void loadNotes();
+  }, []);
+
+  useEffect(() => {
+    function onHashChange() {
+      setView(parseViewFromHash());
+    }
+
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
+
+  useEffect(() => {
+    if (!window.location.hash) {
+      window.location.hash = "#/notes";
+    }
   }, []);
 
   function selectNote(note: Note) {
@@ -147,45 +169,101 @@ function App() {
     (draft.title !== selectedNote.title ||
       draft.content !== selectedNote.content);
 
+  function goToNotes() {
+    window.location.hash = "#/notes";
+  }
+
+  function goToChat() {
+    window.location.hash = "#/chat";
+  }
+
+  async function openNoteFromChat(noteId: number) {
+    const current = notes.find((note) => note.id === noteId);
+    if (current) {
+      selectNote(current);
+      goToNotes();
+      return;
+    }
+
+    setError("");
+    try {
+      const result = await listNotes();
+      setNotes(result);
+      const match = result.find((note) => note.id === noteId);
+      if (match) {
+        selectNote(match);
+      } else {
+        setError(`Source note #${noteId} is no longer available in MS1.`);
+      }
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "Could not load the source note from MS1.",
+      );
+    } finally {
+      goToNotes();
+    }
+  }
+
   return (
     <main className="app-shell">
       <header className="topbar">
-        <a className="brand" href="#" aria-label="Personal Knowledge Hub home">
+        <a
+          className="brand"
+          href="#/notes"
+          aria-label="Personal Knowledge Hub notes"
+        >
           <span className="brand-mark">p</span>
           <span>Personal Knowledge Hub</span>
         </a>
-        <span className="topbar-label">YOUR LIBRARY</span>
+        <nav className="topbar-nav" aria-label="Primary navigation">
+          <button
+            type="button"
+            className={`topbar-nav-button${view === "notes" ? " is-active" : ""}`}
+            onClick={goToNotes}
+          >
+            Notes
+          </button>
+          <button
+            type="button"
+            className={`topbar-nav-button${view === "chat" ? " is-active" : ""}`}
+            onClick={goToChat}
+          >
+            Chat
+          </button>
+        </nav>
       </header>
 
-      <section className="workspace" aria-label="Notes">
-        <NoteList
-          notes={filteredNotes}
-          totalCount={notes.length}
+      {view === "notes" ? (
+        <NotesWorkspace
+          notes={notes}
+          filteredNotes={filteredNotes}
           selectedId={selectedId}
-          loading={loading}
+          selectedNote={selectedNote}
+          draft={draft}
+          isNew={isNew}
           search={search}
+          loading={loading}
+          saving={saving}
+          enriching={enriching}
+          error={error}
+          hasUnsavedChanges={hasUnsavedChanges}
           onSearchChange={setSearch}
           onSelect={selectNote}
           onCreate={startNewNote}
-        />
-        <NoteEditor
-          note={selectedNote}
-          isNew={isNew}
-          draft={draft}
-          saving={saving}
-          enriching={enriching}
-          hasUnsavedChanges={hasUnsavedChanges}
-          error={error}
           onDraftChange={setDraft}
           onSave={(event) => void saveNote(event)}
           onDelete={() => void deleteNote()}
           onEnrich={() => void enrichNote()}
-          onCreate={startNewNote}
         />
-      </section>
+      ) : (
+        <ChatWorkspace onOpenNote={(noteId) => void openNoteFromChat(noteId)} />
+      )}
+
       <footer className="page-footer">
         <span>PERSONAL KNOWLEDGE HUB</span>
-        <span>MS1 · NOTES</span>
+        <span>{view === "notes" ? "MS1 · NOTES" : "MS2 · RAG CHAT"}</span>
       </footer>
     </main>
   );
