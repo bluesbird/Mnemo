@@ -8,10 +8,9 @@ type ChatWorkspaceProps = {
   messages: ChatMessage[];
   onMessagesChange: (messages: ChatMessage[]) => void;
   onOpenNote: (noteId: number) => void;
+  suggestions?: string[];
+  onClear?: () => void;
 };
-
-const EMPTY_MESSAGE =
-  "Ask a question about your notes.";
 
 function summarizeAdminResult(
   operation: "reconcile" | "rebuild",
@@ -24,6 +23,8 @@ export function ChatWorkspace({
   messages,
   onMessagesChange,
   onOpenNote,
+  suggestions = [],
+  onClear,
 }: ChatWorkspaceProps) {
   const [question, setQuestion] = useState("");
   const [isAsking, setIsAsking] = useState(false);
@@ -148,6 +149,7 @@ export function ChatWorkspace({
   function startNewChat() {
     if (isAsking || isAdminActionRunning) return;
     onMessagesChange([]);
+    onClear?.();
     setQuestion("");
     setAdminFeedback("");
   }
@@ -213,7 +215,23 @@ export function ChatWorkspace({
         {messages.length === 0 && (
           <div className="chat-empty">
             <span className="chat-empty-icon" aria-hidden="true">?</span>
-            <p>{EMPTY_MESSAGE}</p>
+            <h2>Ask your notes anything.</h2>
+            <p>Answers come only from what you have written.</p>
+            {suggestions.length > 0 && (
+              <div className="chat-suggestions">
+                {suggestions.map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    type="button"
+                    className="chat-suggestion"
+                    disabled={isAsking}
+                    onClick={() => void sendQuestion(suggestion)}
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+            )}
             <p className="chat-empty-hint">
               Note changes may take a moment to appear in answers.
             </p>

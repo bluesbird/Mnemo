@@ -41,6 +41,22 @@ function App() {
   const [error, setError] = useState("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(loadChatMessages);
 
+  const [suggestionSeed, setSuggestionSeed] = useState(0);
+  const chatIsEmpty = chatMessages.length === 0;
+  const chatSuggestions = useMemo(() => {
+    const byRecent = [...notes].sort((a, b) =>
+      b.updatedAt.localeCompare(a.updatedAt),
+    );
+    const picked = byRecent.slice(0, 2);
+    const rest = byRecent.slice(2);
+    if (rest.length > 0) {
+      picked.push(rest[Math.floor(Math.random() * rest.length)]);
+    }
+    return picked.map((note) => `What do my notes say about ${note.title}?`);
+    // chatIsEmpty and suggestionSeed re-roll the random pick on clear
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notes, chatIsEmpty, suggestionSeed]);
+
   useEffect(() => {
     try {
       sessionStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(chatMessages));
@@ -304,6 +320,8 @@ function App() {
         <ChatWorkspace
           messages={chatMessages}
           onMessagesChange={setChatMessages}
+          suggestions={chatSuggestions}
+          onClear={() => setSuggestionSeed((seed) => seed + 1)}
           onOpenNote={(noteId) => void openNoteFromChat(noteId)}
         />
       </div>
