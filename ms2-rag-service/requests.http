@@ -1,4 +1,4 @@
-# Requires: MS1 on :8080, Ollama on :11434 (qwen3-embedding:0.6b, qwen3:1.7b), MS2 on :8000
+# Requires: MS1 on :8080, Ollama on :11434 (qwen3-embedding:0.6b, qwen3:4b), MS2 on :8000
 # Start MS2 (from ms2-rag-service):
 #   python -m venv .venv ; .\.venv\Scripts\python.exe -m pip install .
 #   $env:MS2_ADMIN_API_KEY='dev-admin-key' ; .\.venv\Scripts\python.exe -m uvicorn app.main:app --port 8000

@@ -21,7 +21,7 @@ class Settings(BaseSettings):
 
     ollama_base_url: str = "http://localhost:11434"
     embedding_model: str = "qwen3-embedding:0.6b"
-    chat_model: str = "qwen3:1.7b"
+    chat_model: str = "qwen3:4b"
     chat_num_ctx: int = 4096
     chat_temperature: float = 0.1
     chat_think: bool = False

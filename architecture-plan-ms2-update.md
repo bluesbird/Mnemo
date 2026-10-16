@@ -18,7 +18,7 @@ No LangChain, separate chunk database, or sparse retrieval in V1.
 ## Model Stack (V1)
 
 - **Embedding model:** `qwen3-embedding:0.6b` via Ollama (multilingual, long context, small enough for local CPU/GPU).
-- **RAG LLM:** `qwen3:1.7b` via Ollama.
+- **RAG LLM:** `qwen3:4b` via Ollama (also used by MS1 for enrichment). The model and temperature are fixed server-side configuration, not user-selectable in the UI.
 - **Tokenizer:** `Qwen/Qwen3-Embedding-0.6B` from Hugging Face, used only to count tokens for chunking (use the lightweight `tokenizers` package, not full `transformers`). Only the tokenizer files are downloaded; the model weights come from Ollama.
 - Pin the tokenizer to a specific Hugging Face revision and cache the files locally (also in the Docker image) so chunking is reproducible and works offline. Include the tokenizer revision in `indexing_version`.
 - Token counts are an approximation for the quantized Ollama model; keep headroom below the embedding context limit.
@@ -28,7 +28,7 @@ No LangChain, separate chunk database, or sparse retrieval in V1.
 - Set `num_ctx` explicitly for the chat model (Ollama's default is small and silently truncates context) and size it for the retrieved chunks plus question plus answer.
 - Disable Qwen3 "thinking" mode for answer generation (e.g. `think: false`) to reduce latency and avoid reasoning text leaking into answers.
 - The 1.7B model is weak at faithfulness: use a strict prompt ("answer only from the context; say you don't know otherwise"), low temperature, and a small top-k (e.g. 3-5 chunks).
-- Upgrade path if quality is insufficient: a larger chat model such as `qwen3:4b` or `qwen3:8b`, changed through configuration only.
+- Upgrade path if quality is insufficient: a larger chat model such as `qwen3:8b`, changed through configuration only.
 
 ## Responsibilities
 

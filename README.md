@@ -23,7 +23,7 @@ Prerequisites: Docker, Java 25, Python 3.12+, [Ollama](https://ollama.com).
 
 1. Pull the models (once):
    - `ollama pull qwen3-embedding:0.6b`
-   - `ollama pull qwen3:1.7b`
+   - `ollama pull qwen3:4b`
 2. Start infrastructure (PostgreSQL + RabbitMQ; management UI at `http://localhost:15672`):
    - `docker compose up -d db rabbitmq`
 3. Run MS1 (`http://localhost:8080`):

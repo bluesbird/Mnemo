@@ -56,7 +56,7 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
 ## 3. MS2 — RAG Service
 
 - **Status:** Implemented (indexing, RabbitMQ events, reconcile/rebuild, chat query); containerized in Compose; UI integration completed.
-- **Stack:** Python, FastAPI, Ollama (`qwen3-embedding:0.6b` embeddings, `qwen3:1.7b` answers), Qwen3-Embedding tokenizer (`tokenizers`) for chunking.
+- **Stack:** Python, FastAPI, Ollama (`qwen3-embedding:0.6b` embeddings, `qwen3:4b` answers), Qwen3-Embedding tokenizer (`tokenizers`) for chunking.
 - **Database:** ChromaDB for embeddings and vector-index data.
 - **Responsibilities:**
   - [x] Consume note events and update the vector index.
