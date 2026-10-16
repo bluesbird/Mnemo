@@ -1,4 +1,4 @@
-from app.retrieval import Candidate, fuse, keyword_score, keywords, normalize_query
+from app.rag.retrieval import Candidate, fuse, keyword_score, keywords, normalize_query
 
 
 def test_normalize_query_drops_trailing_punctuation():

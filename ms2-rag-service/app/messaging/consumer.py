@@ -7,7 +7,7 @@ from pika.adapters.blocking_connection import BlockingChannel
 from pika.spec import Basic, BasicProperties
 from pydantic import ValidationError
 
-from app.config import Settings
+from app.core.config import Settings
 from app.schemas import NoteEvent
 
 logger = logging.getLogger(__name__)

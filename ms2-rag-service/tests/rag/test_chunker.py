@@ -1,5 +1,5 @@
-from app.chunker import NoteChunker
-from app.config import Settings
+from app.rag.chunker import NoteChunker
+from app.core.config import Settings
 
 
 def make_chunker(size: int = 20, overlap: int = 5) -> NoteChunker:

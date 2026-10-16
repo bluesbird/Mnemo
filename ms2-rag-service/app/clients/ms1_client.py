@@ -2,7 +2,7 @@ import logging
 
 import httpx
 
-from app.config import Settings
+from app.core.config import Settings
 from app.schemas import IndexMetadataItem, NoteForIndex
 
 logger = logging.getLogger(__name__)

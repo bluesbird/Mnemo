@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import Header, HTTPException, status
 
-from app.config import get_settings
+from app.core.config import get_settings
 
 
 def require_admin_api_key(

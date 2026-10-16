@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from tokenizers import Tokenizer
 
-from app.config import Settings
+from app.core.config import Settings
 
 logger = logging.getLogger(__name__)
 

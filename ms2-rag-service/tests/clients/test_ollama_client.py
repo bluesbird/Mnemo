@@ -1,7 +1,7 @@
 import httpx
 
-from app.config import Settings
-from app.ollama_client import OllamaClient
+from app.core.config import Settings
+from app.clients.ollama_client import OllamaClient
 
 
 def _client_returning(content: str) -> OllamaClient:

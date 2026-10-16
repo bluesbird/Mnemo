@@ -2,10 +2,12 @@ import hashlib
 
 import pytest
 
-from app.chunker import NoteChunker
-from app.config import Settings
-from app.rag_service import RagService
+from app.core.config import Settings
+from app.rag.chunker import NoteChunker
 from app.schemas import IndexMetadataItem, NoteForIndex
+from app.services.index_store import IndexStore
+from app.services.indexing_service import IndexingService
+from app.services.query_service import QueryService
 
 
 class FakeMs1:
@@ -62,5 +64,15 @@ def ollama() -> FakeOllama:
 
 
 @pytest.fixture
-def rag(settings, ms1, ollama) -> RagService:
-    return RagService(settings, ms1, ollama, NoteChunker(settings))
+def store(settings) -> IndexStore:
+    return IndexStore(settings)
+
+
+@pytest.fixture
+def indexing(settings, ms1, ollama, store) -> IndexingService:
+    return IndexingService(settings, ms1, ollama, NoteChunker(settings), store)
+
+
+@pytest.fixture
+def query(settings, ollama, store) -> QueryService:
+    return QueryService(settings, ollama, store)

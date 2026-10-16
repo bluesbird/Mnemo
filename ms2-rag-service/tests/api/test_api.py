@@ -2,14 +2,17 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 
-from app.config import get_settings
-from app.main import app, get_rag_service
+from app.core.config import get_settings
+from app.api.deps import get_indexing_service, get_query_service
+from app.main import app
 
 
-class BoomRag:
+class BoomQuery:
     def answer_query(self, question, top_k):
         raise httpx.ConnectError("ollama down")
 
+
+class BoomIndexing:
     def reconcile_index(self):
         raise RuntimeError("boom")
 
@@ -19,7 +22,8 @@ def client(monkeypatch):
     monkeypatch.setenv("MS2_ADMIN_API_KEY", "test-key")
     monkeypatch.setenv("MS2_RABBITMQ_ENABLED", "false")
     get_settings.cache_clear()
-    app.dependency_overrides[get_rag_service] = lambda: BoomRag()
+    app.dependency_overrides[get_query_service] = lambda: BoomQuery()
+    app.dependency_overrides[get_indexing_service] = lambda: BoomIndexing()
     yield TestClient(app, raise_server_exceptions=False)
     app.dependency_overrides.clear()
     get_settings.cache_clear()
