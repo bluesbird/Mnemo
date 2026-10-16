@@ -36,6 +36,8 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
 - [x] RAG chatbot UI with Notes/Chat navigation, source references, and in-session chat history (kept in `sessionStorage`).
 - [x] Calls MS1 through REST; local development uses the Vite proxy, with direct CORS access configurable.
 - [x] Calls MS2 through REST (`/api/v1/chat/query`) and supports manual index actions (`/api/v1/admin/index/reconcile`, `/api/v1/admin/index/rebuild`).
+- [x] Multi-stage UI image: Node builds static assets; nginx serves them and proxies same-origin `/api` to MS1 and `/rag-api` to MS2 (prefix stripped). Hash routing and the Vite development workflow are unchanged.
+- [x] Validated runtime upstream origins and server-side admin-key injection only for MS2 admin paths; no key in the browser bundle. This proxy is not authentication: any UI caller can invoke admin actions, so deployment remains local/trusted-only.
 
 ## 2. MS1 — Knowledge Service (core done; MS2 integration work pending)
 
@@ -84,10 +86,11 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
 
 ## 5. Infrastructure and Quality
 
-- [x] Docker Compose for local development with PostgreSQL, RabbitMQ, MS1, and MS2.
-- [x] Separate Docker images for MS1 and MS2 (multi-stage Dockerfiles, built by Compose); UI containerization optional.
+- [x] Docker Compose for local development with PostgreSQL, RabbitMQ, MS1, MS2 and UI (`http://localhost:5173`, UI bound to loopback).
+- [x] Separate multi-stage Docker images for MS1, MS2 and UI, built by Compose.
 - [x] GitHub Actions CI for builds and tests (`.github/workflows/ci.yml`: MS1, MS2, and UI jobs on push to `main` and on PRs).
 - [x] MS1 persistence integration tests, MS2 unit/API tests (pytest), and isolated cross-service integration tests (`tests/e2e`, also run in CI).
+- [x] UI container build and nginx smoke checks in that isolated E2E stack: static assets, real service proxy lifecycle, wire-level path/method/body/status/header checks and unsafe runtime configuration rejection; no real model downloads.
 - [x] OpenAPI / Swagger documentation for API exploration.
 - [x] Structured logs for debugging and operations (MS1 ECS JSON and MS2 JSON enabled in Compose; no centralized collection or cross-service tracing).
 - [x] Retry and dead-letter handling for RabbitMQ consumers in MS2.
@@ -113,5 +116,6 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
 7. [x] CI setup (GitHub Actions builds and tests all three services)
 8. [x] Cross-service integration tests (MS1 → RabbitMQ → MS2 → chat), run in CI
 9. [x] MS1 structured (JSON) logging
-10. [ ] Optional: MS1 pagination, server-side search, and tag filtering, plus UI tag filtering
-11. [ ] Optional: CD (publish Docker images), HTTPS and production secret management, Transactional Outbox, PostgreSQL backup procedure
+10. [x] UI containerization and same-origin nginx proxy in Compose, validated in isolated CI E2E
+11. [ ] Optional: MS1 pagination, server-side search, and tag filtering, plus UI tag filtering
+12. [ ] Optional: CD (publish Docker images), HTTPS and production secret management, Transactional Outbox, PostgreSQL backup procedure

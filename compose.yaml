@@ -93,6 +93,25 @@ services:
       - services
     restart: unless-stopped
 
+  ui:
+    build:
+      context: ./ui
+    image: mnemo-ui:0.1.0
+    ports:
+      - "127.0.0.1:5173:80"
+    environment:
+      UI_MS1_UPSTREAM: http://ms1-knowledge-service:8080
+      UI_MS2_UPSTREAM: http://ms2-rag-service:8000
+      MS2_ADMIN_API_KEY: ${MS2_ADMIN_API_KEY:-dev-admin-key}
+    depends_on:
+      ms1-knowledge-service:
+        condition: service_started
+      ms2-rag-service:
+        condition: service_started
+    networks:
+      - services
+    restart: unless-stopped
+
 networks:
   db:
     driver: bridge

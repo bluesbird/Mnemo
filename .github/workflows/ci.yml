@@ -7,7 +7,7 @@ on:
 
 jobs:
   e2e:
-    name: Cross-service integration
+    name: Cross-service integration and UI container smoke
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:

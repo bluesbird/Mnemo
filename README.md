@@ -62,16 +62,23 @@ python .\tests\e2e\run.py
 
 On Linux/macOS: `python tests/e2e/run.py`. No host Java, service Python dependencies,
 Ollama installation, model downloads, or running development services are needed.
-The first run builds the production MS1/MS2 images and downloads base images/dependencies.
+The first run builds the production MS1/MS2/UI images and downloads base images/dependencies.
 
 The standalone test Compose stack uses real PostgreSQL, RabbitMQ and MS2's embedded
 Chroma, and a local deterministic Ollama-compatible HTTP fake. It creates a note
 through MS1, waits for event-driven chat retrieval with its source/hash, updates it
 and checks the new content/hash replaces the old one, then deletes it and verifies
-there are no stale chat sources. It never calls reconcile/rebuild. Consumer readiness,
+there are no stale chat sources. This direct-service lifecycle never calls
+reconcile/rebuild. Consumer readiness,
 event acknowledgements and an empty dead-letter queue are also checked.
 The runner also verifies MS1's emitted JSON logs contain timestamp, severity, logger,
 message and service name.
+After the unchanged direct-service lifecycle, it checks the UI's static assets and
+hash route, real note CRUD/chat/admin actions through nginx, and a separate echo
+upstream for exact proxy paths, query strings, methods, bodies, error statuses and
+admin-header isolation (including browser-supplied headers and path aliases).
+It validates nginx configuration and rejects unsafe runtime substitutions. This same
+CI job builds and smoke-tests the production UI container without model downloads.
 Polling is deadline-bounded and reports the last failed observation.
 
 Each run has a unique Compose project, private network and disposable data volumes,
@@ -90,9 +97,52 @@ After a forcibly terminated local run, use the project name printed by Compose:
 
 ## Run everything in Docker
 
-Ollama must run on the host (reached via `host.docker.internal`).
+Ollama must run on the host (reached via `host.docker.internal`), with the models
+listed above already pulled. Docker Compose is the only other runtime prerequisite;
+host Java, Node and Python are not needed.
 
-`docker compose up -d --build` builds and starts PostgreSQL, RabbitMQ, MS1 and MS2 (admin key `MS2_ADMIN_API_KEY`, default `dev-admin-key`). Stop host-run MS1/MS2 first to free ports 8080/8000.
+From the repository root:
+
+```powershell
+docker compose up -d --build
+```
+
+Open **http://localhost:5173** once the services are ready. This builds and starts
+PostgreSQL, RabbitMQ, MS1, MS2 and the UI. Stop host-run MS1/MS2 and the Vite dev
+server first to free ports 8080/8000/5173. UI port 5173 is bound to loopback only.
+The existing backend/infrastructure ports and persistent volumes are unchanged.
+
+The UI image builds React/Vite assets with Node in a separate stage and serves them
+with nginx; Node and development `.env` files are not in the runtime image.
+The browser uses the same origin: `/api/...` goes unchanged to MS1 and
+`/rag-api/...` goes to MS2 with `/rag-api` stripped. `#/chat` remains client-side.
+No `VITE_*` build arguments or runtime browser configuration are needed.
+
+Runtime container settings (override via a Compose override file, or `docker run -e`):
+
+| Variable | Default in the UI image | Meaning |
+| --- | --- | --- |
+| `UI_MS1_UPSTREAM` | `http://ms1-knowledge-service:8080` | MS1 origin |
+| `UI_MS2_UPSTREAM` | `http://ms2-rag-service:8000` | MS2 origin |
+| `MS2_ADMIN_API_KEY` | empty | Server-side key for MS2 admin paths only |
+
+Upstreams must be HTTP(S) hostname/IPv4 origins with an optional port, without
+credentials, paths or trailing slashes. Keys accept letters, digits and
+`. _ ~ + / = -`; other characters fail startup rather than being interpreted as
+nginx syntax. Only these variables are substituted, preserving nginx variables.
+Changing settings requires recreating the UI container, not rebuilding the assets.
+An empty key sends no admin header. Compose supplies the same `MS2_ADMIN_API_KEY`
+to UI and MS2 (local default `dev-admin-key`); override it in the root environment
+or an untracked root `.env`, **never** a `VITE_*` variable.
+
+**Local/trusted deployment only:** the key is held by nginx, not served as browser
+configuration or bundled assets, and browser `X-API-Key` headers are discarded. nginx injects
+its key only for `/rag-api/api/v1/admin/...` requests. However, this is **not user
+authentication**: anyone who can reach the UI can invoke its admin proxy, including
+rebuild/reconcile. The app still has unauthenticated note/chat APIs, local Compose
+credentials and published backend ports. Do not expose this stack to the Internet
+or untrusted users. A real public domain deployment needs access control, TLS,
+restricted backend ports and production secret management separately.
 
 ## Application logs
 

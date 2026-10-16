@@ -61,6 +61,7 @@ services:
       MS2_RABBITMQ_USERNAME: e2e
       MS2_RABBITMQ_PASSWORD: e2e-only
       MS2_LOG_FORMAT: json
+      MS2_ADMIN_API_KEY: e2e-ui-admin-key
       # Exercise the existing offline word-count fallback, without model/tokenizer downloads.
       HF_HUB_OFFLINE: "1"
       ANONYMIZED_TELEMETRY: "False"
@@ -74,11 +75,42 @@ services:
       ollama:
         condition: service_started
 
+  ui:
+    build:
+      context: ../../ui
+    environment:
+      UI_MS1_UPSTREAM: http://ms1:8080
+      UI_MS2_UPSTREAM: http://ms2:8000
+      MS2_ADMIN_API_KEY: e2e-ui-admin-key
+    depends_on:
+      ms1:
+        condition: service_started
+      ms2:
+        condition: service_started
+
+  proxy-probe:
+    image: python:3.12-slim
+    working_dir: /tests
+    volumes:
+      - ./proxy_probe.py:/tests/proxy_probe.py:ro
+    command: ["python", "proxy_probe.py"]
+
+  ui-probe:
+    extends:
+      service: ui
+    environment:
+      UI_MS1_UPSTREAM: http://proxy-probe:8080
+      UI_MS2_UPSTREAM: http://proxy-probe:8080
+    depends_on:
+      proxy-probe:
+        condition: service_started
+
   tests:
     image: python:3.12-slim
     working_dir: /tests
     volumes:
       - ./scenario.py:/tests/scenario.py:ro
+      - ./proxy_smoke.py:/tests/proxy_smoke.py:ro
     command: ["python", "-u", "scenario.py"]
     profiles: ["test"]
 

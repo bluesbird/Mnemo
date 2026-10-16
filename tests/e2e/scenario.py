@@ -132,6 +132,8 @@ def main():
     # Check again after the consumer has acknowledged deletion.
     assert_removed()
     print("PASS: full event-driven lifecycle (no reconcile/rebuild calls)", flush=True)
+    from proxy_smoke import run
+    run(request, eventually)
 
 
 if __name__ == "__main__":

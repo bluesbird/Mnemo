@@ -33,6 +33,27 @@ def verify_ms1_json_logs(output):
                for record in records), "Missing MS1 structured startup log"
 
 
+def verify_ui_configuration(command, env):
+    for service in ("ui", "ui-probe"):
+        subprocess.run(command + ["exec", "-T", service, "nginx", "-t"],
+                       env=env, check=True, timeout=30)
+    for setting in (
+        "UI_MS1_UPSTREAM=http://ms1:8080;include /etc/passwd",
+        "UI_MS1_UPSTREAM=http://ms1:8080/api",
+        "UI_MS2_UPSTREAM=http://ms2:8000\nhttp://ms2:8000",
+        "MS2_ADMIN_API_KEY=unsafe$key",
+        'MS2_ADMIN_API_KEY=unsafe";',
+        "MS2_ADMIN_API_KEY=unsafe\nkey",
+    ):
+        result = subprocess.run(
+            command + ["run", "--rm", "--no-deps", "-T", "-e", setting, "ui", "true"],
+            env=env, capture_output=True, text=True, timeout=30,
+        )
+        assert result.returncode != 0 and "Invalid " in result.stderr, (
+            "UI must reject unsafe runtime configuration", result.returncode, result.stderr)
+    print("PASS: nginx configuration and runtime injection rejection", flush=True)
+
+
 def main():
     project = "mnemo-e2e-" + uuid.uuid4().hex[:12]
     env = {key: value for key, value in os.environ.items() if not key.startswith("COMPOSE_")}
@@ -50,6 +71,7 @@ def main():
                        stdout=subprocess.DEVNULL, timeout=30)
         subprocess.run(command + ["up", "--detach", "--build"], env=env,
                        check=True, timeout=900)
+        verify_ui_configuration(command, env)
         with scenario_log.open("w", encoding="utf-8") as log:
             subprocess.run(command + ["run", "--rm", "-T", "tests"], env=env,
                            stdout=log, stderr=subprocess.STDOUT, check=True, timeout=420)
