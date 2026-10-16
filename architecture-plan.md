@@ -33,7 +33,7 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
 - [x] Note management UI: list, search note title/content/tags, create, edit, and delete notes through MS1.
 - [x] Display summaries and tags already stored on a note.
 - [x] Trigger AI enrichment from the UI for a saved note.
-- [x] RAG chatbot UI with Notes/Chat navigation, source references, and in-session chat history.
+- [x] RAG chatbot UI with Notes/Chat navigation, source references, and in-session chat history (kept in `sessionStorage`).
 - [x] Calls MS1 through REST; local development uses the Vite proxy, with direct CORS access configurable.
 - [x] Calls MS2 through REST (`/api/v1/chat/query`) and supports manual index actions (`/api/v1/admin/index/reconcile`, `/api/v1/admin/index/rebuild`).
 

@@ -4,7 +4,7 @@ Monorepo with three independent project modules:
 
 - `ms1-knowledge-service`: Java / Spring Boot knowledge API (current implementation)
 - `ms2-rag-service`: Python / FastAPI RAG service (Chroma + Ollama, RabbitMQ-driven indexing)
-- `ui`: React + TypeScript frontend for note management
+- `ui`: React + TypeScript frontend for note management and the RAG chat
 
 ## Structure
 
@@ -63,7 +63,9 @@ Ollama must run on the host (reached via `host.docker.internal`).
 3. Open:
    - `http://localhost:5173`
 
-The UI defaults to `/api` and uses Vite proxy to reach MS1 at `http://localhost:8080`.
+The UI defaults to `/api` and uses Vite proxy to reach MS1 at `http://localhost:8080`. Chat requests go to `/rag-api`, which the proxy forwards to MS2 at `http://localhost:8000` and adds the admin key (`MS2_ADMIN_API_KEY`, default `dev-admin-key`) for the Index actions.
+
+Chat tab: the empty state offers three example questions (the two most recently updated notes plus one random note, re-rolled on "Clear chat"). The conversation is kept in `sessionStorage` and survives a page reload. Tests: `npm test`.
 
 Optional direct browser-to-MS1 mode (uses CORS):
 

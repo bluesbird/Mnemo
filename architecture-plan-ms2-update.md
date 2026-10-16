@@ -117,7 +117,7 @@ No LangChain, separate chunk database, or sparse retrieval in V1.
    - Ollama is expected on the host (`host.docker.internal:11434`); admin key via `MS2_ADMIN_API_KEY` (default `dev-admin-key`, local only).
 9. [x] Connect the frontend chatbot to MS2.
    - UI now sends chat queries to `POST /api/v1/chat/query` via Vite proxy (`/rag-api` rewrite).
-   - UI supports source-note navigation without clearing the current chat; explicit reset is handled by a "New chat" action.
+   - UI supports source-note navigation without clearing the current chat; explicit reset is handled by a "Clear chat" action. The conversation is persisted in `sessionStorage`, and the empty state shows example questions derived from the notes (two most recent, one random).
    - UI exposes manual reconcile/rebuild (confirm on rebuild) through MS2 admin endpoints; the Vite dev proxy injects `X-API-Key` (`MS2_ADMIN_API_KEY`, default `dev-admin-key`), so the key is never bundled into the browser.
 
 ## Deferred
