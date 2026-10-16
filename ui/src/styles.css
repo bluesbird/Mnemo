@@ -151,6 +151,14 @@ button {
   align-items: center;
   gap: 14px;
 }
+.save-status {
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 600;
+}
+.save-status.is-unsaved {
+  color: #a0761f;
+}
 .index-menu {
   position: relative;
   font-size: 12px;

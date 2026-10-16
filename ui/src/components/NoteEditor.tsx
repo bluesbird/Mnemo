@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import type { FormEventHandler } from "react";
 import type { Note, NoteDraft } from "../types/note";
 
@@ -33,6 +34,21 @@ export function NoteEditor({
   const hasEditor = isNew || note !== null;
   const canSave =
     draft.title.trim().length > 0 && draft.content.trim().length > 0;
+  const [justSaved, setJustSaved] = useState(false);
+  const wasSaving = useRef(false);
+
+  useEffect(() => {
+    if (wasSaving.current && !saving && !error) {
+      setJustSaved(true);
+      const timer = window.setTimeout(() => setJustSaved(false), 2500);
+      wasSaving.current = false;
+      return () => window.clearTimeout(timer);
+    }
+    wasSaving.current = saving;
+  }, [saving, error]);
+
+  const showUnsaved = hasUnsavedChanges || (isNew && (draft.title || draft.content));
+  const status = showUnsaved ? "Unsaved changes" : justSaved ? "Saved" : "";
 
   return (
     <section className="editor-panel" aria-label="Note editor">
@@ -46,6 +62,14 @@ export function NoteEditor({
           <div className="editor-toolbar">
             <span>{isNew ? "NEW NOTE" : `NOTE  /  ${note?.id}`}</span>
             <div className="toolbar-actions">
+              {status && (
+                <span
+                  className={`save-status${showUnsaved ? " is-unsaved" : ""}`}
+                  role="status"
+                >
+                  {status}
+                </span>
+              )}
               {note && (
                 <>
                   <button

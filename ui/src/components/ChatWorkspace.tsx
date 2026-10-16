@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { FormEvent, KeyboardEvent } from "react";
 import { queryChat, rebuildIndex, reconcileIndex } from "../api/chat";
 import type { ChatMessage, IndexOperationResponse } from "../types/chat";
+import { shortExcerpt, uniqueSources } from "../utils/sources";
 
 type ChatWorkspaceProps = {
   messages: ChatMessage[];
@@ -30,6 +31,16 @@ export function ChatWorkspace({
   const [adminFeedback, setAdminFeedback] = useState("");
   const threadEnd = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const indexMenu = useRef<HTMLDetailsElement>(null);
+
+  useEffect(() => {
+    function closeOnOutsideClick(event: MouseEvent) {
+      const menu = indexMenu.current;
+      if (menu && !menu.contains(event.target as Node)) menu.open = false;
+    }
+    document.addEventListener("mousedown", closeOnOutsideClick);
+    return () => document.removeEventListener("mousedown", closeOnOutsideClick);
+  }, []);
 
   useEffect(() => {
     threadEnd.current?.scrollIntoView({ block: "end" });
@@ -104,6 +115,7 @@ export function ChatWorkspace({
 
   async function runAdminAction(operation: "reconcile" | "rebuild") {
     if (isAdminActionRunning || isAsking) return;
+    if (indexMenu.current) indexMenu.current.open = false;
     if (
       operation === "rebuild" &&
       !window.confirm(
@@ -167,7 +179,7 @@ export function ChatWorkspace({
           >
             New chat
           </button>
-          <details className="index-menu">
+          <details className="index-menu" ref={indexMenu}>
             <summary>Index</summary>
             <div className="index-menu-items">
               <button
@@ -222,16 +234,18 @@ export function ChatWorkspace({
               <div className="chat-sources">
                 <p className="chat-sources-label">Sources</p>
                 <ul>
-                  {message.sources.map((source, index) => (
-                    <li key={`${message.id}-${source.note_id}-${index}`}>
+                  {uniqueSources(message.sources).map((source) => (
+                    <li key={`${message.id}-${source.note_id}`}>
                       <button
                         type="button"
                         className="text-button"
                         onClick={() => onOpenNote(source.note_id)}
                       >
-                        {source.note_title} (note #{source.note_id})
+                        {source.note_title}
                       </button>
-                      <p className="chat-source-excerpt">{source.excerpt}</p>
+                      <p className="chat-source-excerpt">
+                        {shortExcerpt(source.excerpt)}
+                      </p>
                     </li>
                   ))}
                 </ul>

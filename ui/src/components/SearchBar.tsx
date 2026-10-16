@@ -15,7 +15,6 @@ export function SearchBar({ value, onChange }: SearchBarProps) {
         value={value}
         onChange={(event) => onChange(event.target.value)}
       />
-      <kbd>/</kbd>
     </label>
   );
 }
