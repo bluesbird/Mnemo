@@ -169,10 +169,7 @@ export function ChatWorkspace({
     <section className="chat-workspace" aria-label="Chat workspace">
       <header className="chat-header">
         <div className="chat-title-row">
-          <div>
-            <p className="eyebrow">CHAT</p>
-            <h1>Ask your knowledge base</h1>
-          </div>
+          <h1>Ask your knowledge base</h1>
           <div className="chat-header-actions">
             <button
               type="button"
@@ -180,7 +177,7 @@ export function ChatWorkspace({
               disabled={isAsking || isAdminActionRunning}
               onClick={startNewChat}
             >
-              <span aria-hidden="true">+</span> New chat
+              Clear chat
             </button>
             <details className="index-menu" ref={indexMenu}>
               <summary className="outline-button">Index ▾</summary>
@@ -205,10 +202,11 @@ export function ChatWorkspace({
             </details>
           </div>
         </div>
-        <p className="chat-admin-feedback" role="status">
-          {adminFeedback ||
-            "Note changes may take a moment to appear in answers."}
-        </p>
+        {adminFeedback && (
+          <p className="chat-admin-feedback" role="status">
+            {adminFeedback}
+          </p>
+        )}
       </header>
 
       <div className="chat-thread" aria-live="polite">
@@ -216,6 +214,9 @@ export function ChatWorkspace({
           <div className="chat-empty">
             <span className="chat-empty-icon" aria-hidden="true">?</span>
             <p>{EMPTY_MESSAGE}</p>
+            <p className="chat-empty-hint">
+              Note changes may take a moment to appear in answers.
+            </p>
           </div>
         )}
         {messages.map((message) => (
@@ -269,6 +270,7 @@ export function ChatWorkspace({
       <form className="chat-form" onSubmit={(event) => void ask(event)}>
         <textarea
           ref={textareaRef}
+          rows={1}
           aria-label="Question for the chatbot"
           placeholder="Ask about your notes…"
           value={question}
@@ -278,7 +280,7 @@ export function ChatWorkspace({
           required
         />
         <button className="save-button" type="submit" disabled={isAsking}>
-          {isAsking ? "Asking…" : "Ask ↵"}
+          {isAsking ? "Asking…" : "Ask"}
         </button>
       </form>
     </section>
