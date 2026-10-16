@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" role="img" aria-label="Mnemo infinity icon">
+  <path fill="#2f644e" d="M12 0h16a12 12 0 0 1 12 12v16a12 12 0 0 1-12 12H4a4 4 0 0 1-4-4V12A12 12 0 0 1 12 0Z"/>
+  <g transform="rotate(-12 20 20)" fill="none" stroke="#f7f5ee" stroke-width="2.6" stroke-linecap="round">
+    <path d="M20 20C16 15 14 13 11 13a7 7 0 0 0 0 14c3 0 5-2 9-7s6-7 9-7a7 7 0 0 1 0 14c-3 0-5-2-9-7Z"/>
+    <path d="M17 16.5 23 23.5" stroke="#2f644e" stroke-width="6"/>
+    <path d="M17 16.5 23 23.5"/>
+  </g>
+</svg>
