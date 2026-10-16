@@ -216,13 +216,13 @@ function App() {
       if (match) {
         selectNote(match);
       } else {
-        setError(`Source note #${noteId} is no longer available in MS1.`);
+        setError(`Source note #${noteId} is no longer available.`);
       }
     } catch (cause) {
       setError(
         cause instanceof Error
           ? cause.message
-          : "Could not load the source note from MS1.",
+          : "Could not load the source note.",
       );
     } finally {
       goToNotes();
@@ -291,7 +291,7 @@ function App() {
 
       <footer className="page-footer">
         <span>PERSONAL KNOWLEDGE HUB</span>
-        <span>{view === "notes" ? "MS1 · NOTES" : "MS2 · RAG CHAT"}</span>
+        <span>{view === "notes" ? "NOTES" : "CHAT"}</span>
       </footer>
     </main>
   );

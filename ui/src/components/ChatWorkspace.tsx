@@ -11,13 +11,13 @@ type ChatWorkspaceProps = {
 };
 
 const EMPTY_MESSAGE =
-  "Ask a question about your notes. I will answer using indexed note content from MS2.";
+  "Ask a question about your notes.";
 
 function summarizeAdminResult(
   operation: "reconcile" | "rebuild",
   result: IndexOperationResponse,
 ): string {
-  return `${operation === "reconcile" ? "Reconcile" : "Rebuild"} complete · indexed ${result.indexed_note_ids.length}, deleted ${result.deleted_note_ids.length}, skipped ${result.skipped_note_ids.length}, total MS1 notes ${result.total_ms1_notes}.`;
+  return `${operation === "reconcile" ? "Reconcile" : "Rebuild"} complete · indexed ${result.indexed_note_ids.length}, deleted ${result.deleted_note_ids.length}, skipped ${result.skipped_note_ids.length}, total notes ${result.total_ms1_notes}.`;
 }
 
 export function ChatWorkspace({
@@ -138,7 +138,7 @@ export function ChatWorkspace({
       setAdminFeedback(
         cause instanceof Error
           ? cause.message
-          : "Admin action failed. Please check MS2 availability and API key.",
+          : "Admin action failed. Please check that the chat service is available and the API key is set.",
       );
     } finally {
       setIsAdminActionRunning(false);
@@ -168,38 +168,42 @@ export function ChatWorkspace({
   return (
     <section className="chat-workspace" aria-label="Chat workspace">
       <header className="chat-header">
-        <p className="eyebrow">RAG CHAT</p>
-        <h1>Ask your knowledge base</h1>
-        <div className="chat-header-actions">
-          <button
-            type="button"
-            className="text-button"
-            disabled={isAsking || isAdminActionRunning}
-            onClick={startNewChat}
-          >
-            New chat
-          </button>
-          <details className="index-menu" ref={indexMenu}>
-            <summary>Index</summary>
-            <div className="index-menu-items">
-              <button
-                type="button"
-                className="text-button"
-                disabled={isAsking || isAdminActionRunning}
-                onClick={() => void runAdminAction("reconcile")}
-              >
-                Reconcile (sync changes)
-              </button>
-              <button
-                type="button"
-                className="text-button delete-button"
-                disabled={isAsking || isAdminActionRunning}
-                onClick={() => void runAdminAction("rebuild")}
-              >
-                Rebuild (re-embed all)
-              </button>
-            </div>
-          </details>
+        <div className="chat-title-row">
+          <div>
+            <p className="eyebrow">CHAT</p>
+            <h1>Ask your knowledge base</h1>
+          </div>
+          <div className="chat-header-actions">
+            <button
+              type="button"
+              className="outline-button"
+              disabled={isAsking || isAdminActionRunning}
+              onClick={startNewChat}
+            >
+              <span aria-hidden="true">+</span> New chat
+            </button>
+            <details className="index-menu" ref={indexMenu}>
+              <summary className="outline-button">Index ▾</summary>
+              <div className="index-menu-items">
+                <button
+                  type="button"
+                  className="text-button"
+                  disabled={isAsking || isAdminActionRunning}
+                  onClick={() => void runAdminAction("reconcile")}
+                >
+                  Reconcile (sync changes)
+                </button>
+                <button
+                  type="button"
+                  className="text-button delete-button"
+                  disabled={isAsking || isAdminActionRunning}
+                  onClick={() => void runAdminAction("rebuild")}
+                >
+                  Rebuild (re-embed all)
+                </button>
+              </div>
+            </details>
+          </div>
         </div>
         <p className="chat-admin-feedback" role="status">
           {adminFeedback ||
@@ -208,7 +212,12 @@ export function ChatWorkspace({
       </header>
 
       <div className="chat-thread" aria-live="polite">
-        {messages.length === 0 && <p className="list-message">{EMPTY_MESSAGE}</p>}
+        {messages.length === 0 && (
+          <div className="chat-empty">
+            <span className="chat-empty-icon" aria-hidden="true">?</span>
+            <p>{EMPTY_MESSAGE}</p>
+          </div>
+        )}
         {messages.map((message) => (
           <article
             key={message.id}
@@ -269,7 +278,7 @@ export function ChatWorkspace({
           required
         />
         <button className="save-button" type="submit" disabled={isAsking}>
-          {isAsking ? "Asking…" : "Ask"}
+          {isAsking ? "Asking…" : "Ask ↵"}
         </button>
       </form>
     </section>
