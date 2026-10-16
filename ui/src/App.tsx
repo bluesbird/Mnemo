@@ -270,10 +270,10 @@ function App() {
         <a
           className="brand"
           href="#/notes"
-          aria-label="Personal Knowledge Hub notes"
+          aria-label="Mnemo notes"
         >
           <span className="brand-mark">p</span>
-          <span>Personal Knowledge Hub</span>
+          <span>Mnemo</span>
         </a>
         <nav className="topbar-nav" aria-label="Primary navigation">
           <button
@@ -327,7 +327,7 @@ function App() {
       </div>
 
       <footer className="page-footer">
-        <span>PERSONAL KNOWLEDGE HUB</span>
+        <span>MNEMO</span>
         <span>{view === "notes" ? "NOTES" : "CHAT"}</span>
       </footer>
     </main>

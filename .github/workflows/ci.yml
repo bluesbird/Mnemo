@@ -1,4 +1,4 @@
-﻿name: CI
+name: CI
 
 on:
   push:
@@ -18,16 +18,16 @@ jobs:
         env:
           POSTGRES_USER: bluesbird
           POSTGRES_PASSWORD: password
-          POSTGRES_DB: spring_boot_refresh
+          POSTGRES_DB: mnemo
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U bluesbird -d spring_boot_refresh"
+          --health-cmd "pg_isready -U bluesbird -d mnemo"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
     env:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/spring_boot_refresh
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/mnemo
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4

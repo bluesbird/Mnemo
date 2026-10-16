@@ -1,4 +1,4 @@
-# Personal Knowledge Hub — Target Architecture
+# Mnemo — Target Architecture
 
 ## Goal
 

@@ -8,11 +8,11 @@
         <version>4.1.1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.personalknowledgehub</groupId>
+    <groupId>com.mnemo</groupId>
     <artifactId>ms1-knowledge-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>ms1-knowledge-service</name>
-    <description>Personal Knowledge Hub MS1 Knowledge Service</description>
+    <description>Mnemo MS1 Knowledge Service</description>
     <url/>
     <licenses>
         <license/>

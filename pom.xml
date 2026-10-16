@@ -4,12 +4,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.personalknowledgehub</groupId>
-    <artifactId>personal-knowledge-hub</artifactId>
+    <groupId>com.mnemo</groupId>
+    <artifactId>mnemo</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>personal-knowledge-hub</name>
-    <description>Monorepo parent for Personal Knowledge Hub services</description>
+    <name>mnemo</name>
+    <description>Monorepo parent for Mnemo services</description>
 
     <modules>
         <module>ms1-knowledge-service</module>

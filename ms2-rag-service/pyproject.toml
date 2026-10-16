@@ -8,7 +8,7 @@ include = ["app*"]
 [project]
 name = "ms2-rag-service"
 version = "0.1.0"
-description = "RAG service stub for Personal Knowledge Hub"
+description = "RAG service stub for Mnemo"
 requires-python = ">=3.12"
 dependencies = [
     "chromadb==1.1.1",

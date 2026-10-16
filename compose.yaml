@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_USER: bluesbird
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: spring_boot_refresh
+      POSTGRES_DB: mnemo
       PGDATA: /data/postgres
     volumes:
       - db:/data/postgres
@@ -15,7 +15,7 @@ services:
       - db
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U bluesbird -d spring_boot_refresh"]
+      test: ["CMD-SHELL", "pg_isready -U bluesbird -d mnemo"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -45,7 +45,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/spring_boot_refresh
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/mnemo
       SPRING_DATASOURCE_USERNAME: bluesbird
       SPRING_DATASOURCE_PASSWORD: password
       SPRING_RABBITMQ_HOST: rabbitmq

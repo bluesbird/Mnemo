@@ -1,4 +1,6 @@
-# Personal Knowledge Hub
+# Mnemo
+
+Self-hosted personal notes with a local RAG chatbot.
 
 Monorepo with three independent project modules:
 
@@ -9,7 +11,7 @@ Monorepo with three independent project modules:
 ## Structure
 
 ```text
-personal-knowledge-hub/
+mnemo/
 ├── ms1-knowledge-service/
 ├── ms2-rag-service/
 ├── ui/
