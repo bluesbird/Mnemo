@@ -1,5 +1,7 @@
 # Mnemo
 
+**Your personal knowledge hub.**
+
 Self-hosted personal notes with a local RAG chatbot.
 
 Monorepo with three independent project modules:

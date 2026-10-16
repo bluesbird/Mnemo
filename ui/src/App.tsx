@@ -272,8 +272,17 @@ function App() {
           href="#/notes"
           aria-label="Mnemo notes"
         >
-          <span className="brand-mark">p</span>
-          <span>Mnemo</span>
+          <img
+            className="brand-mark"
+            src="/mnemo.svg"
+            alt=""
+            width="38"
+            height="38"
+          />
+          <span className="brand-copy">
+            <span className="brand-name">Mnemo</span>
+            <span className="brand-subtitle">Your personal knowledge hub</span>
+          </span>
         </a>
         <nav className="topbar-nav" aria-label="Primary navigation">
           <button
