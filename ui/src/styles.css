@@ -120,6 +120,23 @@ button {
   background: #edf3ee;
   color: #2f644e;
 }
+.topbar-repo-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: var(--ink);
+  border-radius: 4px;
+}
+.topbar-repo-link:hover {
+  color: var(--green);
+  background: var(--pale-green);
+}
+.topbar-repo-link:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
 
 .workspace {
   width: 100%;
