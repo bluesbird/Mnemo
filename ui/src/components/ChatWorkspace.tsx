@@ -1,9 +1,7 @@
-import { useState } from "react";
-import type { FormEvent } from "react";
-import type { KeyboardEvent } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { FormEvent, KeyboardEvent } from "react";
 import { queryChat, rebuildIndex, reconcileIndex } from "../api/chat";
-import type { IndexOperationResponse } from "../types/chat";
-import type { ChatMessage } from "../types/chat";
+import type { ChatMessage, IndexOperationResponse } from "../types/chat";
 
 type ChatWorkspaceProps = {
   messages: ChatMessage[];
@@ -30,6 +28,16 @@ export function ChatWorkspace({
   const [isAsking, setIsAsking] = useState(false);
   const [isAdminActionRunning, setIsAdminActionRunning] = useState(false);
   const [adminFeedback, setAdminFeedback] = useState("");
+  const threadEnd = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    threadEnd.current?.scrollIntoView({ block: "end" });
+  }, [messages, isAsking]);
+
+  useEffect(() => {
+    if (!isAsking) textareaRef.current?.focus();
+  }, [isAsking]);
 
   async function sendQuestion(text: string) {
     const trimmed = text.trim();
@@ -45,6 +53,19 @@ export function ChatWorkspace({
 
     onMessagesChange(nextMessages);
     setQuestion("");
+    await runQuery(trimmed, nextMessages);
+  }
+
+  async function retryLast() {
+    const last = messages[messages.length - 1];
+    const lastUser = messages[messages.length - 2];
+    if (isAsking || !last?.isError || lastUser?.role !== "user") return;
+    const base = messages.slice(0, -1);
+    onMessagesChange(base);
+    await runQuery(lastUser.text, base);
+  }
+
+  async function runQuery(trimmed: string, nextMessages: ChatMessage[]) {
     setIsAsking(true);
 
     try {
@@ -83,8 +104,20 @@ export function ChatWorkspace({
 
   async function runAdminAction(operation: "reconcile" | "rebuild") {
     if (isAdminActionRunning || isAsking) return;
+    if (
+      operation === "rebuild" &&
+      !window.confirm(
+        "Rebuild the whole index? This re-embeds every note and can take a while.",
+      )
+    ) {
+      return;
+    }
     setIsAdminActionRunning(true);
-    setAdminFeedback("");
+    setAdminFeedback(
+      operation === "rebuild"
+        ? "Rebuilding index… this may take a while."
+        : "Reconciling index…",
+    );
     try {
       const result =
         operation === "reconcile" ? await reconcileIndex() : await rebuildIndex();
@@ -108,7 +141,11 @@ export function ChatWorkspace({
   }
 
   function onQuestionKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
-    if (event.key === "Enter" && !event.shiftKey) {
+    if (
+      event.key === "Enter" &&
+      !event.shiftKey &&
+      !event.nativeEvent.isComposing
+    ) {
       event.preventDefault();
       if (!isAsking && question.trim()) {
         void sendQuestion(question);
@@ -126,28 +163,36 @@ export function ChatWorkspace({
             type="button"
             className="text-button"
             disabled={isAsking || isAdminActionRunning}
-            onClick={() => void runAdminAction("reconcile")}
-          >
-            Reconcile index
-          </button>
-          <button
-            type="button"
-            className="text-button"
-            disabled={isAsking || isAdminActionRunning}
-            onClick={() => void runAdminAction("rebuild")}
-          >
-            Rebuild index
-          </button>
-          <button
-            type="button"
-            className="text-button"
-            disabled={isAsking || isAdminActionRunning}
             onClick={startNewChat}
           >
             New chat
           </button>
+          <details className="index-menu">
+            <summary>Index</summary>
+            <div className="index-menu-items">
+              <button
+                type="button"
+                className="text-button"
+                disabled={isAsking || isAdminActionRunning}
+                onClick={() => void runAdminAction("reconcile")}
+              >
+                Reconcile (sync changes)
+              </button>
+              <button
+                type="button"
+                className="text-button delete-button"
+                disabled={isAsking || isAdminActionRunning}
+                onClick={() => void runAdminAction("rebuild")}
+              >
+                Rebuild (re-embed all)
+              </button>
+            </div>
+          </details>
         </div>
-        {adminFeedback && <p className="chat-admin-feedback">{adminFeedback}</p>}
+        <p className="chat-admin-feedback" role="status">
+          {adminFeedback ||
+            "Note changes may take a moment to appear in answers."}
+        </p>
       </header>
 
       <div className="chat-thread" aria-live="polite">
@@ -163,6 +208,16 @@ export function ChatWorkspace({
               {message.role === "user" ? "You" : "Assistant"}
             </p>
             <p>{message.text}</p>
+            {message.isError && message === messages[messages.length - 1] && (
+              <button
+                type="button"
+                className="text-button"
+                disabled={isAsking}
+                onClick={() => void retryLast()}
+              >
+                Retry
+              </button>
+            )}
             {message.sources.length > 0 && (
               <div className="chat-sources">
                 <p className="chat-sources-label">Sources</p>
@@ -185,10 +240,12 @@ export function ChatWorkspace({
           </article>
         ))}
         {isAsking && <p className="list-message">Thinking…</p>}
+        <div ref={threadEnd} />
       </div>
 
       <form className="chat-form" onSubmit={(event) => void ask(event)}>
         <textarea
+          ref={textareaRef}
           aria-label="Question for the chatbot"
           placeholder="Ask about your notes…"
           value={question}

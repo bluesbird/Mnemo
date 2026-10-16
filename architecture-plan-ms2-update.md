@@ -118,7 +118,7 @@ No LangChain, separate chunk database, or sparse retrieval in V1.
 9. [x] Connect the frontend chatbot to MS2.
    - UI now sends chat queries to `POST /api/v1/chat/query` via Vite proxy (`/rag-api` rewrite).
    - UI supports source-note navigation without clearing the current chat; explicit reset is handled by a "New chat" action.
-   - UI exposes manual admin operations for reconcile/rebuild through MS2 endpoints using `X-API-Key` (`VITE_MS2_ADMIN_API_KEY` in frontend env).
+   - UI exposes manual reconcile/rebuild (confirm on rebuild) through MS2 admin endpoints; the Vite dev proxy injects `X-API-Key` (`MS2_ADMIN_API_KEY`, default `dev-admin-key`), so the key is never bundled into the browser.
 
 ## Deferred
 

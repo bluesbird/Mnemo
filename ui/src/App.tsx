@@ -89,6 +89,25 @@ function App() {
     setError("");
   }
 
+  function confirmDiscardChanges(): boolean {
+    const hasUnsavedNewNote =
+      isNew && (draft.title.trim() !== "" || draft.content.trim() !== "");
+    return (
+      !(hasUnsavedChanges || hasUnsavedNewNote) ||
+      window.confirm("You have unsaved changes. Discard them?")
+    );
+  }
+
+  function selectNoteGuarded(note: Note) {
+    if (note.id === selectedId || !confirmDiscardChanges()) return;
+    selectNote(note);
+  }
+
+  function startNewNoteGuarded() {
+    if (!confirmDiscardChanges()) return;
+    startNewNote();
+  }
+
   function startNewNote() {
     setSelectedId(null);
     setDraft({ title: "", content: "" });
@@ -180,6 +199,8 @@ function App() {
   }
 
   async function openNoteFromChat(noteId: number) {
+    if (selectedId !== noteId && !confirmDiscardChanges()) return;
+
     const current = notes.find((note) => note.id === noteId);
     if (current) {
       selectNote(current);
@@ -237,7 +258,7 @@ function App() {
         </nav>
       </header>
 
-      <div className={view === "notes" ? "" : "is-hidden"}>
+      <div className={view === "notes" ? "view" : "view is-hidden"}>
         <NotesWorkspace
           notes={notes}
           filteredNotes={filteredNotes}
@@ -252,15 +273,15 @@ function App() {
           error={error}
           hasUnsavedChanges={hasUnsavedChanges}
           onSearchChange={setSearch}
-          onSelect={selectNote}
-          onCreate={startNewNote}
+          onSelect={selectNoteGuarded}
+          onCreate={startNewNoteGuarded}
           onDraftChange={setDraft}
           onSave={(event) => void saveNote(event)}
           onDelete={() => void deleteNote()}
           onEnrich={() => void enrichNote()}
         />
       </div>
-      <div className={view === "chat" ? "" : "is-hidden"}>
+      <div className={view === "chat" ? "view" : "view is-hidden"}>
         <ChatWorkspace
           messages={chatMessages}
           onMessagesChange={setChatMessages}
