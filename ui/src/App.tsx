@@ -13,6 +13,17 @@ import type { Note, NoteDraft } from "./types/note";
 
 type AppView = "notes" | "chat";
 
+const CHAT_STORAGE_KEY = "pkh.chat";
+
+function loadChatMessages(): ChatMessage[] {
+  try {
+    const parsed = JSON.parse(sessionStorage.getItem(CHAT_STORAGE_KEY) ?? "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 function parseViewFromHash(): AppView {
   return window.location.hash === "#/chat" ? "chat" : "notes";
 }
@@ -28,7 +39,15 @@ function App() {
   const [saving, setSaving] = useState(false);
   const [enriching, setEnriching] = useState(false);
   const [error, setError] = useState("");
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(loadChatMessages);
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(chatMessages));
+    } catch {
+      // storage unavailable: chat simply stays in memory
+    }
+  }, [chatMessages]);
 
   const selectedNote = notes.find((note) => note.id === selectedId) ?? null;
   const filteredNotes = useMemo(() => {
