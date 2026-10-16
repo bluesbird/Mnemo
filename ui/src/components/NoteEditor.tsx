@@ -73,7 +73,7 @@ export function NoteEditor({
               {note && (
                 <>
                   <button
-                    className="text-button enrich-button"
+                    className="outline-button"
                     type="button"
                     onClick={onEnrich}
                     disabled={saving || enriching || hasUnsavedChanges}
@@ -86,7 +86,7 @@ export function NoteEditor({
                     {enriching ? "Enriching…" : "Enrich with AI"}
                   </button>
                   <button
-                    className="text-button delete-button"
+                    className=                    "outline-button danger-button"
                     type="button"
                     onClick={onDelete}
                     disabled={saving || enriching}
