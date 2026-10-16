@@ -1,0 +1,85 @@
+services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: e2e
+      POSTGRES_PASSWORD: e2e-only
+      POSTGRES_DB: mnemo_e2e
+    volumes:
+      - postgres:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U e2e -d mnemo_e2e"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    environment:
+      RABBITMQ_DEFAULT_USER: e2e
+      RABBITMQ_DEFAULT_PASS: e2e-only
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 3s
+      timeout: 5s
+      retries: 30
+
+  ollama:
+    image: python:3.12-slim
+    working_dir: /tests
+    volumes:
+      - ./fake_ollama.py:/tests/fake_ollama.py:ro
+    command: ["python", "fake_ollama.py"]
+
+  ms1:
+    build:
+      context: ../../ms1-knowledge-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/mnemo_e2e
+      SPRING_DATASOURCE_USERNAME: e2e
+      SPRING_DATASOURCE_PASSWORD: e2e-only
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_USERNAME: e2e
+      SPRING_RABBITMQ_PASSWORD: e2e-only
+      SPRING_AI_OLLAMA_BASE_URL: http://ollama:11434
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  ms2:
+    build:
+      context: ../../ms2-rag-service
+    environment:
+      MS2_APP_ENV: e2e
+      MS2_MS1_BASE_URL: http://ms1:8080
+      MS2_OLLAMA_BASE_URL: http://ollama:11434
+      MS2_RABBITMQ_HOST: rabbitmq
+      MS2_RABBITMQ_USERNAME: e2e
+      MS2_RABBITMQ_PASSWORD: e2e-only
+      MS2_LOG_FORMAT: json
+      # Exercise the existing offline word-count fallback, without model/tokenizer downloads.
+      HF_HUB_OFFLINE: "1"
+      ANONYMIZED_TELEMETRY: "False"
+    volumes:
+      - chroma:/app/data
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      ms1:
+        condition: service_started
+      ollama:
+        condition: service_started
+
+  tests:
+    image: python:3.12-slim
+    working_dir: /tests
+    volumes:
+      - ./scenario.py:/tests/scenario.py:ro
+    command: ["python", "-u", "scenario.py"]
+    profiles: ["test"]
+
+volumes:
+  postgres:
+  chroma:

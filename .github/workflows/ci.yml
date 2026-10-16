@@ -6,6 +6,32 @@ on:
   pull_request:
 
 jobs:
+  e2e:
+    name: Cross-service integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m unittest discover -s tests/e2e -p test_harness.py
+      - run: python tests/e2e/run.py
+      - name: Upload isolated stack diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-diagnostics
+          path: tests/e2e/artifacts/
+          retention-days: 7
+      - name: Final cleanup after interruption
+        if: always()
+        run: |
+          if [ -f tests/e2e/artifacts/project.txt ]; then
+            project=$(cat tests/e2e/artifacts/project.txt)
+            docker compose --project-name "$project" --env-file tests/e2e/e2e.env --file tests/e2e/compose.yaml down --volumes --remove-orphans --rmi local --timeout 10
+          fi
+
   ms1:
     name: MS1 (Java)
     runs-on: ubuntu-latest

@@ -87,7 +87,7 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
 - [x] Docker Compose for local development with PostgreSQL, RabbitMQ, MS1, and MS2.
 - [x] Separate Docker images for MS1 and MS2 (multi-stage Dockerfiles, built by Compose); UI containerization optional.
 - [x] GitHub Actions CI for builds and tests (`.github/workflows/ci.yml`: MS1, MS2, and UI jobs on push to `main` and on PRs).
-- [x] MS1 persistence integration tests and MS2 unit/API tests (pytest); cross-service integration tests remain planned.
+- [x] MS1 persistence integration tests, MS2 unit/API tests (pytest), and isolated cross-service integration tests (`tests/e2e`, also run in CI).
 - [x] OpenAPI / Swagger documentation for API exploration.
 - [ ] Structured logs for debugging and operations (MS2 supports JSON logs; MS1 has basic SLF4J logs only).
 - [x] Retry and dead-letter handling for RabbitMQ consumers in MS2.
@@ -111,7 +111,7 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
 5. [x] MS1 ↔ MS2 integration via RabbitMQ incremental events
 6. [x] UI for RAG chatbot
 7. [x] CI setup (GitHub Actions builds and tests all three services)
-8. [ ] Cross-service integration tests (MS1 → RabbitMQ → MS2 → chat), run in CI
+8. [x] Cross-service integration tests (MS1 → RabbitMQ → MS2 → chat), run in CI
 9. [ ] MS1 structured (JSON) logging
 10. [ ] Optional: MS1 pagination, server-side search, and tag filtering, plus UI tag filtering
 11. [ ] Optional: CD (publish Docker images), HTTPS and production secret management, Transactional Outbox, PostgreSQL backup procedure

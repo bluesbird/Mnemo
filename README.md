@@ -51,6 +51,41 @@ MS2 options (env vars, prefix `MS2_`): `RABBITMQ_ENABLED=false` runs without the
 
 - MS1: `cd ms1-knowledge-service; .\mvnw.cmd test`
 - MS2: `cd ms2-rag-service; .\.venv\Scripts\python.exe -m pytest`
+
+### Cross-service integration (phase 8)
+
+From the repository root, with Python 3.12+ and Docker Compose v2 available:
+
+```powershell
+python .\tests\e2e\run.py
+```
+
+On Linux/macOS: `python tests/e2e/run.py`. No host Java, service Python dependencies,
+Ollama installation, model downloads, or running development services are needed.
+The first run builds the production MS1/MS2 images and downloads base images/dependencies.
+
+The standalone test Compose stack uses real PostgreSQL, RabbitMQ and MS2's embedded
+Chroma, and a local deterministic Ollama-compatible HTTP fake. It creates a note
+through MS1, waits for event-driven chat retrieval with its source/hash, updates it
+and checks the new content/hash replaces the old one, then deletes it and verifies
+there are no stale chat sources. It never calls reconcile/rebuild. Consumer readiness,
+event acknowledgements and an empty dead-letter queue are also checked.
+Polling is deadline-bounded and reports the last failed observation.
+
+Each run has a unique Compose project, private network and disposable data volumes,
+no published host ports, no development `.env` files, and no development data mounts.
+The tokenizer uses MS2's existing offline word-count fallback. The fake returns fixed
+embeddings and echoes only retrieved context: this tests integration, not model quality,
+semantic ranking or the real tokenizer. No production code is substituted.
+
+The runner always attempts teardown (including volumes) and writes service logs,
+scenario output, container status and queue diagnostics to ignored `tests\e2e\artifacts`.
+Project-built images are removed; shared base images/build cache are retained. CI runs it
+as an independent job and uploads those diagnostics, with a final cleanup step.
+Fast fake/polling checks: `python -m unittest discover -s tests\e2e -p test_harness.py`.
+After a forcibly terminated local run, use the project name printed by Compose:
+`docker compose -p <mnemo-e2e-ID> --env-file .\tests\e2e\e2e.env -f .\tests\e2e\compose.yaml down -v --remove-orphans --rmi local`.
+
 ## Run everything in Docker
 
 Ollama must run on the host (reached via `host.docker.internal`).
