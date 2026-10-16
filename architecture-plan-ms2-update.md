@@ -76,8 +76,6 @@ No LangChain, separate chunk database, or sparse retrieval in V1.
 - `GET /api/v1/health` — health check.
 - Admin endpoints are protected in V1 by a static API key sent in an `X-API-Key` header and read from an environment variable (never committed). Chat and health endpoints stay open.
 
-These are proposed endpoint names, not yet implemented.
-
 ## RAG Pipeline
 
 1. Receive a question.
@@ -117,7 +115,10 @@ These are proposed endpoint names, not yet implemented.
 8. [x] Containerize MS2 and integrate it into Docker Compose.
    - Non-root image with healthcheck; `docker compose up -d --build ms2-rag-service`. Chroma data and the HF tokenizer cache live in named volumes.
    - Ollama is expected on the host (`host.docker.internal:11434`); admin key via `MS2_ADMIN_API_KEY` (default `dev-admin-key`, local only).
-9. [ ] Connect the frontend chatbot to MS2.
+9. [x] Connect the frontend chatbot to MS2.
+   - UI now sends chat queries to `POST /api/v1/chat/query` via Vite proxy (`/rag-api` rewrite).
+   - UI supports source-note navigation without clearing the current chat; explicit reset is handled by a "New chat" action.
+   - UI exposes manual admin operations for reconcile/rebuild through MS2 endpoints using `X-API-Key` (`VITE_MS2_ADMIN_API_KEY` in frontend env).
 
 ## Deferred
 

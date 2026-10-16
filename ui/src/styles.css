@@ -38,6 +38,9 @@ button {
   display: flex;
   flex-direction: column;
 }
+.is-hidden {
+  display: none;
+}
 .topbar {
   height: 76px;
   display: flex;
@@ -131,6 +134,17 @@ button {
 .chat-header h1 {
   font-size: clamp(24px, 2.6vw, 34px);
   line-height: 1.2;
+}
+.chat-header-actions {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.chat-admin-feedback {
+  margin: 10px 0 0;
+  color: #647169;
+  font-size: 12px;
 }
 .chat-thread {
   overflow-y: auto;
@@ -588,6 +602,10 @@ kbd {
   }
   .chat-header {
     padding: 18px 16px 14px;
+  }
+  .chat-header-actions {
+    flex-wrap: wrap;
+    gap: 10px;
   }
   .chat-thread {
     padding: 14px 16px;

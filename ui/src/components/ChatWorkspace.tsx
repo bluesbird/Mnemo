@@ -1,23 +1,38 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { queryChat } from "../api/chat";
+import type { KeyboardEvent } from "react";
+import { queryChat, rebuildIndex, reconcileIndex } from "../api/chat";
+import type { IndexOperationResponse } from "../types/chat";
 import type { ChatMessage } from "../types/chat";
 
 type ChatWorkspaceProps = {
+  messages: ChatMessage[];
+  onMessagesChange: (messages: ChatMessage[]) => void;
   onOpenNote: (noteId: number) => void;
 };
 
 const EMPTY_MESSAGE =
   "Ask a question about your notes. I will answer using indexed note content from MS2.";
 
-export function ChatWorkspace({ onOpenNote }: ChatWorkspaceProps) {
-  const [question, setQuestion] = useState("");
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isAsking, setIsAsking] = useState(false);
+function summarizeAdminResult(
+  operation: "reconcile" | "rebuild",
+  result: IndexOperationResponse,
+): string {
+  return `${operation === "reconcile" ? "Reconcile" : "Rebuild"} complete · indexed ${result.indexed_note_ids.length}, deleted ${result.deleted_note_ids.length}, skipped ${result.skipped_note_ids.length}, total MS1 notes ${result.total_ms1_notes}.`;
+}
 
-  async function ask(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const trimmed = question.trim();
+export function ChatWorkspace({
+  messages,
+  onMessagesChange,
+  onOpenNote,
+}: ChatWorkspaceProps) {
+  const [question, setQuestion] = useState("");
+  const [isAsking, setIsAsking] = useState(false);
+  const [isAdminActionRunning, setIsAdminActionRunning] = useState(false);
+  const [adminFeedback, setAdminFeedback] = useState("");
+
+  async function sendQuestion(text: string) {
+    const trimmed = text.trim();
     if (!trimmed || isAsking) return;
 
     const userMessage: ChatMessage = {
@@ -26,8 +41,9 @@ export function ChatWorkspace({ onOpenNote }: ChatWorkspaceProps) {
       text: trimmed,
       sources: [],
     };
+    const nextMessages = [...messages, userMessage];
 
-    setMessages((current) => [...current, userMessage]);
+    onMessagesChange(nextMessages);
     setQuestion("");
     setIsAsking(true);
 
@@ -39,14 +55,14 @@ export function ChatWorkspace({ onOpenNote }: ChatWorkspaceProps) {
         text: response.answer,
         sources: response.sources,
       };
-      setMessages((current) => [...current, assistantMessage]);
+      onMessagesChange([...nextMessages, assistantMessage]);
     } catch (cause) {
       const message =
         cause instanceof Error
           ? cause.message
           : "Could not get an answer from the chatbot.";
-      setMessages((current) => [
-        ...current,
+      onMessagesChange([
+        ...nextMessages,
         {
           id: crypto.randomUUID(),
           role: "assistant",
@@ -60,11 +76,78 @@ export function ChatWorkspace({ onOpenNote }: ChatWorkspaceProps) {
     }
   }
 
+  async function ask(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    await sendQuestion(question);
+  }
+
+  async function runAdminAction(operation: "reconcile" | "rebuild") {
+    if (isAdminActionRunning || isAsking) return;
+    setIsAdminActionRunning(true);
+    setAdminFeedback("");
+    try {
+      const result =
+        operation === "reconcile" ? await reconcileIndex() : await rebuildIndex();
+      setAdminFeedback(summarizeAdminResult(operation, result));
+    } catch (cause) {
+      setAdminFeedback(
+        cause instanceof Error
+          ? cause.message
+          : "Admin action failed. Please check MS2 availability and API key.",
+      );
+    } finally {
+      setIsAdminActionRunning(false);
+    }
+  }
+
+  function startNewChat() {
+    if (isAsking || isAdminActionRunning) return;
+    onMessagesChange([]);
+    setQuestion("");
+    setAdminFeedback("");
+  }
+
+  function onQuestionKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      if (!isAsking && question.trim()) {
+        void sendQuestion(question);
+      }
+    }
+  }
+
   return (
     <section className="chat-workspace" aria-label="Chat workspace">
       <header className="chat-header">
         <p className="eyebrow">RAG CHAT</p>
         <h1>Ask your knowledge base</h1>
+        <div className="chat-header-actions">
+          <button
+            type="button"
+            className="text-button"
+            disabled={isAsking || isAdminActionRunning}
+            onClick={() => void runAdminAction("reconcile")}
+          >
+            Reconcile index
+          </button>
+          <button
+            type="button"
+            className="text-button"
+            disabled={isAsking || isAdminActionRunning}
+            onClick={() => void runAdminAction("rebuild")}
+          >
+            Rebuild index
+          </button>
+          <button
+            type="button"
+            className="text-button"
+            disabled={isAsking || isAdminActionRunning}
+            onClick={startNewChat}
+          >
+            New chat
+          </button>
+        </div>
+        {adminFeedback && <p className="chat-admin-feedback">{adminFeedback}</p>}
       </header>
 
       <div className="chat-thread" aria-live="polite">
@@ -110,6 +193,7 @@ export function ChatWorkspace({ onOpenNote }: ChatWorkspaceProps) {
           placeholder="Ask about your notes…"
           value={question}
           onChange={(event) => setQuestion(event.target.value)}
+          onKeyDown={onQuestionKeyDown}
           disabled={isAsking}
           required
         />

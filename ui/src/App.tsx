@@ -8,6 +8,7 @@ import {
 } from "./api/notes";
 import { ChatWorkspace } from "./components/ChatWorkspace";
 import { NotesWorkspace } from "./components/NotesWorkspace";
+import type { ChatMessage } from "./types/chat";
 import type { Note, NoteDraft } from "./types/note";
 
 type AppView = "notes" | "chat";
@@ -27,6 +28,7 @@ function App() {
   const [saving, setSaving] = useState(false);
   const [enriching, setEnriching] = useState(false);
   const [error, setError] = useState("");
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
 
   const selectedNote = notes.find((note) => note.id === selectedId) ?? null;
   const filteredNotes = useMemo(() => {
@@ -235,7 +237,7 @@ function App() {
         </nav>
       </header>
 
-      {view === "notes" ? (
+      <div className={view === "notes" ? "" : "is-hidden"}>
         <NotesWorkspace
           notes={notes}
           filteredNotes={filteredNotes}
@@ -257,9 +259,14 @@ function App() {
           onDelete={() => void deleteNote()}
           onEnrich={() => void enrichNote()}
         />
-      ) : (
-        <ChatWorkspace onOpenNote={(noteId) => void openNoteFromChat(noteId)} />
-      )}
+      </div>
+      <div className={view === "chat" ? "" : "is-hidden"}>
+        <ChatWorkspace
+          messages={chatMessages}
+          onMessagesChange={setChatMessages}
+          onOpenNote={(noteId) => void openNoteFromChat(noteId)}
+        />
+      </div>
 
       <footer className="page-footer">
         <span>PERSONAL KNOWLEDGE HUB</span>
