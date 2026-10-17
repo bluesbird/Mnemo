@@ -117,5 +117,11 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
 8. [x] Cross-service integration tests (MS1 → RabbitMQ → MS2 → chat), run in CI
 9. [x] MS1 structured (JSON) logging
 10. [x] UI containerization and same-origin nginx proxy in Compose, validated in isolated CI E2E
-11. [ ] Optional: MS1 pagination, server-side search, and tag filtering, plus UI tag filtering
-12. [ ] Optional: CD (publish Docker images), HTTPS and production secret management, Transactional Outbox, PostgreSQL backup procedure
+11. [x] Versioned MS1 database migrations (Flyway), replacing Hibernate `ddl-auto=update` with a safe migration path for existing data
+12. [ ] Transactional Outbox in MS1: persist note changes and events atomically; scheduled publishing with RabbitMQ publisher confirms and retries; retain idempotent MS2 consumption
+13. [ ] Failure-recovery E2E: save a note while RabbitMQ is unavailable, restore the broker, and verify eventual indexing through the outbox
+14. [ ] PostgreSQL backup and restore: document the procedure and verify restoration; rebuild the derived Chroma index from MS1
+15. [ ] Release polish: verify one-command startup instructions and model prerequisites, add screenshots; optionally publish versioned container images to GHCR through CI
+16. [ ] Optional: small real-model RAG evaluation set with expected source references and unanswerable questions, separate from deterministic CI E2E
+17. [ ] Deferred until needed: MS1 pagination, server-side search, and tag filtering, plus UI tag filtering
+18. [ ] Before public deployment: access control, HTTPS, and production secret management (current deployment is local/trusted only)

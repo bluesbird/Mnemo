@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import time
 import uuid
 
 HERE = Path(__file__).resolve().parent
@@ -31,6 +32,31 @@ def verify_ms1_json_logs(output):
         records.append(record)
     assert any("Started KnowledgeServiceApplication" in record["message"]
                for record in records), "Missing MS1 structured startup log"
+
+
+def verify_ms1_migrations(command, env):
+    deadline = time.monotonic() + 120
+    last_observation = "migration history not queried"
+    while time.monotonic() < deadline:
+        result = subprocess.run(
+            command + ["exec", "-T", "db", "psql", "-U", "e2e", "-d", "mnemo_e2e",
+                       "-At", "-c",
+                       "SELECT count(*) || ':' || COALESCE(bool_and(success), false)::text "
+                       "FROM flyway_schema_history WHERE version = '1' AND type = 'SQL'"],
+            env=env, capture_output=True, text=True, timeout=30,
+        )
+        last_observation = result.stdout.strip() or result.stderr.strip()
+        if result.returncode == 0 and result.stdout.strip() == "1:true":
+            break
+        if result.returncode == 0 and result.stdout.strip() not in ("0:false", ""):
+            raise AssertionError(
+                "Expected a successful fresh Flyway V1 migration: " + last_observation)
+        time.sleep(1)
+    else:
+        raise AssertionError("Timed out waiting for Flyway V1; last observation: "
+                             + last_observation)
+    subprocess.run(command + ["restart", "ms1"], env=env, check=True, timeout=60)
+    print("PASS: fresh Flyway V1 applied and MS1 restarted with validated schema", flush=True)
 
 
 def verify_ui_configuration(command, env):
@@ -71,6 +97,7 @@ def main():
                        stdout=subprocess.DEVNULL, timeout=30)
         subprocess.run(command + ["up", "--detach", "--build"], env=env,
                        check=True, timeout=900)
+        verify_ms1_migrations(command, env)
         verify_ui_configuration(command, env)
         with scenario_log.open("w", encoding="utf-8") as log:
             subprocess.run(command + ["run", "--rm", "-T", "tests"], env=env,

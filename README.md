@@ -52,6 +52,50 @@ MS2 options (env vars, prefix `MS2_`): `RABBITMQ_ENABLED=false` runs without the
 - MS1: `cd ms1-knowledge-service; .\mvnw.cmd test`
 - MS2: `cd ms2-rag-service; .\.venv\Scripts\python.exe -m pytest`
 
+## MS1 database migrations
+
+MS1 applies versioned PostgreSQL migrations from
+`ms1-knowledge-service/src/main/resources/db/migration` at startup. New databases
+receive `V1__create_knowledge_schema.sql`; Hibernate uses `ddl-auto=validate` and
+does not create or update tables. Keep future schema changes in new versioned
+migrations; do not edit a migration after it has been applied.
+
+Existing databases created by older MS1 versions have no Flyway history. Do not
+enable baseline-on-migrate for normal operation: it is off by default. To adopt a
+known legacy database, stop MS1 and all other writers, take and verify a database
+backup, and run the read-only compatibility check against the intended database
+and schema:
+
+```powershell
+$backup = Join-Path $env:USERPROFILE 'mnemo-before-flyway.dump'
+pg_dump --format=custom --host=localhost --port=5332 --username=bluesbird `
+  --dbname=mnemo --file="$backup"
+if ($LASTEXITCODE -ne 0) { throw 'Database backup failed' }
+pg_restore --list "$backup"
+if ($LASTEXITCODE -ne 0) { throw 'Database backup verification failed' }
+
+psql -h localhost -p 5332 -U bluesbird -d mnemo -v ON_ERROR_STOP=1 `
+  -f .\ms1-knowledge-service\docs\legacy-schema-preflight.sql
+```
+
+The dump is outside the repository and `pg_restore --list` verifies it can be read.
+The preflight rejects a different table set, column shape, source-hash default, or
+primary/unique/foreign-key definitions. Review the result and confirm the database
+is the expected MS1 legacy schema before proceeding. If it fails, do not baseline;
+investigate the schema/data drift and resolve it from the verified backup first.
+
+For the one-time adoption, start MS1 once with
+`SPRING_FLYWAY_BASELINE_ON_MIGRATE=true` (for a host-run PowerShell start, set
+`$env:SPRING_FLYWAY_BASELINE_ON_MIGRATE = "true"` before
+`.\mvnw.cmd spring-boot:run`). The configured baseline is version `1`: Flyway
+records that the existing schema already represents V1 and does not execute V1
+against the populated tables. Hibernate then validates the schema during startup.
+If startup validation fails, stop and restore/investigate; do not switch back to
+schema auto-update. After a successful start, stop MS1, remove the environment
+variable (`Remove-Item Env:SPRING_FLYWAY_BASELINE_ON_MIGRATE`), and start it
+normally. Normal startups keep baseline-on-migrate disabled and apply only newer
+migrations.
+
 ### Cross-service integration (phase 8)
 
 From the repository root, with Python 3.12+ and Docker Compose v2 available:
