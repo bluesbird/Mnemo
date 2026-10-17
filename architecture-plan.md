@@ -118,10 +118,19 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
 9. [x] MS1 structured (JSON) logging
 10. [x] UI containerization and same-origin nginx proxy in Compose, validated in isolated CI E2E
 11. [x] Versioned MS1 database migrations (Flyway), replacing Hibernate `ddl-auto=update` with a safe migration path for existing data
-12. [ ] Transactional Outbox in MS1: persist note changes and events atomically; scheduled publishing with RabbitMQ publisher confirms and retries; retain idempotent MS2 consumption
-13. [ ] Failure-recovery E2E: save a note while RabbitMQ is unavailable, restore the broker, and verify eventual indexing through the outbox
-14. [ ] PostgreSQL backup and restore: document the procedure and verify restoration; rebuild the derived Chroma index from MS1
-15. [ ] Release polish: verify one-command startup instructions and model prerequisites, add screenshots; optionally publish versioned container images to GHCR through CI
-16. [ ] Optional: small real-model RAG evaluation set with expected source references and unanswerable questions, separate from deterministic CI E2E
-17. [ ] Deferred until needed: MS1 pagination, server-side search, and tag filtering, plus UI tag filtering
-18. [ ] Before public deployment: access control, HTTPS, and production secret management (current deployment is local/trusted only)
+
+### Remaining priorities
+
+Phase numbers are retained for reference; use the order below for the remaining work.
+
+- **Phase 16 — RAG evaluation:** [ ] Small real-model evaluation set with expected source references and unanswerable questions, separate from deterministic CI E2E. First real-model run and provisional assistant review saved in [evaluation/results.md](evaluation/results.md); project-author acceptance remains pending. Scope and procedure: [evaluation-plan.md](evaluation-plan.md).
+- **Phase 18 — Public deployment safeguards:** [ ] Required before public hosting: access control, HTTPS, production secret management, and restricted exposure of backend/infrastructure ports. Keep authentication deployment-focused rather than adding account management to the app. Current deployment remains local/trusted only.
+- **Phase 15 — Release polish:** [ ] Keep startup instructions and model prerequisites accurate throughout development; finalize screenshots, architecture/limitations documentation, and a clean-start walkthrough after evaluation and any intended deployment safeguards are finished. Public hosting is not required for a repository-only release.
+
+### Optional / deferred work
+
+- **Phase 12 — Transactional Outbox:** [ ] Optional reliability extension, preserved on `feature/transactional-outbox`, not included in `main`. Atomic note/event persistence, scheduled publishing with publisher confirms and retries, and idempotent MS2 consumption.
+- **Phase 13 — Outbox recovery E2E:** [ ] Only needed if phase 12 is adopted: save a note while RabbitMQ is unavailable, restore the broker, and verify eventual indexing.
+- **Phase 14 — Backup and restore:** [ ] Defer while data is disposable; revisit before relying on Mnemo for real notes. Document and verify PostgreSQL restoration, then rebuild the derived Chroma index from MS1.
+- **Phase 17 — Collection scaling and filtering:** [ ] MS1 pagination, server-side search, and tag filtering, plus UI tag filtering, when collection size or usage justifies them.
+- **Optional release automation:** [ ] Publish versioned container images to GHCR through CI; not required for phase 15 or a complete portfolio release.

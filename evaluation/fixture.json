@@ -1,0 +1,143 @@
+{
+  "description": "Original synthetic notes written for this sanity check. All places, people, schedules and procedures are fictional; no personal or database notes were read or copied. Texts and answer key frozen before the run.",
+  "notes": [
+    {
+      "key": "willow-access",
+      "length": "short",
+      "title": "Willow workshop visitor access",
+      "content": "The Willow community workshop welcomes visitors on Tuesday and Thursday from 18:00 to 20:00. Enter through the courtyard door, not the street entrance. A volunteer meets visitors at the green desk. These hours are for visits to the room; equipment collection has its own shorter window."
+    },
+    {
+      "key": "willow-loans",
+      "length": "short",
+      "title": "Willow equipment collection window",
+      "content": "Willow equipment loans can be collected on Thursday from 18:30 to 19:00 at the green desk. Bring the reservation code on paper or on a screen. This collection window applies only to Willow equipment. Returns go on the marked return shelf, where a volunteer checks the case before closing the loan."
+    },
+    {
+      "key": "harbor-loans",
+      "length": "short",
+      "title": "Harbor equipment collection window",
+      "content": "Harbor equipment loans can be collected on Saturday from 10:00 to 11:00 at the orange counter. Bring the reservation code. Harbor is a separate workshop with its own stock and volunteers; its Saturday collection window does not apply to Willow. Return cases to the orange counter rather than leaving them outside."
+    },
+    {
+      "key": "seed-library",
+      "length": "short",
+      "title": "Seed library borrowing rule",
+      "content": "Seed library members may take at most two seed packets per visit. They do not need to bring replacement seeds that day. At the end of the growing season, members are encouraged, but not required, to return one labelled packet of saved seeds. Write the plant variety and harvest year on any returned packet."
+    },
+    {
+      "key": "printer-recovery",
+      "length": "medium",
+      "title": "Label printer recovery after an empty feed",
+      "content": "This procedure is for the desk label printer when it feeds blank backing without printing a label. It is not the procedure for a paper jam. First cancel the active print job in the queue. Next open the cover and reseat the label roll so that the labels face upward. Close the cover, then hold the feed button for three seconds to recalibrate. Finally print one test label before releasing the waiting jobs.\n\nKeep the discarded backing beside the printer until the test label has been inspected. The volunteer at the desk checks that the text sits within the label border and that the date is readable. A successful test label can be attached to the shift sheet rather than thrown away.\n\nIf that test still comes out blank, stop using the printer and put a handwritten sign on it. Do not send the whole queue again while the cause is unknown. The spare marker and plain tags are in the shallow drawer beneath the printer, so the desk can continue labelling items by hand."
+    },
+    {
+      "key": "archive-release",
+      "length": "medium",
+      "title": "Public archive release gate",
+      "content": "A batch of scanned workshop records can be released to the public archive only after both checks have passed: all visible address labels have been redacted, and a second volunteer has checked the page order against the intake sheet. Neither check substitutes for the other. The release volunteer records both check marks on the batch cover.\n\nThe redaction check is performed on the exported images, not merely on the working files in the editor. This avoids releasing an earlier export by mistake. If a label remains legible, return the batch to editing and export a fresh copy before checking again.\n\nFor the order check, the second volunteer compares each exported page with its position on the intake sheet. A cover page counts as a page and must not silently disappear. Once both checks pass, the release volunteer moves the batch to the public folder and writes the release date on the cover. This note defines the release gate, not the retention schedule for physical intake receipts."
+    },
+    {
+      "key": "willow-packing",
+      "length": "medium",
+      "title": "Willow loan packing pouch",
+      "content": "Before a Willow equipment loan leaves the workshop, put exactly these three items in the small packing pouch: the laminated quick-start card, the USB-C charging cable, and the paper condition checklist. The borrower and the desk volunteer tick the checklist together. The pouch travels inside the equipment case so that loose paperwork cannot fall out on the journey.\n\nCheck the printed equipment number on the quick-start card against the number on the case. Cards from a different case go back to the desk rather than travelling with the borrower. Coil the charging cable loosely and secure it with the reusable strap attached to the cable; do not use adhesive tape on it.\n\nThe condition checklist stays on paper during the loan. Mark existing scratches before departure and leave the return column empty for the return inspection. This packing instruction does not change the collection window or the reservation requirement. The loan desk follows the separate equipment collection note for those details."
+    },
+    {
+      "key": "archive-handbook",
+      "length": "long",
+      "title": "Archive intake handbook and receipt retention",
+      "content": "The workshop archive accepts donated meeting sheets, project sketches and printed event programmes. Intake is deliberately separate from publication: accepting a box does not mean its contents are ready to appear online. At the start of a shift, clear one table and place an empty tray on it. Keep food and drinks on the shelf outside the sorting room. A volunteer writes the batch identifier on a removable card and places that card on top of the box, without attaching adhesive labels to original papers.\n\nBegin the inventory by counting folders, not individual pages. Write the folder count on the intake sheet and give each folder a temporary number in pencil on its protective sleeve. Folded sheets stay folded until the condition check. If a folder contains a loose photograph, put the photograph in its own sleeve while keeping its temporary number linked to the original folder. The inventory describes what arrived; it is not an assessment of the historical value of the donation. Volunteers should avoid adding guesses about authorship to the intake sheet.\n\nThe condition check happens before scanning. Remove metal clips only when they can be lifted without pulling the paper. A torn page goes in a support sleeve and is scanned through the sleeve if opening it would make the tear worse. Note unreadable portions on the working copy instead of writing on the original. When an item cannot lie flat safely, set it aside for a later session rather than pressing it under a heavy object. The scanner table should contain only the folder currently being processed and its intake sheet.\n\nCreate a working folder named with the batch identifier and scan pages in intake order. Keep the first image as a reference even if a later image has better contrast. Volunteers can adjust brightness in a working copy but should not overwrite the first scan. Record any intentional missing page on the intake sheet so that the order checker can distinguish an omission from an accidental skip. File names use consecutive page numbers within each batch. The folder name carries the batch identifier, so repeating it inside every page title is unnecessary.\n\nAt the end of a scanning session, compare the number of image files with the number of scanned pages recorded that day. A mismatch should be resolved before packing the box away. Leave the working folder in the internal area until the public release gate has been completed. The separate release-gate note covers redaction and independent order checks. Do not infer public permission from the existence of a scan. Working images remain internal even when they are easy to read and the donation seems routine. The shift sheet records who last handled the batch.\n\nPhysical receipt retention starts only after public release. Keep the blue intake receipt for 45 days after the batch's public release date, then place it in the locked shredding bin. Do not put that receipt in ordinary paper recycling. The blue receipt is the temporary desk copy; the batch cover remains with the archive record. When closing a receipt entry, write the disposal date in the receipt register so another shift can see that disposal has already happened. A delayed release also delays the start of this retention period.\n\nFor handover, return protective sleeves to their labelled trays and leave the scanner glass clean. The next shift should find a short written description of any unresolved mismatch rather than an unexplained stack of loose pages. Put the intake sheet back with its batch and leave the temporary folder numbers visible. A volunteer who did not work on the batch should be able to reconstruct the sequence from the inventory and shift sheet. This handbook concerns workshop archive records only; equipment reservations and seed packets follow their own desk procedures."
+    },
+    {
+      "key": "garden-handbook",
+      "length": "long",
+      "title": "Courtyard garden weekly observation handbook",
+      "content": "The courtyard garden is a shared observation space rather than a production allotment. Its log helps volunteers notice changes from week to week without turning every visit into a measurement exercise. Each bed has a wooden marker and a matching page in the green binder. At the start of a visit, check that the marker is still legible and that the binder page names the same bed. Do not move markers to make a photograph look tidier, because later volunteers use their positions to compare observations.\n\nA useful observation describes what can be seen rather than assigning an immediate cause. For example, write that the leaves on the north side are pale instead of declaring that the plant needs a particular treatment. Include the date and whether the surface soil feels dry, damp or wet. Volunteers may use the same small wooden probe kept beside the binder. Return it clean after each bed so that a later observation does not simply describe soil carried over from the previous one. The log is a record, not a diagnosis.\n\nWatering decisions begin with the soil check and the current shift instructions on the board. Avoid watering just because the surface looks lighter in a photograph. When watering is requested, use the can marked for garden water and keep it separate from cleaning buckets. Apply water slowly near the soil instead of spraying the leaves for the photograph. Record that watering happened and which bed was watered. Do not create a new fixed watering timetable in the binder; the board is where the current shift instructions belong.\n\nPhotographs should be taken from the marked paving stone whenever that spot is accessible. Include the bed marker in the frame so the picture can be matched to the correct binder page. A second close-up is useful for a change that would be hard to see in the overview. Keep both pictures and give them the same visit date. Avoid including visitors in the background. If the paving stone is blocked by a class, write down that the angle changed rather than trying to move the group or pretending the view is directly comparable.\n\nThe small tray near the wall is for temporarily holding detached plant labels. It is not a place to leave unlabelled seed packets. A loose label should be recorded with the place where it was found, even if a volunteer thinks its original bed is obvious. Compare the label with the binder before putting it back. Similar-looking young plants are a reason to wait for confirmation, not a reason to guess. This garden observation system is separate from the seed library borrowing rules; taking seeds does not automatically assign a garden bed.\n\nAt the end of the visit, close the binder and return it to the dry shelf. Empty the observation tray only when every loose label has been reconciled with a bed or listed as unresolved. Wipe the wooden probe and put it beside the binder. If a can is damaged, leave a written notice for the next shift so nobody discovers the leak halfway through watering. Routine handover notes belong on the board, while permanent observations belong on the dated binder page. Keeping those two records distinct makes old observations easier to interpret.\n\nA monthly group walk compares the dated photographs and binder entries. The group chooses two visible changes to discuss and leaves other entries as records for later. Volunteers are encouraged to distinguish observations from interpretations during the discussion. Nobody is expected to identify every plant or explain every mark on a leaf. The walk ends with a short list of questions for the next month, not a ranking of the beds. The courtyard project values a consistent record more than polished photographs or confident guesses."
+    },
+    {
+      "key": "festival-handbook",
+      "length": "long",
+      "title": "Lantern festival volunteer desk handbook",
+      "content": "The Lantern festival volunteer desk coordinates a fictional neighbourhood evening event. It is not the Willow equipment loan desk or the Harbor workshop counter. The festival desk uses a purple tablecloth and a large paper map so visitors can identify it without reading a small sign. Before opening the desk, two volunteers walk the route marked on the map and compare its arrows with the signs placed on the ground. If a sign points the wrong way, correct the sign and record the change on the desk copy of the map.\n\nEach shift has a welcome volunteer and a map volunteer. The welcome volunteer greets visitors and asks which activity they are looking for. The map volunteer marks the route on a small handout rather than sending everyone to the nearest busy table. Volunteers can swap roles at handover, but the desk should not be left empty while both go to look for an activity. Unresolved questions go on the handover sheet with a short description of what has already been checked. Do not record a visitor's personal details just to remember a route question.\n\nActivity cards list the table name, the kind of activity and the materials available there. They do not guarantee a free place at the moment someone reads them. When a table pauses, its volunteer brings a pause card to the festival desk. The map volunteer puts that card beside the table name until the table sends an update. Do not erase the activity from the printed map, because visitors may be returning to meet friends there. A temporary pause should stay visibly temporary rather than being mistaken for a permanent relocation.\n\nThe lantern display uses reusable holders supplied by the display team. Desk volunteers direct questions about fitting a holder to that team instead of improvising instructions. Visitors may watch the display preparation from behind the marked line. Keep the route between the display and the desk clear so groups can move without blocking the information table. A clear route is more useful than arranging a decorative queue around the desk. If handouts run low, the map volunteer asks the storage volunteer for another bundle rather than leaving the desk to search through boxes.\n\nThe festival keeps a simple tally of questions about routes, paused activities and missing signs. Place one mark in the matching column after the conversation, without trying to capture every sentence. The tally helps the next team improve its signs. It is not an attendance count and must not be reported as the number of unique visitors. A person who asks about two routes may produce two marks. At handover, explain any unusual cluster of marks so the next shift understands whether it came from a missing sign or a temporary activity pause.\n\nLost objects brought to the festival desk go in the covered tray behind the purple tablecloth. Describe the object on the handover sheet using ordinary visible features, but keep it out of public photographs. A person claiming an object should describe it before the tray is opened. Desk volunteers should not announce the full contents of the tray to everyone passing by. The purpose of this local procedure is to avoid accidental mix-ups during the event. It does not establish a general retention period for workshop records or archive intake receipts.\n\nWhen a shift ends, count remaining map handouts and leave the count on the handover sheet. Check that pause cards still match the latest messages from activity tables. Return unused activity cards to their envelope so the incoming map volunteer does not mistake them for live updates. The outgoing welcome volunteer briefly explains any unresolved route question. Written notes should be sufficient if the next team arrives late; the desk should not depend on remembering a hurried conversation. Keep the purple tablecloth in place until the final closing walk has returned.\n\nAfter the closing walk, remove arrows and table signs in the reverse order of the opening route. Stack reusable holders separately from printed handouts so they are not crushed in a paper box. The final tally and annotated map go into the event folder for the next planning session. Clean the covered tray and check that any remaining object is listed on the closing sheet. The handbook intentionally describes desk organisation rather than budgets, travel reimbursements or workshop opening hours. Those subjects must not be inferred from this festival's volunteer arrangements."
+    }
+  ],
+  "questions": [
+    {
+      "id": "Q1",
+      "kind": "direct",
+      "question": "On which days and at what times can visitors enter the Willow workshop?",
+      "required_facts": ["Tuesday and Thursday", "18:00 to 20:00"],
+      "required_sources": ["willow-access"]
+    },
+    {
+      "id": "Q2",
+      "kind": "procedural",
+      "question": "What steps should I follow when the desk label printer feeds blank backing, before releasing the waiting print jobs?",
+      "required_facts": ["Cancel the active print job", "Open the cover and reseat the roll with labels facing upward", "Close the cover", "Hold the feed button for three seconds to recalibrate", "Print one test label before releasing waiting jobs"],
+      "required_sources": ["printer-recovery"]
+    },
+    {
+      "id": "Q3",
+      "kind": "direct",
+      "question": "Which two checks must pass before a scanned batch can enter the public archive?",
+      "required_facts": ["All visible address labels redacted", "A second volunteer checks page order against the intake sheet"],
+      "required_sources": ["archive-release"]
+    },
+    {
+      "id": "Q4",
+      "kind": "paraphrase",
+      "question": "If I leave the seed library with seeds today, how much can I take and must I replace them immediately?",
+      "required_facts": ["At most two packets per visit", "No replacement seeds required that day"],
+      "required_sources": ["seed-library"]
+    },
+    {
+      "id": "Q5",
+      "kind": "deep-long-note",
+      "question": "After an archive batch is publicly released, how long do we keep its blue intake receipt and where does it go afterwards?",
+      "required_facts": ["45 days after public release", "Locked shredding bin"],
+      "required_sources": ["archive-handbook"]
+    },
+    {
+      "id": "Q6",
+      "kind": "multi-note",
+      "question": "For a Willow equipment loan, when is Thursday collection and which three items must go in the packing pouch?",
+      "required_facts": ["Thursday 18:30 to 19:00", "Laminated quick-start card", "USB-C charging cable", "Paper condition checklist"],
+      "required_sources": ["willow-loans", "willow-packing"]
+    },
+    {
+      "id": "Q7",
+      "kind": "similar-note-distractor",
+      "question": "Is Willow equipment collection on Saturday from 10:00 to 11:00 like Harbor, or does Willow have a different collection window?",
+      "required_facts": ["No: Saturday 10:00 to 11:00 is Harbor", "Willow Thursday 18:30 to 19:00"],
+      "required_sources": ["willow-loans", "harbor-loans"]
+    },
+    {
+      "id": "Q8",
+      "kind": "abstention-missing-detail",
+      "question": "What is the Willow workshop's telephone number?",
+      "required_facts": [],
+      "required_sources": [],
+      "expected_abstention": true,
+      "reason": "No note contains a telephone number."
+    },
+    {
+      "id": "Q9",
+      "kind": "abstention-related-absent",
+      "question": "Which moon phase does the seed library recommend for sowing its seeds?",
+      "required_facts": [],
+      "required_sources": [],
+      "expected_abstention": true,
+      "reason": "Borrowing and garden observation are covered, but lunar sowing recommendations are absent."
+    },
+    {
+      "id": "Q10",
+      "kind": "abstention-outside-topic",
+      "question": "What is Jupiter's atmospheric helium percentage?",
+      "required_facts": [],
+      "required_sources": [],
+      "expected_abstention": true,
+      "reason": "Astronomy and Jupiter are absent from the entire corpus."
+    }
+  ]
+}

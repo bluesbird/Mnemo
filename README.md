@@ -52,6 +52,14 @@ MS2 options (env vars, prefix `MS2_`): `RABBITMQ_ENABLED=false` runs without the
 - MS1: `cd ms1-knowledge-service; .\mvnw.cmd test`
 - MS2: `cd ms2-rag-service; .\.venv\Scripts\python.exe -m pytest`
 
+### Real-model RAG sanity check
+
+The separate [evaluation results](evaluation/results.md) contain a fixed synthetic
+10-note corpus, ten questions with an answer key, the first real-model responses
+and provisional assistant-reviewed scores. This is not a deterministic CI test.
+See that page for the small standard-library runner, isolation and reproduction
+instructions; it never loads or clears the development notes/index.
+
 ## MS1 database migrations
 
 MS1 applies versioned PostgreSQL migrations from

@@ -1,0 +1,1169 @@
+{
+  "setup_attempts": [
+    {
+      "project": "mnemo-eval-f070c2fe46e5",
+      "finished_at": "2026-10-17T16:05:00.870313+00:00",
+      "status": "blocked_before_ingestion",
+      "questions_asked": 0,
+      "error": "RabbitMQ exited on startup: Error when reading /var/lib/rabbitmq/.erlang.cookie: eacces",
+      "resolution": "The evaluation-only Compose override creates the disposable broker cookie with rabbitmq ownership and mode 600. No application or retrieval settings changed.",
+      "cleanup": {
+        "containers_remaining": "",
+        "volumes_remaining": ""
+      }
+    }
+  ],
+  "started_at": "2026-10-17T16:05:45.482574+00:00",
+  "status": "completed",
+  "project": "mnemo-eval-916b5798b5ba",
+  "commit": "81478af11ac3a127f24927094efdc233e6f6eb4c",
+  "dirty_state": [
+    " M architecture-plan.md",
+    "?? AGENTS.md",
+    "?? evaluation-plan.md",
+    "?? evaluation/.gitignore",
+    "?? evaluation/fixture.json",
+    "?? evaluation/run.py",
+    "?? evaluation/setup-blocked.json",
+    "?? evaluation/test_run.py",
+    "?? ui/.env"
+  ],
+  "fixture_sha256": "58934e5c3ae1e73d4ad5afb3df876ea39441d644f1e8196352a8abefcaa74798",
+  "notes": [
+    {
+      "key": "willow-access",
+      "note_id": 1,
+      "source_hash": "b326d31e146c67e4ca1491ceadd831188d8efcb3b94dfe017339125ac861db19",
+      "chunk_count": 1
+    },
+    {
+      "key": "willow-loans",
+      "note_id": 2,
+      "source_hash": "8f553bebde2f69cc072a4d83014411633df508250496ae5b62422931d662e38f",
+      "chunk_count": 1
+    },
+    {
+      "key": "harbor-loans",
+      "note_id": 3,
+      "source_hash": "6a2ddd308fe91224caa81dc677e1484ab6085ce90a5b8801f1042e940d8342c8",
+      "chunk_count": 1
+    },
+    {
+      "key": "seed-library",
+      "note_id": 4,
+      "source_hash": "8163fe5cc6d0c55a1c579bc7d63c586edade17935207509e986ce10d871a9811",
+      "chunk_count": 1
+    },
+    {
+      "key": "printer-recovery",
+      "note_id": 5,
+      "source_hash": "a85afbcdff8752f387c4528b108660d3ac369ecc97d5f04f244577d8f2f6cc9c",
+      "chunk_count": 1
+    },
+    {
+      "key": "archive-release",
+      "note_id": 6,
+      "source_hash": "e970d915fa64f25f51dde0f26bf6adb596a0b701a71df4f75369cb4b08442f39",
+      "chunk_count": 1
+    },
+    {
+      "key": "willow-packing",
+      "note_id": 7,
+      "source_hash": "bc0b95599d983894878d5996f15d5df704bdfb3afc830a0a0e9f37b12cef617c",
+      "chunk_count": 1
+    },
+    {
+      "key": "archive-handbook",
+      "note_id": 8,
+      "source_hash": "0895bd12051df9145b82d52063dece8d31373af2af92aaa841620bfac93ed97f",
+      "chunk_count": 3
+    },
+    {
+      "key": "garden-handbook",
+      "note_id": 9,
+      "source_hash": "8495f880144f0fcd2b67a279aef77b00cdae991de1eb6e101e76a0e11d1c8484",
+      "chunk_count": 3
+    },
+    {
+      "key": "festival-handbook",
+      "note_id": 10,
+      "source_hash": "df0302bb01eae60e90f4f4728b719c2e3d4a4219f44b1742f1e6714b1db9f162",
+      "chunk_count": 3
+    }
+  ],
+  "questions": [
+    {
+      "id": "Q1",
+      "question": "On which days and at what times can visitors enter the Willow workshop?",
+      "started_at": "2026-10-17T16:07:23.836714+00:00",
+      "response": {
+        "http_status": 200,
+        "body": {
+          "answer": "Visitors can enter the Willow workshop on Tuesday and Thursday from 18:00 to 20:00.",
+          "sources": [
+            {
+              "note_id": 1,
+              "note_title": "Willow workshop visitor access",
+              "chunk_index": 0,
+              "source_hash": "b326d31e146c67e4ca1491ceadd831188d8efcb3b94dfe017339125ac861db19",
+              "score": 0.907841145992279,
+              "excerpt": "Willow workshop visitor access\n\nThe Willow community workshop welcomes visitors on Tuesday and Thursday from 18:00 to 20:00. Enter through the courtyard door, not the street entrance. A volunteer meets visitors at the green desk. These hours are for visits to the room; equipment collection has its o"
+            },
+            {
+              "note_id": 3,
+              "note_title": "Harbor equipment collection window",
+              "chunk_index": 0,
+              "source_hash": "6a2ddd308fe91224caa81dc677e1484ab6085ce90a5b8801f1042e940d8342c8",
+              "score": 0.5024676322937012,
+              "excerpt": "Harbor equipment collection window\n\nHarbor equipment loans can be collected on Saturday from 10:00 to 11:00 at the orange counter. Bring the reservation code. Harbor is a separate workshop with its own stock and volunteers; its Saturday collection window does not apply to Willow. Return cases to the"
+            },
+            {
+              "note_id": 10,
+              "note_title": "Lantern festival volunteer desk handbook",
+              "chunk_index": 0,
+              "source_hash": "df0302bb01eae60e90f4f4728b719c2e3d4a4219f44b1742f1e6714b1db9f162",
+              "score": 0.3472488522529602,
+              "excerpt": "Lantern festival volunteer desk handbook\n\nThe Lantern festival volunteer desk coordinates a fictional neighbourhood evening event. It is not the Willow equipment loan desk or the Harbor workshop counter. The festival desk uses a purple tablecloth and a large paper map so visitors can identify it wit"
+            },
+            {
+              "note_id": 2,
+              "note_title": "Willow equipment collection window",
+              "chunk_index": 0,
+              "source_hash": "8f553bebde2f69cc072a4d83014411633df508250496ae5b62422931d662e38f",
+              "score": 0.6696053147315979,
+              "excerpt": "Willow equipment collection window\n\nWillow equipment loans can be collected on Thursday from 18:30 to 19:00 at the green desk. Bring the reservation code on paper or on a screen. This collection window applies only to Willow equipment. Returns go on the marked return shelf, where a volunteer checks"
+            }
+          ]
+        }
+      },
+      "source_keys": [
+        "willow-access",
+        "harbor-loans",
+        "festival-handbook",
+        "willow-loans"
+      ],
+      "elapsed_seconds": 8.935
+    },
+    {
+      "id": "Q2",
+      "question": "What steps should I follow when the desk label printer feeds blank backing, before releasing the waiting print jobs?",
+      "started_at": "2026-10-17T16:07:32.774198+00:00",
+      "response": {
+        "http_status": 200,
+        "body": {
+          "answer": "Cancel the active print job in the queue, open the cover and reseat the label roll with labels facing upward, close the cover, hold the feed button for three seconds to recalibrate, and print one test label before releasing the waiting print jobs.",
+          "sources": [
+            {
+              "note_id": 5,
+              "note_title": "Label printer recovery after an empty feed",
+              "chunk_index": 0,
+              "source_hash": "a85afbcdff8752f387c4528b108660d3ac369ecc97d5f04f244577d8f2f6cc9c",
+              "score": 0.8233367204666138,
+              "excerpt": "Label printer recovery after an empty feed\n\nThis procedure is for the desk label printer when it feeds blank backing without printing a label. It is not the procedure for a paper jam. First cancel the active print job in the queue. Next open the cover and reseat the label roll so that the labels fac"
+            },
+            {
+              "note_id": 8,
+              "note_title": "Archive intake handbook and receipt retention",
+              "chunk_index": 2,
+              "source_hash": "0895bd12051df9145b82d52063dece8d31373af2af92aaa841620bfac93ed97f",
+              "score": 0.4820293188095093,
+              "excerpt": "The blue receipt is the temporary desk copy; the batch cover remains with the archive record. When closing a receipt entry, write the disposal date in the receipt register so another shift can see that disposal has already happened. A delayed release also delays the start of this retention period."
+            },
+            {
+              "note_id": 6,
+              "note_title": "Public archive release gate",
+              "chunk_index": 0,
+              "source_hash": "e970d915fa64f25f51dde0f26bf6adb596a0b701a71df4f75369cb4b08442f39",
+              "score": 0.44045668840408325,
+              "excerpt": "Public archive release gate\n\nA batch of scanned workshop records can be released to the public archive only after both checks have passed: all visible address labels have been redacted, and a second volunteer has checked the page order against the intake sheet. Neither check substitutes for the othe"
+            },
+            {
+              "note_id": 8,
+              "note_title": "Archive intake handbook and receipt retention",
+              "chunk_index": 1,
+              "source_hash": "0895bd12051df9145b82d52063dece8d31373af2af92aaa841620bfac93ed97f",
+              "score": 0.47612595558166504,
+              "excerpt": "Note unreadable portions on the working copy instead of writing on the original. When an item cannot lie flat safely, set it aside for a later session rather than pressing it under a heavy object. The scanner table should contain only the folder currently being processed and its intake sheet.\n\nCreat"
+            }
+          ]
+        }
+      },
+      "source_keys": [
+        "printer-recovery",
+        "archive-handbook",
+        "archive-release",
+        "archive-handbook"
+      ],
+      "elapsed_seconds": 56.764
+    },
+    {
+      "id": "Q3",
+      "question": "Which two checks must pass before a scanned batch can enter the public archive?",
+      "started_at": "2026-10-17T16:08:29.540466+00:00",
+      "response": {
+        "http_status": 200,
+        "body": {
+          "answer": "All visible address labels must be redacted, and a second volunteer must check the page order against the intake sheet.",
+          "sources": [
+            {
+              "note_id": 6,
+              "note_title": "Public archive release gate",
+              "chunk_index": 0,
+              "source_hash": "e970d915fa64f25f51dde0f26bf6adb596a0b701a71df4f75369cb4b08442f39",
+              "score": 0.7107291221618652,
+              "excerpt": "Public archive release gate\n\nA batch of scanned workshop records can be released to the public archive only after both checks have passed: all visible address labels have been redacted, and a second volunteer has checked the page order against the intake sheet. Neither check substitutes for the othe"
+            },
+            {
+              "note_id": 8,
+              "note_title": "Archive intake handbook and receipt retention",
+              "chunk_index": 1,
+              "source_hash": "0895bd12051df9145b82d52063dece8d31373af2af92aaa841620bfac93ed97f",
+              "score": 0.6804918646812439,
+              "excerpt": "Note unreadable portions on the working copy instead of writing on the original. When an item cannot lie flat safely, set it aside for a later session rather than pressing it under a heavy object. The scanner table should contain only the folder currently being processed and its intake sheet.\n\nCreat"
+            },
+            {
+              "note_id": 8,
+              "note_title": "Archive intake handbook and receipt retention",
+              "chunk_index": 0,
+              "source_hash": "0895bd12051df9145b82d52063dece8d31373af2af92aaa841620bfac93ed97f",
+              "score": 0.5815556645393372,
+              "excerpt": "Archive intake handbook and receipt retention\n\nThe workshop archive accepts donated meeting sheets, project sketches and printed event programmes. Intake is deliberately separate from publication: accepting a box does not mean its contents are ready to appear online. At the start of a shift, clear o"
+            },
+            {
+              "note_id": 8,
+              "note_title": "Archive intake handbook and receipt retention",
+              "chunk_index": 2,
+              "source_hash": "0895bd12051df9145b82d52063dece8d31373af2af92aaa841620bfac93ed97f",
+              "score": 0.5607249140739441,
+              "excerpt": "The blue receipt is the temporary desk copy; the batch cover remains with the archive record. When closing a receipt entry, write the disposal date in the receipt register so another shift can see that disposal has already happened. A delayed release also delays the start of this retention period."
+            }
+          ]
+        }
+      },
+      "source_keys": [
+        "archive-release",
+        "archive-handbook",
+        "archive-handbook",
+        "archive-handbook"
+      ],
+      "elapsed_seconds": 47.232
+    },
+    {
+      "id": "Q4",
+      "question": "If I leave the seed library with seeds today, how much can I take and must I replace them immediately?",
+      "started_at": "2026-10-17T16:09:16.774952+00:00",
+      "response": {
+        "http_status": 200,
+        "body": {
+          "answer": "You can take at most two seed packets per visit, and you do not need to replace them immediately.",
+          "sources": [
+            {
+              "note_id": 9,
+              "note_title": "Courtyard garden weekly observation handbook",
+              "chunk_index": 1,
+              "source_hash": "8495f880144f0fcd2b67a279aef77b00cdae991de1eb6e101e76a0e11d1c8484",
+              "score": 0.5196205377578735,
+              "excerpt": "and keep it separate from cleaning buckets. Apply water slowly near the soil instead of spraying the leaves for the photograph. Record that watering happened and which bed was watered. Do not create a new fixed watering timetable in the binder; the board is where the current shift instructions belon"
+            },
+            {
+              "note_id": 4,
+              "note_title": "Seed library borrowing rule",
+              "chunk_index": 0,
+              "source_hash": "8163fe5cc6d0c55a1c579bc7d63c586edade17935207509e986ce10d871a9811",
+              "score": 0.7475272417068481,
+              "excerpt": "Seed library borrowing rule\n\nSeed library members may take at most two seed packets per visit. They do not need to bring replacement seeds that day. At the end of the growing season, members are encouraged, but not required, to return one labelled packet of saved seeds. Write the plant variety and h"
+            },
+            {
+              "note_id": 8,
+              "note_title": "Archive intake handbook and receipt retention",
+              "chunk_index": 2,
+              "source_hash": "0895bd12051df9145b82d52063dece8d31373af2af92aaa841620bfac93ed97f",
+              "score": 0.445428729057312,
+              "excerpt": "The blue receipt is the temporary desk copy; the batch cover remains with the archive record. When closing a receipt entry, write the disposal date in the receipt register so another shift can see that disposal has already happened. A delayed release also delays the start of this retention period."
+            },
+            {
+              "note_id": 9,
+              "note_title": "Courtyard garden weekly observation handbook",
+              "chunk_index": 2,
+              "source_hash": "8495f880144f0fcd2b67a279aef77b00cdae991de1eb6e101e76a0e11d1c8484",
+              "score": 0.4416578412055969,
+              "excerpt": "the binder. If a can is damaged, leave a written notice for the next shift so nobody discovers the leak halfway through watering. Routine handover notes belong on the board, while permanent observations belong on the dated binder page. Keeping those two records distinct makes old observations easier"
+            }
+          ]
+        }
+      },
+      "source_keys": [
+        "garden-handbook",
+        "seed-library",
+        "archive-handbook",
+        "garden-handbook"
+      ],
+      "elapsed_seconds": 27.71
+    },
+    {
+      "id": "Q5",
+      "question": "After an archive batch is publicly released, how long do we keep its blue intake receipt and where does it go afterwards?",
+      "started_at": "2026-10-17T16:09:44.487842+00:00",
+      "response": {
+        "http_status": 200,
+        "body": {
+          "answer": "After public release, the blue intake receipt is kept for 45 days and then placed in the locked shredding bin.",
+          "sources": [
+            {
+              "note_id": 8,
+              "note_title": "Archive intake handbook and receipt retention",
+              "chunk_index": 1,
+              "source_hash": "0895bd12051df9145b82d52063dece8d31373af2af92aaa841620bfac93ed97f",
+              "score": 0.6583729386329651,
+              "excerpt": "Note unreadable portions on the working copy instead of writing on the original. When an item cannot lie flat safely, set it aside for a later session rather than pressing it under a heavy object. The scanner table should contain only the folder currently being processed and its intake sheet.\n\nCreat"
+            },
+            {
+              "note_id": 6,
+              "note_title": "Public archive release gate",
+              "chunk_index": 0,
+              "source_hash": "e970d915fa64f25f51dde0f26bf6adb596a0b701a71df4f75369cb4b08442f39",
+              "score": 0.6147795915603638,
+              "excerpt": "Public archive release gate\n\nA batch of scanned workshop records can be released to the public archive only after both checks have passed: all visible address labels have been redacted, and a second volunteer has checked the page order against the intake sheet. Neither check substitutes for the othe"
+            },
+            {
+              "note_id": 8,
+              "note_title": "Archive intake handbook and receipt retention",
+              "chunk_index": 2,
+              "source_hash": "0895bd12051df9145b82d52063dece8d31373af2af92aaa841620bfac93ed97f",
+              "score": 0.7087937593460083,
+              "excerpt": "The blue receipt is the temporary desk copy; the batch cover remains with the archive record. When closing a receipt entry, write the disposal date in the receipt register so another shift can see that disposal has already happened. A delayed release also delays the start of this retention period."
+            },
+            {
+              "note_id": 10,
+              "note_title": "Lantern festival volunteer desk handbook",
+              "chunk_index": 2,
+              "source_hash": "df0302bb01eae60e90f4f4728b719c2e3d4a4219f44b1742f1e6714b1db9f162",
+              "score": 0.47293150424957275,
+              "excerpt": "it before the tray is opened. Desk volunteers should not announce the full contents of the tray to everyone passing by. The purpose of this local procedure is to avoid accidental mix-ups during the event. It does not establish a general retention period for workshop records or archive intake receipt"
+            }
+          ]
+        }
+      },
+      "source_keys": [
+        "archive-handbook",
+        "archive-release",
+        "archive-handbook",
+        "festival-handbook"
+      ],
+      "elapsed_seconds": 34.313
+    },
+    {
+      "id": "Q6",
+      "question": "For a Willow equipment loan, when is Thursday collection and which three items must go in the packing pouch?",
+      "started_at": "2026-10-17T16:10:18.803443+00:00",
+      "response": {
+        "http_status": 200,
+        "body": {
+          "answer": "For a Willow equipment loan, Thursday collection occurs from 18:30 to 19:00 at the green desk, and the three items that must go in the packing pouch are the laminated quick-start card, the USB-C charging cable, and the paper condition checklist.",
+          "sources": [
+            {
+              "note_id": 2,
+              "note_title": "Willow equipment collection window",
+              "chunk_index": 0,
+              "source_hash": "8f553bebde2f69cc072a4d83014411633df508250496ae5b62422931d662e38f",
+              "score": 0.8338937759399414,
+              "excerpt": "Willow equipment collection window\n\nWillow equipment loans can be collected on Thursday from 18:30 to 19:00 at the green desk. Bring the reservation code on paper or on a screen. This collection window applies only to Willow equipment. Returns go on the marked return shelf, where a volunteer checks"
+            },
+            {
+              "note_id": 7,
+              "note_title": "Willow loan packing pouch",
+              "chunk_index": 0,
+              "source_hash": "bc0b95599d983894878d5996f15d5df704bdfb3afc830a0a0e9f37b12cef617c",
+              "score": 0.7944391965866089,
+              "excerpt": "Willow loan packing pouch\n\nBefore a Willow equipment loan leaves the workshop, put exactly these three items in the small packing pouch: the laminated quick-start card, the USB-C charging cable, and the paper condition checklist. The borrower and the desk volunteer tick the checklist together. The p"
+            },
+            {
+              "note_id": 3,
+              "note_title": "Harbor equipment collection window",
+              "chunk_index": 0,
+              "source_hash": "6a2ddd308fe91224caa81dc677e1484ab6085ce90a5b8801f1042e940d8342c8",
+              "score": 0.6371777057647705,
+              "excerpt": "Harbor equipment collection window\n\nHarbor equipment loans can be collected on Saturday from 10:00 to 11:00 at the orange counter. Bring the reservation code. Harbor is a separate workshop with its own stock and volunteers; its Saturday collection window does not apply to Willow. Return cases to the"
+            },
+            {
+              "note_id": 1,
+              "note_title": "Willow workshop visitor access",
+              "chunk_index": 0,
+              "source_hash": "b326d31e146c67e4ca1491ceadd831188d8efcb3b94dfe017339125ac861db19",
+              "score": 0.5659520626068115,
+              "excerpt": "Willow workshop visitor access\n\nThe Willow community workshop welcomes visitors on Tuesday and Thursday from 18:00 to 20:00. Enter through the courtyard door, not the street entrance. A volunteer meets visitors at the green desk. These hours are for visits to the room; equipment collection has its o"
+            }
+          ]
+        }
+      },
+      "source_keys": [
+        "willow-loans",
+        "willow-packing",
+        "harbor-loans",
+        "willow-access"
+      ],
+      "elapsed_seconds": 9.916
+    },
+    {
+      "id": "Q7",
+      "question": "Is Willow equipment collection on Saturday from 10:00 to 11:00 like Harbor, or does Willow have a different collection window?",
+      "started_at": "2026-10-17T16:10:28.721995+00:00",
+      "response": {
+        "http_status": 200,
+        "body": {
+          "answer": "Willow equipment collection does not occur on Saturday from 10:00 to 11:00; it is scheduled for Thursday from 18:30 to 19:00.",
+          "sources": [
+            {
+              "note_id": 2,
+              "note_title": "Willow equipment collection window",
+              "chunk_index": 0,
+              "source_hash": "8f553bebde2f69cc072a4d83014411633df508250496ae5b62422931d662e38f",
+              "score": 0.8289415836334229,
+              "excerpt": "Willow equipment collection window\n\nWillow equipment loans can be collected on Thursday from 18:30 to 19:00 at the green desk. Bring the reservation code on paper or on a screen. This collection window applies only to Willow equipment. Returns go on the marked return shelf, where a volunteer checks"
+            },
+            {
+              "note_id": 3,
+              "note_title": "Harbor equipment collection window",
+              "chunk_index": 0,
+              "source_hash": "6a2ddd308fe91224caa81dc677e1484ab6085ce90a5b8801f1042e940d8342c8",
+              "score": 0.7273982167243958,
+              "excerpt": "Harbor equipment collection window\n\nHarbor equipment loans can be collected on Saturday from 10:00 to 11:00 at the orange counter. Bring the reservation code. Harbor is a separate workshop with its own stock and volunteers; its Saturday collection window does not apply to Willow. Return cases to the"
+            },
+            {
+              "note_id": 1,
+              "note_title": "Willow workshop visitor access",
+              "chunk_index": 0,
+              "source_hash": "b326d31e146c67e4ca1491ceadd831188d8efcb3b94dfe017339125ac861db19",
+              "score": 0.727800190448761,
+              "excerpt": "Willow workshop visitor access\n\nThe Willow community workshop welcomes visitors on Tuesday and Thursday from 18:00 to 20:00. Enter through the courtyard door, not the street entrance. A volunteer meets visitors at the green desk. These hours are for visits to the room; equipment collection has its o"
+            },
+            {
+              "note_id": 7,
+              "note_title": "Willow loan packing pouch",
+              "chunk_index": 0,
+              "source_hash": "bc0b95599d983894878d5996f15d5df704bdfb3afc830a0a0e9f37b12cef617c",
+              "score": 0.5946130156517029,
+              "excerpt": "Willow loan packing pouch\n\nBefore a Willow equipment loan leaves the workshop, put exactly these three items in the small packing pouch: the laminated quick-start card, the USB-C charging cable, and the paper condition checklist. The borrower and the desk volunteer tick the checklist together. The p"
+            }
+          ]
+        }
+      },
+      "source_keys": [
+        "willow-loans",
+        "harbor-loans",
+        "willow-access",
+        "willow-packing"
+      ],
+      "elapsed_seconds": 20.765
+    },
+    {
+      "id": "Q8",
+      "question": "What is the Willow workshop's telephone number?",
+      "started_at": "2026-10-17T16:10:49.489372+00:00",
+      "response": {
+        "http_status": 200,
+        "body": {
+          "answer": "I don't know based on the provided notes.",
+          "sources": []
+        }
+      },
+      "source_keys": [],
+      "elapsed_seconds": 7.333
+    },
+    {
+      "id": "Q9",
+      "question": "Which moon phase does the seed library recommend for sowing its seeds?",
+      "started_at": "2026-10-17T16:10:56.824567+00:00",
+      "response": {
+        "http_status": 200,
+        "body": {
+          "answer": "I don't know based on the provided notes.",
+          "sources": []
+        }
+      },
+      "source_keys": [],
+      "elapsed_seconds": 8.225
+    },
+    {
+      "id": "Q10",
+      "question": "What is Jupiter's atmospheric helium percentage?",
+      "started_at": "2026-10-17T16:11:05.052788+00:00",
+      "response": {
+        "http_status": 200,
+        "body": {
+          "answer": "I don't know based on the provided notes.",
+          "sources": []
+        }
+      },
+      "source_keys": [],
+      "elapsed_seconds": 9.454
+    }
+  ],
+  "errors": [],
+  "ingestion": "Explicit reconcile; event consumer disabled to avoid concurrent ingestion.",
+  "ollama_version": {
+    "version": "0.40.5"
+  },
+  "models_before": {
+    "models": [
+      {
+        "name": "qwen3:4b",
+        "model": "qwen3:4b",
+        "modified_at": "2026-10-16T14:45:58.4439302+02:00",
+        "size": 2497293931,
+        "digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen3",
+          "families": [
+            "qwen3"
+          ],
+          "parameter_size": "4.0B",
+          "quantization_level": "Q4_K_M",
+          "context_length": 262144,
+          "embedding_length": 2560,
+          "runner": "ggml"
+        },
+        "capabilities": [
+          "completion",
+          "tools",
+          "thinking"
+        ]
+      },
+      {
+        "name": "qwen3-embedding:0.6b",
+        "model": "qwen3-embedding:0.6b",
+        "modified_at": "2026-10-15T17:50:43.4501175+02:00",
+        "size": 639150858,
+        "digest": "ac6da0dfba84a81fdbfbaf330198c33cd77c4cdfc53e8bc50eb581914a15621d",
+        "details": {
+          "parent_model": "/Users/ollama/.ollama/models/blobs/sha256-06507c7b42688469c4e7298b0a1e16deff06caf291cf0a5b278c308249c3e439",
+          "format": "gguf",
+          "family": "qwen3",
+          "families": [
+            "qwen3"
+          ],
+          "parameter_size": "595.78M",
+          "quantization_level": "Q8_0",
+          "context_length": 32768,
+          "embedding_length": 1024,
+          "runner": "ggml"
+        },
+        "capabilities": [
+          "tools",
+          "thinking",
+          "embedding"
+        ]
+      },
+      {
+        "name": "qwen3:1.7b",
+        "model": "qwen3:1.7b",
+        "modified_at": "2026-10-12T12:45:57.3817045+02:00",
+        "size": 1359293444,
+        "digest": "8f68893c685c3ddff2aa3fffce2aa60a30bb2da65ca488b61fff134a4d1730e7",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen3",
+          "families": [
+            "qwen3"
+          ],
+          "parameter_size": "2.0B",
+          "quantization_level": "Q4_K_M",
+          "context_length": 40960,
+          "embedding_length": 2048,
+          "runner": "ggml"
+        },
+        "capabilities": [
+          "completion",
+          "tools",
+          "thinking"
+        ]
+      }
+    ]
+  },
+  "model_details": {
+    "qwen3-embedding:0.6b": {
+      "modelfile": "# Modelfile generated by \"ollama show\"\n# To build a new Modelfile based on this, replace FROM with:\n# FROM qwen3-embedding:0.6b\n\nFROM C:\\Users\\Lorenz\\.ollama\\models\\blobs\\sha256-06507c7b42688469c4e7298b0a1e16deff06caf291cf0a5b278c308249c3e439\nTEMPLATE {{ .Prompt }}\n",
+      "template": "{%- if tools %}\n    {{- '<|im_start|>system\\n' }}\n    {%- if messages[0].role == 'system' %}\n        {{- messages[0].content + '\\n\\n' }}\n    {%- endif %}\n    {{- \"# Tools\\n\\nYou may call one or more functions to assist with the user query.\\n\\nYou are provided with function signatures within <tools></tools> XML tags:\\n<tools>\" }}\n    {%- for tool in tools %}\n        {{- \"\\n\" }}\n        {{- tool | tojson }}\n    {%- endfor %}\n    {{- \"\\n</tools>\\n\\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\\n<tool_call>\\n{\\\"name\\\": <function-name>, \\\"arguments\\\": <args-json-object>}\\n</tool_call><|im_end|>\\n\" }}\n{%- else %}\n    {%- if messages[0].role == 'system' %}\n        {{- '<|im_start|>system\\n' + messages[0].content + '<|im_end|>\\n' }}\n    {%- endif %}\n{%- endif %}\n{%- set ns = namespace(multi_step_tool=true, last_query_index=messages|length - 1) %}\n{%- for message in messages[::-1] %}\n    {%- set index = (messages|length - 1) - loop.index0 %}\n    {%- if ns.multi_step_tool and message.role == \"user\" and not(message.content.startswith('<tool_response>') and message.content.endswith('</tool_response>')) %}\n        {%- set ns.multi_step_tool = false %}\n        {%- set ns.last_query_index = index %}\n    {%- endif %}\n{%- endfor %}\n{%- for message in messages %}\n    {%- if (message.role == \"user\") or (message.role == \"system\" and not loop.first) %}\n        {{- '<|im_start|>' + message.role + '\\n' + message.content + '<|im_end|>' + '\\n' }}\n    {%- elif message.role == \"assistant\" %}\n        {%- set content = message.content %}\n        {%- set reasoning_content = '' %}\n        {%- if message.reasoning_content is defined and message.reasoning_content is not none %}\n            {%- set reasoning_content = message.reasoning_content %}\n        {%- else %}\n            {%- if '</think>' in message.content %}\n                {%- set content = message.content.split('</think>')[-1].lstrip('\\n') %}\n                {%- set reasoning_content = message.content.split('</think>')[0].rstrip('\\n').split('<think>')[-1].lstrip('\\n') %}\n            {%- endif %}\n        {%- endif %}\n        {%- if loop.index0 > ns.last_query_index %}\n            {%- if loop.last or (not loop.last and reasoning_content) %}\n                {{- '<|im_start|>' + message.role + '\\n<think>\\n' + reasoning_content.strip('\\n') + '\\n</think>\\n\\n' + content.lstrip('\\n') }}\n            {%- else %}\n                {{- '<|im_start|>' + message.role + '\\n' + content }}\n            {%- endif %}\n        {%- else %}\n            {{- '<|im_start|>' + message.role + '\\n' + content }}\n        {%- endif %}\n        {%- if message.tool_calls %}\n            {%- for tool_call in message.tool_calls %}\n                {%- if (loop.first and content) or (not loop.first) %}\n                    {{- '\\n' }}\n                {%- endif %}\n                {%- if tool_call.function %}\n                    {%- set tool_call = tool_call.function %}\n                {%- endif %}\n                {{- '<tool_call>\\n{\"name\": \"' }}\n                {{- tool_call.name }}\n                {{- '\", \"arguments\": ' }}\n                {%- if tool_call.arguments is string %}\n                    {{- tool_call.arguments }}\n                {%- else %}\n                    {{- tool_call.arguments | tojson }}\n                {%- endif %}\n                {{- '}\\n</tool_call>' }}\n            {%- endfor %}\n        {%- endif %}\n        {{- '<|im_end|>\\n' }}\n    {%- elif message.role == \"tool\" %}\n        {%- if loop.first or (messages[loop.index0 - 1].role != \"tool\") %}\n            {{- '<|im_start|>user' }}\n        {%- endif %}\n        {{- '\\n<tool_response>\\n' }}\n        {{- message.content }}\n        {{- '\\n</tool_response>' }}\n        {%- if loop.last or (messages[loop.index0 + 1].role != \"tool\") %}\n            {{- '<|im_end|>\\n' }}\n        {%- endif %}\n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {{- '<|im_start|>assistant\\n' }}\n    {%- if enable_thinking is defined and enable_thinking is false %}\n        {{- '<think>\\n\\n</think>\\n\\n' }}\n    {%- endif %}\n{%- endif %}",
+      "details": {
+        "parent_model": "/Users/ollama/.ollama/models/blobs/sha256-06507c7b42688469c4e7298b0a1e16deff06caf291cf0a5b278c308249c3e439",
+        "format": "gguf",
+        "family": "qwen3",
+        "families": [
+          "qwen3"
+        ],
+        "parameter_size": "595.78M",
+        "quantization_level": "Q8_0"
+      },
+      "model_info": {
+        "general.architecture": "qwen3",
+        "general.base_model.0.name": "Qwen3 0.6B Base",
+        "general.base_model.0.organization": "Qwen",
+        "general.base_model.0.repo_url": "https://huggingface.co/Qwen/Qwen3-0.6B-Base",
+        "general.base_model.count": 1,
+        "general.basename": "qwen3-embedding",
+        "general.file_type": 7,
+        "general.license": "apache-2.0",
+        "general.parameter_count": 595776512,
+        "general.quantization_version": 2,
+        "general.size_label": "0.6B",
+        "general.tags": [
+          "transformers",
+          "sentence-transformers",
+          "sentence-similarity",
+          "feature-extraction",
+          "text-embeddings-inference"
+        ],
+        "general.type": "model",
+        "qwen3.attention.head_count": 16,
+        "qwen3.attention.head_count_kv": 8,
+        "qwen3.attention.key_length": 128,
+        "qwen3.attention.layer_norm_rms_epsilon": 1e-06,
+        "qwen3.attention.value_length": 128,
+        "qwen3.block_count": 28,
+        "qwen3.context_length": 32768,
+        "qwen3.embedding_length": 1024,
+        "qwen3.feed_forward_length": 3072,
+        "qwen3.pooling_type": 3,
+        "qwen3.rope.freq_base": 1000000,
+        "tokenizer.ggml.add_bos_token": false,
+        "tokenizer.ggml.add_eos_token": true,
+        "tokenizer.ggml.bos_token_id": 151643,
+        "tokenizer.ggml.eos_token_id": 151643,
+        "tokenizer.ggml.eot_token_id": 151645,
+        "tokenizer.ggml.merges": [],
+        "tokenizer.ggml.model": "gpt2",
+        "tokenizer.ggml.padding_token_id": 151643,
+        "tokenizer.ggml.pre": "qwen2",
+        "tokenizer.ggml.token_type": [],
+        "tokenizer.ggml.tokens": []
+      },
+      "capabilities": [
+        "tools",
+        "thinking",
+        "embedding"
+      ],
+      "modified_at": "2026-10-15T17:50:43.4501175+02:00"
+    },
+    "qwen3:4b": {
+      "thinking": {
+        "values": [
+          true
+        ],
+        "default": true
+      },
+      "license": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n   1. Definitions.\n\n      \"License\" shall mean the terms and conditions for use, reproduction,\n      and distribution as defined by Sections 1 through 9 of this document.\n\n      \"Licensor\" shall mean the copyright owner or entity authorized by\n      the copyright owner that is granting the License.\n\n      \"Legal Entity\" shall mean the union of the acting entity and all\n      other entities that control, are controlled by, or are under common\n      control with that entity. For the purposes of this definition,\n      \"control\" means (i) the power, direct or indirect, to cause the\n      direction or management of such entity, whether by contract or\n      otherwise, or (ii) ownership of fifty percent (50%) or more of the\n      outstanding shares, or (iii) beneficial ownership of such entity.\n\n      \"You\" (or \"Your\") shall mean an individual or Legal Entity\n      exercising permissions granted by this License.\n\n      \"Source\" form shall mean the preferred form for making modifications,\n      including but not limited to software source code, documentation\n      source, and configuration files.\n\n      \"Object\" form shall mean any form resulting from mechanical\n      transformation or translation of a Source form, including but\n      not limited to compiled object code, generated documentation,\n      and conversions to other media types.\n\n      \"Work\" shall mean the work of authorship, whether in Source or\n      Object form, made available under the License, as indicated by a\n      copyright notice that is included in or attached to the work\n      (an example is provided in the Appendix below).\n\n      \"Derivative Works\" shall mean any work, whether in Source or Object\n      form, that is based on (or derived from) the Work and for which the\n      editorial revisions, annotations, elaborations, or other modifications\n      represent, as a whole, an original work of authorship. For the purposes\n      of this License, Derivative Works shall not include works that remain\n      separable from, or merely link (or bind by name) to the interfaces of,\n      the Work and Derivative Works thereof.\n\n      \"Contribution\" shall mean any work of authorship, including\n      the original version of the Work and any modifications or additions\n      to that Work or Derivative Works thereof, that is intentionally\n      submitted to Licensor for inclusion in the Work by the copyright owner\n      or by an individual or Legal Entity authorized to submit on behalf of\n      the copyright owner. For the purposes of this definition, \"submitted\"\n      means any form of electronic, verbal, or written communication sent\n      to the Licensor or its representatives, including but not limited to\n      communication on electronic mailing lists, source code control systems,\n      and issue tracking systems that are managed by, or on behalf of, the\n      Licensor for the purpose of discussing and improving the Work, but\n      excluding communication that is conspicuously marked or otherwise\n      designated in writing by the copyright owner as \"Not a Contribution.\"\n\n      \"Contributor\" shall mean Licensor and any individual or Legal Entity\n      on behalf of whom a Contribution has been received by Licensor and\n      subsequently incorporated within the Work.\n\n   2. Grant of Copyright License. Subject to the terms and conditions of\n      this License, each Contributor hereby grants to You a perpetual,\n      worldwide, non-exclusive, no-charge, royalty-free, irrevocable\n      copyright license to reproduce, prepare Derivative Works of,\n      publicly display, publicly perform, sublicense, and distribute the\n      Work and such Derivative Works in Source or Object form.\n\n   3. Grant of Patent License. Subject to the terms and conditions of\n      this License, each Contributor hereby grants to You a perpetual,\n      worldwide, non-exclusive, no-charge, royalty-free, irrevocable\n      (except as stated in this section) patent license to make, have made,\n      use, offer to sell, sell, import, and otherwise transfer the Work,\n      where such license applies only to those patent claims licensable\n      by such Contributor that are necessarily infringed by their\n      Contribution(s) alone or by combination of their Contribution(s)\n      with the Work to which such Contribution(s) was submitted. If You\n      institute patent litigation against any entity (including a\n      cross-claim or counterclaim in a lawsuit) alleging that the Work\n      or a Contribution incorporated within the Work constitutes direct\n      or contributory patent infringement, then any patent licenses\n      granted to You under this License for that Work shall terminate\n      as of the date such litigation is filed.\n\n   4. Redistribution. You may reproduce and distribute copies of the\n      Work or Derivative Works thereof in any medium, with or without\n      modifications, and in Source or Object form, provided that You\n      meet the following conditions:\n\n      (a) You must give any other recipients of the Work or\n          Derivative Works a copy of this License; and\n\n      (b) You must cause any modified files to carry prominent notices\n          stating that You changed the files; and\n\n      (c) You must retain, in the Source form of any Derivative Works\n          that You distribute, all copyright, patent, trademark, and\n          attribution notices from the Source form of the Work,\n          excluding those notices that do not pertain to any part of\n          the Derivative Works; and\n\n      (d) If the Work includes a \"NOTICE\" text file as part of its\n          distribution, then any Derivative Works that You distribute must\n          include a readable copy of the attribution notices contained\n          within such NOTICE file, excluding those notices that do not\n          pertain to any part of the Derivative Works, in at least one\n          of the following places: within a NOTICE text file distributed\n          as part of the Derivative Works; within the Source form or\n          documentation, if provided along with the Derivative Works; or,\n          within a display generated by the Derivative Works, if and\n          wherever such third-party notices normally appear. The contents\n          of the NOTICE file are for informational purposes only and\n          do not modify the License. You may add Your own attribution\n          notices within Derivative Works that You distribute, alongside\n          or as an addendum to the NOTICE text from the Work, provided\n          that such additional attribution notices cannot be construed\n          as modifying the License.\n\n      You may add Your own copyright statement to Your modifications and\n      may provide additional or different license terms and conditions\n      for use, reproduction, or distribution of Your modifications, or\n      for any such Derivative Works as a whole, provided Your use,\n      reproduction, and distribution of the Work otherwise complies with\n      the conditions stated in this License.\n\n   5. Submission of Contributions. Unless You explicitly state otherwise,\n      any Contribution intentionally submitted for inclusion in the Work\n      by You to the Licensor shall be under the terms and conditions of\n      this License, without any additional terms or conditions.\n      Notwithstanding the above, nothing herein shall supersede or modify\n      the terms of any separate license agreement you may have executed\n      with Licensor regarding such Contributions.\n\n   6. Trademarks. This License does not grant permission to use the trade\n      names, trademarks, service marks, or product names of the Licensor,\n      except as required for reasonable and customary use in describing the\n      origin of the Work and reproducing the content of the NOTICE file.\n\n   7. Disclaimer of Warranty. Unless required by applicable law or\n      agreed to in writing, Licensor provides the Work (and each\n      Contributor provides its Contributions) on an \"AS IS\" BASIS,\n      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or\n      implied, including, without limitation, any warranties or conditions\n      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A\n      PARTICULAR PURPOSE. You are solely responsible for determining the\n      appropriateness of using or redistributing the Work and assume any\n      risks associated with Your exercise of permissions under this License.\n\n   8. Limitation of Liability. In no event and under no legal theory,\n      whether in tort (including negligence), contract, or otherwise,\n      unless required by applicable law (such as deliberate and grossly\n      negligent acts) or agreed to in writing, shall any Contributor be\n      liable to You for damages, including any direct, indirect, special,\n      incidental, or consequential damages of any character arising as a\n      result of this License or out of the use or inability to use the\n      Work (including but not limited to damages for loss of goodwill,\n      work stoppage, computer failure or malfunction, or any and all\n      other commercial damages or losses), even if such Contributor\n      has been advised of the possibility of such damages.\n\n   9. Accepting Warranty or Additional Liability. While redistributing\n      the Work or Derivative Works thereof, You may choose to offer,\n      and charge a fee for, acceptance of support, warranty, indemnity,\n      or other liability obligations and/or rights consistent with this\n      License. However, in accepting such obligations, You may act only\n      on Your own behalf and on Your sole responsibility, not on behalf\n      of any other Contributor, and only if You agree to indemnify,\n      defend, and hold each Contributor harmless for any liability\n      incurred by, or claims asserted against, such Contributor by reason\n      of your accepting any such warranty or additional liability.\n\n   END OF TERMS AND CONDITIONS\n\n   APPENDIX: How to apply the Apache License to your work.\n\n      To apply the Apache License to your work, attach the following\n      boilerplate notice, with the fields enclosed by brackets \"[]\"\n      replaced with your own identifying information. (Don't include\n      the brackets!)  The text should be enclosed in the appropriate\n      comment syntax for the file format. We also recommend that a\n      file or class name and description of purpose be included on the\n      same \"printed page\" as the copyright notice for easier\n      identification within third-party archives.\n   Copyright 2024 Alibaba Cloud\n   Licensed under the Apache License, Version 2.0 (the \"License\");\n   you may not use this file except in compliance with the License.\n   You may obtain a copy of the License at\n       http://www.apache.org/licenses/LICENSE-2.0\n   Unless required by applicable law or agreed to in writing, software\n   distributed under the License is distributed on an \"AS IS\" BASIS,\n   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n   See the License for the specific language governing permissions and\n   limitations under the License.",
+      "modelfile": "# Modelfile generated by \"ollama show\"\n# To build a new Modelfile based on this, replace FROM with:\n# FROM qwen3:4b\n\nFROM C:\\Users\\Lorenz\\.ollama\\models\\blobs\\sha256-3e4cb14174460404e7a233e531675303b2fbf7749c02f91864fe311ab6344e4f\nTEMPLATE \"\"\"{{- $lastUserIdx := -1 -}}\n{{- range $idx, $msg := .Messages -}}\n{{- if eq $msg.Role \"user\" }}{{ $lastUserIdx = $idx }}{{ end -}}\n{{- end }}\n{{- if or .System .Tools }}<|im_start|>system\n{{ if .System }}{{ .System }}\n\n{{ end }}\n{{- if .Tools }}# Tools\n\nYou may call one or more functions to assist with the user query.\n\nYou are provided with function signatures within <tools></tools> XML tags:\n<tools>\n{{- range .Tools }}\n{\"type\": \"function\", \"function\": {{ .Function }}}\n{{- end }}\n</tools>\n\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\n<tool_call>\n{\"name\": <function-name>, \"arguments\": <args-json-object>}\n</tool_call>\n{{- end -}}\n<|im_end|>\n{{ end }}\n{{- range $i, $_ := .Messages }}\n{{- $last := eq (len (slice $.Messages $i)) 1 -}}\n{{- if eq .Role \"user\" }}<|im_start|>user\n{{ .Content }}<|im_end|>\n{{ else if eq .Role \"assistant\" }}<|im_start|>assistant\n{{ if (and $.IsThinkSet (and .Thinking (or $last (gt $i $lastUserIdx)))) -}}\n<think>{{ .Thinking }}</think>\n{{ end -}}\n{{ if .Content }}{{ .Content }}{{ end }}\n{{- if .ToolCalls }}\n{{- range .ToolCalls }}\n<tool_call>\n{\"name\": \"{{ .Function.Name }}\", \"arguments\": {{ .Function.Arguments }}}\n</tool_call>\n{{- end }}\n{{- end }}{{ if not $last }}<|im_end|>\n{{ end }}\n{{- else if eq .Role \"tool\" }}<|im_start|>user\n<tool_response>\n{{ .Content }}\n</tool_response><|im_end|>\n{{ end }}\n{{- if and (ne .Role \"assistant\") $last }}<|im_start|>assistant\n<think>\n{{ end }}\n{{- end }}\"\"\"\nPARAMETER top_p 0.95\nPARAMETER repeat_penalty 1\nPARAMETER stop <|im_start|>\nPARAMETER stop <|im_end|>\nPARAMETER temperature 0.6\nPARAMETER top_k 20\nLICENSE \"\"\"                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n   1. Definitions.\n\n      \"License\" shall mean the terms and conditions for use, reproduction,\n      and distribution as defined by Sections 1 through 9 of this document.\n\n      \"Licensor\" shall mean the copyright owner or entity authorized by\n      the copyright owner that is granting the License.\n\n      \"Legal Entity\" shall mean the union of the acting entity and all\n      other entities that control, are controlled by, or are under common\n      control with that entity. For the purposes of this definition,\n      \"control\" means (i) the power, direct or indirect, to cause the\n      direction or management of such entity, whether by contract or\n      otherwise, or (ii) ownership of fifty percent (50%) or more of the\n      outstanding shares, or (iii) beneficial ownership of such entity.\n\n      \"You\" (or \"Your\") shall mean an individual or Legal Entity\n      exercising permissions granted by this License.\n\n      \"Source\" form shall mean the preferred form for making modifications,\n      including but not limited to software source code, documentation\n      source, and configuration files.\n\n      \"Object\" form shall mean any form resulting from mechanical\n      transformation or translation of a Source form, including but\n      not limited to compiled object code, generated documentation,\n      and conversions to other media types.\n\n      \"Work\" shall mean the work of authorship, whether in Source or\n      Object form, made available under the License, as indicated by a\n      copyright notice that is included in or attached to the work\n      (an example is provided in the Appendix below).\n\n      \"Derivative Works\" shall mean any work, whether in Source or Object\n      form, that is based on (or derived from) the Work and for which the\n      editorial revisions, annotations, elaborations, or other modifications\n      represent, as a whole, an original work of authorship. For the purposes\n      of this License, Derivative Works shall not include works that remain\n      separable from, or merely link (or bind by name) to the interfaces of,\n      the Work and Derivative Works thereof.\n\n      \"Contribution\" shall mean any work of authorship, including\n      the original version of the Work and any modifications or additions\n      to that Work or Derivative Works thereof, that is intentionally\n      submitted to Licensor for inclusion in the Work by the copyright owner\n      or by an individual or Legal Entity authorized to submit on behalf of\n      the copyright owner. For the purposes of this definition, \"submitted\"\n      means any form of electronic, verbal, or written communication sent\n      to the Licensor or its representatives, including but not limited to\n      communication on electronic mailing lists, source code control systems,\n      and issue tracking systems that are managed by, or on behalf of, the\n      Licensor for the purpose of discussing and improving the Work, but\n      excluding communication that is conspicuously marked or otherwise\n      designated in writing by the copyright owner as \"Not a Contribution.\"\n\n      \"Contributor\" shall mean Licensor and any individual or Legal Entity\n      on behalf of whom a Contribution has been received by Licensor and\n      subsequently incorporated within the Work.\n\n   2. Grant of Copyright License. Subject to the terms and conditions of\n      this License, each Contributor hereby grants to You a perpetual,\n      worldwide, non-exclusive, no-charge, royalty-free, irrevocable\n      copyright license to reproduce, prepare Derivative Works of,\n      publicly display, publicly perform, sublicense, and distribute the\n      Work and such Derivative Works in Source or Object form.\n\n   3. Grant of Patent License. Subject to the terms and conditions of\n      this License, each Contributor hereby grants to You a perpetual,\n      worldwide, non-exclusive, no-charge, royalty-free, irrevocable\n      (except as stated in this section) patent license to make, have made,\n      use, offer to sell, sell, import, and otherwise transfer the Work,\n      where such license applies only to those patent claims licensable\n      by such Contributor that are necessarily infringed by their\n      Contribution(s) alone or by combination of their Contribution(s)\n      with the Work to which such Contribution(s) was submitted. If You\n      institute patent litigation against any entity (including a\n      cross-claim or counterclaim in a lawsuit) alleging that the Work\n      or a Contribution incorporated within the Work constitutes direct\n      or contributory patent infringement, then any patent licenses\n      granted to You under this License for that Work shall terminate\n      as of the date such litigation is filed.\n\n   4. Redistribution. You may reproduce and distribute copies of the\n      Work or Derivative Works thereof in any medium, with or without\n      modifications, and in Source or Object form, provided that You\n      meet the following conditions:\n\n      (a) You must give any other recipients of the Work or\n          Derivative Works a copy of this License; and\n\n      (b) You must cause any modified files to carry prominent notices\n          stating that You changed the files; and\n\n      (c) You must retain, in the Source form of any Derivative Works\n          that You distribute, all copyright, patent, trademark, and\n          attribution notices from the Source form of the Work,\n          excluding those notices that do not pertain to any part of\n          the Derivative Works; and\n\n      (d) If the Work includes a \"NOTICE\" text file as part of its\n          distribution, then any Derivative Works that You distribute must\n          include a readable copy of the attribution notices contained\n          within such NOTICE file, excluding those notices that do not\n          pertain to any part of the Derivative Works, in at least one\n          of the following places: within a NOTICE text file distributed\n          as part of the Derivative Works; within the Source form or\n          documentation, if provided along with the Derivative Works; or,\n          within a display generated by the Derivative Works, if and\n          wherever such third-party notices normally appear. The contents\n          of the NOTICE file are for informational purposes only and\n          do not modify the License. You may add Your own attribution\n          notices within Derivative Works that You distribute, alongside\n          or as an addendum to the NOTICE text from the Work, provided\n          that such additional attribution notices cannot be construed\n          as modifying the License.\n\n      You may add Your own copyright statement to Your modifications and\n      may provide additional or different license terms and conditions\n      for use, reproduction, or distribution of Your modifications, or\n      for any such Derivative Works as a whole, provided Your use,\n      reproduction, and distribution of the Work otherwise complies with\n      the conditions stated in this License.\n\n   5. Submission of Contributions. Unless You explicitly state otherwise,\n      any Contribution intentionally submitted for inclusion in the Work\n      by You to the Licensor shall be under the terms and conditions of\n      this License, without any additional terms or conditions.\n      Notwithstanding the above, nothing herein shall supersede or modify\n      the terms of any separate license agreement you may have executed\n      with Licensor regarding such Contributions.\n\n   6. Trademarks. This License does not grant permission to use the trade\n      names, trademarks, service marks, or product names of the Licensor,\n      except as required for reasonable and customary use in describing the\n      origin of the Work and reproducing the content of the NOTICE file.\n\n   7. Disclaimer of Warranty. Unless required by applicable law or\n      agreed to in writing, Licensor provides the Work (and each\n      Contributor provides its Contributions) on an \"AS IS\" BASIS,\n      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or\n      implied, including, without limitation, any warranties or conditions\n      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A\n      PARTICULAR PURPOSE. You are solely responsible for determining the\n      appropriateness of using or redistributing the Work and assume any\n      risks associated with Your exercise of permissions under this License.\n\n   8. Limitation of Liability. In no event and under no legal theory,\n      whether in tort (including negligence), contract, or otherwise,\n      unless required by applicable law (such as deliberate and grossly\n      negligent acts) or agreed to in writing, shall any Contributor be\n      liable to You for damages, including any direct, indirect, special,\n      incidental, or consequential damages of any character arising as a\n      result of this License or out of the use or inability to use the\n      Work (including but not limited to damages for loss of goodwill,\n      work stoppage, computer failure or malfunction, or any and all\n      other commercial damages or losses), even if such Contributor\n      has been advised of the possibility of such damages.\n\n   9. Accepting Warranty or Additional Liability. While redistributing\n      the Work or Derivative Works thereof, You may choose to offer,\n      and charge a fee for, acceptance of support, warranty, indemnity,\n      or other liability obligations and/or rights consistent with this\n      License. However, in accepting such obligations, You may act only\n      on Your own behalf and on Your sole responsibility, not on behalf\n      of any other Contributor, and only if You agree to indemnify,\n      defend, and hold each Contributor harmless for any liability\n      incurred by, or claims asserted against, such Contributor by reason\n      of your accepting any such warranty or additional liability.\n\n   END OF TERMS AND CONDITIONS\n\n   APPENDIX: How to apply the Apache License to your work.\n\n      To apply the Apache License to your work, attach the following\n      boilerplate notice, with the fields enclosed by brackets \"[]\"\n      replaced with your own identifying information. (Don't include\n      the brackets!)  The text should be enclosed in the appropriate\n      comment syntax for the file format. We also recommend that a\n      file or class name and description of purpose be included on the\n      same \"printed page\" as the copyright notice for easier\n      identification within third-party archives.\n   Copyright 2024 Alibaba Cloud\n   Licensed under the Apache License, Version 2.0 (the \"License\");\n   you may not use this file except in compliance with the License.\n   You may obtain a copy of the License at\n       http://www.apache.org/licenses/LICENSE-2.0\n   Unless required by applicable law or agreed to in writing, software\n   distributed under the License is distributed on an \"AS IS\" BASIS,\n   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n   See the License for the specific language governing permissions and\n   limitations under the License.\"\"\"\n",
+      "parameters": "top_k                          20\ntop_p                          0.95\nrepeat_penalty                 1\nstop                           \"<|im_start|>\"\nstop                           \"<|im_end|>\"\ntemperature                    0.6",
+      "template": "{{- $lastUserIdx := -1 -}}\n{{- range $idx, $msg := .Messages -}}\n{{- if eq $msg.Role \"user\" }}{{ $lastUserIdx = $idx }}{{ end -}}\n{{- end }}\n{{- if or .System .Tools }}<|im_start|>system\n{{ if .System }}{{ .System }}\n\n{{ end }}\n{{- if .Tools }}# Tools\n\nYou may call one or more functions to assist with the user query.\n\nYou are provided with function signatures within <tools></tools> XML tags:\n<tools>\n{{- range .Tools }}\n{\"type\": \"function\", \"function\": {{ .Function }}}\n{{- end }}\n</tools>\n\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\n<tool_call>\n{\"name\": <function-name>, \"arguments\": <args-json-object>}\n</tool_call>\n{{- end -}}\n<|im_end|>\n{{ end }}\n{{- range $i, $_ := .Messages }}\n{{- $last := eq (len (slice $.Messages $i)) 1 -}}\n{{- if eq .Role \"user\" }}<|im_start|>user\n{{ .Content }}<|im_end|>\n{{ else if eq .Role \"assistant\" }}<|im_start|>assistant\n{{ if (and $.IsThinkSet (and .Thinking (or $last (gt $i $lastUserIdx)))) -}}\n<think>{{ .Thinking }}</think>\n{{ end -}}\n{{ if .Content }}{{ .Content }}{{ end }}\n{{- if .ToolCalls }}\n{{- range .ToolCalls }}\n<tool_call>\n{\"name\": \"{{ .Function.Name }}\", \"arguments\": {{ .Function.Arguments }}}\n</tool_call>\n{{- end }}\n{{- end }}{{ if not $last }}<|im_end|>\n{{ end }}\n{{- else if eq .Role \"tool\" }}<|im_start|>user\n<tool_response>\n{{ .Content }}\n</tool_response><|im_end|>\n{{ end }}\n{{- if and (ne .Role \"assistant\") $last }}<|im_start|>assistant\n<think>\n{{ end }}\n{{- end }}",
+      "details": {
+        "parent_model": "",
+        "format": "gguf",
+        "family": "qwen3",
+        "families": [
+          "qwen3"
+        ],
+        "parameter_size": "4.0B",
+        "quantization_level": "Q4_K_M"
+      },
+      "model_info": {
+        "general.architecture": "qwen3",
+        "general.basename": "Qwen3",
+        "general.file_type": 15,
+        "general.finetune": "Thinking",
+        "general.license": "apache-2.0",
+        "general.license.link": "https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507/blob/main/LICENSE",
+        "general.parameter_count": 4022468096,
+        "general.quantization_version": 2,
+        "general.size_label": "4B",
+        "general.tags": [
+          "text-generation"
+        ],
+        "general.type": "model",
+        "general.version": "2507",
+        "qwen3.attention.head_count": 32,
+        "qwen3.attention.head_count_kv": 8,
+        "qwen3.attention.key_length": 128,
+        "qwen3.attention.layer_norm_rms_epsilon": 1e-06,
+        "qwen3.attention.value_length": 128,
+        "qwen3.block_count": 36,
+        "qwen3.context_length": 262144,
+        "qwen3.embedding_length": 2560,
+        "qwen3.feed_forward_length": 9728,
+        "qwen3.rope.freq_base": 5000000,
+        "tokenizer.ggml.add_bos_token": false,
+        "tokenizer.ggml.bos_token_id": 151643,
+        "tokenizer.ggml.eos_token_id": 151645,
+        "tokenizer.ggml.merges": [],
+        "tokenizer.ggml.model": "gpt2",
+        "tokenizer.ggml.padding_token_id": 151643,
+        "tokenizer.ggml.pre": "qwen2",
+        "tokenizer.ggml.token_type": [],
+        "tokenizer.ggml.tokens": []
+      },
+      "capabilities": [
+        "completion",
+        "tools",
+        "thinking"
+      ],
+      "modified_at": "2026-10-16T14:45:58.4439302+02:00"
+    }
+  },
+  "containers": [
+    {
+      "Command": "\"docker-entrypoint.s…\"",
+      "CreatedAt": "2026-10-17 18:05:54 +0200 CEST",
+      "Engine": "",
+      "ExitCode": 0,
+      "Health": "healthy",
+      "ID": "0f07e846ab02",
+      "Image": "postgres:18",
+      "Labels": "com.docker.compose.container-number=1,com.docker.compose.image=sha256:885953109528ad3dfc90362b1a6f50a78620b5315be19f187753d267e484dc5b,com.docker.compose.oneoff=False,com.docker.compose.project=mnemo-eval-916b5798b5ba,com.docker.compose.project.config_files=C:\\Users\\Lorenz\\IdeaProjects\\mnemo\\tests\\e2e\\compose.yaml,C:\\Users\\Lorenz\\IdeaProjects\\mnemo\\evaluation\\.run\\override.json,com.docker.compose.project.environment_file=C:\\Users\\Lorenz\\IdeaProjects\\mnemo\\tests\\e2e\\e2e.env,com.docker.compose.project.working_dir=C:\\Users\\Lorenz\\IdeaProjects\\mnemo\\tests\\e2e,com.docker.compose.service=db,com.docker.compose.config-hash=41cfe3f8b96d7c7156f5499dbd0ced3eacaf3f4d76b158cf403fa67f42d4b34d,com.docker.compose.depends_on=,com.docker.compose.version=5.5.1,desktop.docker.io/ports.scheme=v2",
+      "LocalVolumes": "1",
+      "Mounts": "mnemo-eval-916…",
+      "Name": "mnemo-eval-916b5798b5ba-db-1",
+      "Names": "mnemo-eval-916b5798b5ba-db-1",
+      "Networks": "mnemo-eval-916b5798b5ba_default",
+      "Ports": "5432/tcp",
+      "Project": "mnemo-eval-916b5798b5ba",
+      "Publishers": [
+        {
+          "URL": "",
+          "TargetPort": 5432,
+          "PublishedPort": 0,
+          "Protocol": "tcp"
+        }
+      ],
+      "RunningFor": "44 seconds ago",
+      "Service": "db",
+      "Size": "0B",
+      "State": "running",
+      "Status": "Up 43 seconds (healthy)"
+    },
+    {
+      "Command": "\"java -XX:MaxRAMPerc…\"",
+      "CreatedAt": "2026-10-17 18:06:24 +0200 CEST",
+      "Engine": "",
+      "ExitCode": 0,
+      "Health": "",
+      "ID": "5737266bab4f",
+      "Image": "mnemo-eval-916b5798b5ba-ms1",
+      "Labels": "org.opencontainers.image.description=The Ubuntu container image maintained by Canonical\n\nUbuntu is a Debian-based Linux operating system that runs from the desktop to the cloud, to all your internet connected things.\nIt is the world's most popular operating system across public clouds and OpenStack clouds.\nIt is the number one platform for containers; from Docker to Kubernetes to LXD, Ubuntu can run your containers at scale.\nFast, secure and simple, Ubuntu powers millions of PCs worldwide.\n,com.docker.compose.container-number=1,com.docker.compose.image=sha256:489279ce92072e11ded221f7ebb32ce0f18458c06459e7a3bd462bea8e5e206e,com.docker.compose.project=mnemo-eval-916b5798b5ba,com.docker.compose.service=ms1,org.opencontainers.image.version=26.04,org.opencontainers.image.created=2026-10-06T21:25:30.040262+00:00,desktop.docker.io/ports.scheme=v2,com.docker.compose.depends_on=,com.docker.compose.project.config_files=C:\\Users\\Lorenz\\IdeaProjects\\mnemo\\tests\\e2e\\compose.yaml,C:\\Users\\Lorenz\\IdeaProjects\\mnemo\\evaluation\\.run\\override.json,com.docker.compose.project.environment_file=C:\\Users\\Lorenz\\IdeaProjects\\mnemo\\tests\\e2e\\e2e.env,com.docker.compose.project.working_dir=C:\\Users\\Lorenz\\IdeaProjects\\mnemo\\tests\\e2e,com.docker.compose.config-hash=9cad6cee9d3e99b41a9c946d9530905e773c3f2287bdeea5fd23130e2e92d5d3,com.docker.compose.oneoff=False,com.docker.compose.version=5.5.1,org.opencontainers.image.title=ubuntu",
+      "LocalVolumes": "0",
+      "Mounts": "",
+      "Name": "mnemo-eval-916b5798b5ba-ms1-1",
+      "Names": "mnemo-eval-916b5798b5ba-ms1-1",
+      "Networks": "mnemo-eval-916b5798b5ba_default",
+      "Ports": "8080/tcp",
+      "Project": "mnemo-eval-916b5798b5ba",
+      "Publishers": [
+        {
+          "URL": "",
+          "TargetPort": 8080,
+          "PublishedPort": 0,
+          "Protocol": "tcp"
+        }
+      ],
+      "RunningFor": "14 seconds ago",
+      "Service": "ms1",
+      "Size": "0B",
+      "State": "running",
+      "Status": "Up 12 seconds"
+    },
+    {
+      "Command": "\"uvicorn app.main:ap…\"",
+      "CreatedAt": "2026-10-17 18:06:24 +0200 CEST",
+      "Engine": "",
+      "ExitCode": 0,
+      "Health": "starting",
+      "ID": "4d558a027a23",
+      "Image": "mnemo-eval-916b5798b5ba-ms2",
+      "Labels": "com.docker.compose.project.config_files=C:\\Users\\Lorenz\\IdeaProjects\\mnemo\\tests\\e2e\\compose.yaml,C:\\Users\\Lorenz\\IdeaProjects\\mnemo\\evaluation\\.run\\override.json,com.docker.compose.service=ms2,com.docker.compose.version=5.5.1,desktop.docker.io/ports.scheme=v2,com.docker.compose.depends_on=ms1:service_started:false,com.docker.compose.image=sha256:297614da69bb1e985faf82b3042bda2360dc96a73a0611df7cc0bf2bc22199fd,com.docker.compose.oneoff=False,com.docker.compose.project=mnemo-eval-916b5798b5ba,com.docker.compose.project.environment_file=C:\\Users\\Lorenz\\IdeaProjects\\mnemo\\tests\\e2e\\e2e.env,com.docker.compose.project.working_dir=C:\\Users\\Lorenz\\IdeaProjects\\mnemo\\tests\\e2e,com.docker.compose.config-hash=f77648dc4bb6b0e8bb5952fae322157448ffbff185b7c20651bc6756b0b031cf,com.docker.compose.container-number=1",
+      "LocalVolumes": "1",
+      "Mounts": "mnemo-eval-916…",
+      "Name": "mnemo-eval-916b5798b5ba-ms2-1",
+      "Names": "mnemo-eval-916b5798b5ba-ms2-1",
+      "Networks": "mnemo-eval-916b5798b5ba_default",
+      "Ports": "8000/tcp",
+      "Project": "mnemo-eval-916b5798b5ba",
+      "Publishers": [
+        {
+          "URL": "",
+          "TargetPort": 8000,
+          "PublishedPort": 0,
+          "Protocol": "tcp"
+        }
+      ],
+      "RunningFor": "14 seconds ago",
+      "Service": "ms2",
+      "Size": "0B",
+      "State": "running",
+      "Status": "Up 12 seconds (health: starting)"
+    },
+    {
+      "Command": "\"docker-entrypoint.s…\"",
+      "CreatedAt": "2026-10-17 18:05:54 +0200 CEST",
+      "Engine": "",
+      "ExitCode": 0,
+      "Health": "healthy",
+      "ID": "d9eb694172ae",
+      "Image": "rabbitmq:4-management",
+      "Labels": "org.opencontainers.image.version=24.04,com.docker.compose.config-hash=9c4400432c235fee5511ae36b2f452be7f04c61c23760a3ab3cba592ea4cf6c2,com.docker.compose.container-number=1,com.docker.compose.depends_on=,com.docker.compose.project.working_dir=C:\\Users\\Lorenz\\IdeaProjects\\mnemo\\tests\\e2e,desktop.docker.io/ports.scheme=v2,com.docker.compose.image=sha256:508ce93e08d981c6377b84dbc99ba1278e8c8ffd8803178a0ab56d679935571b,com.docker.compose.oneoff=False,com.docker.compose.project=mnemo-eval-916b5798b5ba,com.docker.compose.project.config_files=C:\\Users\\Lorenz\\IdeaProjects\\mnemo\\tests\\e2e\\compose.yaml,C:\\Users\\Lorenz\\IdeaProjects\\mnemo\\evaluation\\.run\\override.json,com.docker.compose.project.environment_file=C:\\Users\\Lorenz\\IdeaProjects\\mnemo\\tests\\e2e\\e2e.env,com.docker.compose.service=rabbitmq,com.docker.compose.version=5.5.1",
+      "LocalVolumes": "1",
+      "Mounts": "584994e75ca9be…",
+      "Name": "mnemo-eval-916b5798b5ba-rabbitmq-1",
+      "Names": "mnemo-eval-916b5798b5ba-rabbitmq-1",
+      "Networks": "mnemo-eval-916b5798b5ba_default",
+      "Ports": "4369/tcp, 5671-5672/tcp, 15671-15672/tcp, 15691-15692/tcp, 25672/tcp",
+      "Project": "mnemo-eval-916b5798b5ba",
+      "Publishers": [
+        {
+          "URL": "",
+          "TargetPort": 4369,
+          "PublishedPort": 0,
+          "Protocol": "tcp"
+        },
+        {
+          "URL": "",
+          "TargetPort": 5671,
+          "PublishedPort": 0,
+          "Protocol": "tcp"
+        },
+        {
+          "URL": "",
+          "TargetPort": 5672,
+          "PublishedPort": 0,
+          "Protocol": "tcp"
+        },
+        {
+          "URL": "",
+          "TargetPort": 15671,
+          "PublishedPort": 0,
+          "Protocol": "tcp"
+        },
+        {
+          "URL": "",
+          "TargetPort": 15672,
+          "PublishedPort": 0,
+          "Protocol": "tcp"
+        },
+        {
+          "URL": "",
+          "TargetPort": 15691,
+          "PublishedPort": 0,
+          "Protocol": "tcp"
+        },
+        {
+          "URL": "",
+          "TargetPort": 15692,
+          "PublishedPort": 0,
+          "Protocol": "tcp"
+        },
+        {
+          "URL": "",
+          "TargetPort": 25672,
+          "PublishedPort": 0,
+          "Protocol": "tcp"
+        }
+      ],
+      "RunningFor": "44 seconds ago",
+      "Service": "rabbitmq",
+      "Size": "0B",
+      "State": "running",
+      "Status": "Up 43 seconds (healthy)"
+    }
+  ],
+  "reconcile": {
+    "http_status": 200,
+    "body": {
+      "indexed_note_ids": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "deleted_note_ids": [],
+      "skipped_note_ids": [],
+      "total_ms1_notes": 10
+    }
+  },
+  "index": {
+    "settings": {
+      "app_name": "ms2-rag-service",
+      "app_env": "e2e",
+      "ms1_base_url": "http://ms1:8080",
+      "ms1_timeout_seconds": 10.0,
+      "admin_api_key": "[redacted]",
+      "ollama_base_url": "http://host.docker.internal:11434",
+      "embedding_model": "qwen3-embedding:0.6b",
+      "chat_model": "qwen3:4b",
+      "chat_num_ctx": 4096,
+      "chat_temperature": 0.1,
+      "chat_think": false,
+      "query_instruction_prefix": "Instruct: Given a question, retrieve notes that answer it\nQuery:",
+      "chroma_path": "/app/data/chroma",
+      "chroma_collection_name": "notes",
+      "chunk_size_tokens": 400,
+      "chunk_overlap_tokens": 50,
+      "tokenizer_name": "Qwen/Qwen3-Embedding-0.6B",
+      "tokenizer_revision": "97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3",
+      "retrieval_top_k_default": 4,
+      "retrieval_min_score": 0.4,
+      "log_format": "json",
+      "rabbitmq_enabled": false,
+      "rabbitmq_host": "rabbitmq",
+      "rabbitmq_port": 5672,
+      "rabbitmq_username": "e2e",
+      "rabbitmq_password": "[redacted]",
+      "rabbitmq_heartbeat_seconds": 300,
+      "events_exchange": "notes.events",
+      "events_queue": "ms2.note-events",
+      "events_dead_letter_exchange": "notes.events.dlx",
+      "events_dead_letter_queue": "ms2.note-events.dlq",
+      "events_max_attempts": 3,
+      "events_retry_backoff_seconds": 2.0
+    },
+    "indexing_version": "v1|chunk=400|overlap=50|embed=qwen3-embedding:0.6b|tokenizer=Qwen/Qwen3-Embedding-0.6B@97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3",
+    "tokenizer_fallback": false,
+    "tokenizer_sha256": "71241c4586582e04d5d51a420bad74d3ef5353bfdac5a53a7ba7440dbf33e350",
+    "chunks": [
+      {
+        "note_id": 1,
+        "chunk_index": 0,
+        "tokens": 69,
+        "text": "Willow workshop visitor access\n\nThe Willow community workshop welcomes visitors on Tuesday and Thursday from 18:00 to 20:00. Enter through the courtyard door, not the street entrance. A volunteer meets visitors at the green desk. These hours are for visits to the room; equipment collection has its own shorter window.",
+        "source_hash": "b326d31e146c67e4ca1491ceadd831188d8efcb3b94dfe017339125ac861db19",
+        "indexing_version": "v1|chunk=400|overlap=50|embed=qwen3-embedding:0.6b|tokenizer=Qwen/Qwen3-Embedding-0.6B@97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3"
+      },
+      {
+        "note_id": 2,
+        "chunk_index": 0,
+        "tokens": 74,
+        "text": "Willow equipment collection window\n\nWillow equipment loans can be collected on Thursday from 18:30 to 19:00 at the green desk. Bring the reservation code on paper or on a screen. This collection window applies only to Willow equipment. Returns go on the marked return shelf, where a volunteer checks the case before closing the loan.",
+        "source_hash": "8f553bebde2f69cc072a4d83014411633df508250496ae5b62422931d662e38f",
+        "indexing_version": "v1|chunk=400|overlap=50|embed=qwen3-embedding:0.6b|tokenizer=Qwen/Qwen3-Embedding-0.6B@97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3"
+      },
+      {
+        "note_id": 3,
+        "chunk_index": 0,
+        "tokens": 74,
+        "text": "Harbor equipment collection window\n\nHarbor equipment loans can be collected on Saturday from 10:00 to 11:00 at the orange counter. Bring the reservation code. Harbor is a separate workshop with its own stock and volunteers; its Saturday collection window does not apply to Willow. Return cases to the orange counter rather than leaving them outside.",
+        "source_hash": "6a2ddd308fe91224caa81dc677e1484ab6085ce90a5b8801f1042e940d8342c8",
+        "indexing_version": "v1|chunk=400|overlap=50|embed=qwen3-embedding:0.6b|tokenizer=Qwen/Qwen3-Embedding-0.6B@97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3"
+      },
+      {
+        "note_id": 4,
+        "chunk_index": 0,
+        "tokens": 67,
+        "text": "Seed library borrowing rule\n\nSeed library members may take at most two seed packets per visit. They do not need to bring replacement seeds that day. At the end of the growing season, members are encouraged, but not required, to return one labelled packet of saved seeds. Write the plant variety and harvest year on any returned packet.",
+        "source_hash": "8163fe5cc6d0c55a1c579bc7d63c586edade17935207509e986ce10d871a9811",
+        "indexing_version": "v1|chunk=400|overlap=50|embed=qwen3-embedding:0.6b|tokenizer=Qwen/Qwen3-Embedding-0.6B@97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3"
+      },
+      {
+        "note_id": 5,
+        "chunk_index": 0,
+        "tokens": 202,
+        "text": "Label printer recovery after an empty feed\n\nThis procedure is for the desk label printer when it feeds blank backing without printing a label. It is not the procedure for a paper jam. First cancel the active print job in the queue. Next open the cover and reseat the label roll so that the labels face upward. Close the cover, then hold the feed button for three seconds to recalibrate. Finally print one test label before releasing the waiting jobs.\n\nKeep the discarded backing beside the printer until the test label has been inspected. The volunteer at the desk checks that the text sits within the label border and that the date is readable. A successful test label can be attached to the shift sheet rather than thrown away.\n\nIf that test still comes out blank, stop using the printer and put a handwritten sign on it. Do not send the whole queue again while the cause is unknown. The spare marker and plain tags are in the shallow drawer beneath the printer, so the desk can continue labelling items by hand.",
+        "source_hash": "a85afbcdff8752f387c4528b108660d3ac369ecc97d5f04f244577d8f2f6cc9c",
+        "indexing_version": "v1|chunk=400|overlap=50|embed=qwen3-embedding:0.6b|tokenizer=Qwen/Qwen3-Embedding-0.6B@97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3"
+      },
+      {
+        "note_id": 6,
+        "chunk_index": 0,
+        "tokens": 192,
+        "text": "Public archive release gate\n\nA batch of scanned workshop records can be released to the public archive only after both checks have passed: all visible address labels have been redacted, and a second volunteer has checked the page order against the intake sheet. Neither check substitutes for the other. The release volunteer records both check marks on the batch cover.\n\nThe redaction check is performed on the exported images, not merely on the working files in the editor. This avoids releasing an earlier export by mistake. If a label remains legible, return the batch to editing and export a fresh copy before checking again.\n\nFor the order check, the second volunteer compares each exported page with its position on the intake sheet. A cover page counts as a page and must not silently disappear. Once both checks pass, the release volunteer moves the batch to the public folder and writes the release date on the cover. This note defines the release gate, not the retention schedule for physical intake receipts.",
+        "source_hash": "e970d915fa64f25f51dde0f26bf6adb596a0b701a71df4f75369cb4b08442f39",
+        "indexing_version": "v1|chunk=400|overlap=50|embed=qwen3-embedding:0.6b|tokenizer=Qwen/Qwen3-Embedding-0.6B@97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3"
+      },
+      {
+        "note_id": 7,
+        "chunk_index": 0,
+        "tokens": 187,
+        "text": "Willow loan packing pouch\n\nBefore a Willow equipment loan leaves the workshop, put exactly these three items in the small packing pouch: the laminated quick-start card, the USB-C charging cable, and the paper condition checklist. The borrower and the desk volunteer tick the checklist together. The pouch travels inside the equipment case so that loose paperwork cannot fall out on the journey.\n\nCheck the printed equipment number on the quick-start card against the number on the case. Cards from a different case go back to the desk rather than travelling with the borrower. Coil the charging cable loosely and secure it with the reusable strap attached to the cable; do not use adhesive tape on it.\n\nThe condition checklist stays on paper during the loan. Mark existing scratches before departure and leave the return column empty for the return inspection. This packing instruction does not change the collection window or the reservation requirement. The loan desk follows the separate equipment collection note for those details.",
+        "source_hash": "bc0b95599d983894878d5996f15d5df704bdfb3afc830a0a0e9f37b12cef617c",
+        "indexing_version": "v1|chunk=400|overlap=50|embed=qwen3-embedding:0.6b|tokenizer=Qwen/Qwen3-Embedding-0.6B@97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3"
+      },
+      {
+        "note_id": 8,
+        "chunk_index": 0,
+        "tokens": 303,
+        "text": "Archive intake handbook and receipt retention\n\nThe workshop archive accepts donated meeting sheets, project sketches and printed event programmes. Intake is deliberately separate from publication: accepting a box does not mean its contents are ready to appear online. At the start of a shift, clear one table and place an empty tray on it. Keep food and drinks on the shelf outside the sorting room. A volunteer writes the batch identifier on a removable card and places that card on top of the box, without attaching adhesive labels to original papers.\n\nBegin the inventory by counting folders, not individual pages. Write the folder count on the intake sheet and give each folder a temporary number in pencil on its protective sleeve. Folded sheets stay folded until the condition check. If a folder contains a loose photograph, put the photograph in its own sleeve while keeping its temporary number linked to the original folder. The inventory describes what arrived; it is not an assessment of the historical value of the donation. Volunteers should avoid adding guesses about authorship to the intake sheet.\n\nThe condition check happens before scanning. Remove metal clips only when they can be lifted without pulling the paper. A torn page goes in a support sleeve and is scanned through the sleeve if opening it would make the tear worse. Note unreadable portions on the working copy instead of writing on the original. When an item cannot lie flat safely, set it aside for a later session rather than pressing it under a heavy object. The scanner table should contain only the folder currently being processed and its intake sheet.",
+        "source_hash": "0895bd12051df9145b82d52063dece8d31373af2af92aaa841620bfac93ed97f",
+        "indexing_version": "v1|chunk=400|overlap=50|embed=qwen3-embedding:0.6b|tokenizer=Qwen/Qwen3-Embedding-0.6B@97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3"
+      },
+      {
+        "note_id": 8,
+        "chunk_index": 1,
+        "tokens": 362,
+        "text": "Note unreadable portions on the working copy instead of writing on the original. When an item cannot lie flat safely, set it aside for a later session rather than pressing it under a heavy object. The scanner table should contain only the folder currently being processed and its intake sheet.\n\nCreate a working folder named with the batch identifier and scan pages in intake order. Keep the first image as a reference even if a later image has better contrast. Volunteers can adjust brightness in a working copy but should not overwrite the first scan. Record any intentional missing page on the intake sheet so that the order checker can distinguish an omission from an accidental skip. File names use consecutive page numbers within each batch. The folder name carries the batch identifier, so repeating it inside every page title is unnecessary.\n\nAt the end of a scanning session, compare the number of image files with the number of scanned pages recorded that day. A mismatch should be resolved before packing the box away. Leave the working folder in the internal area until the public release gate has been completed. The separate release-gate note covers redaction and independent order checks. Do not infer public permission from the existence of a scan. Working images remain internal even when they are easy to read and the donation seems routine. The shift sheet records who last handled the batch.\n\nPhysical receipt retention starts only after public release. Keep the blue intake receipt for 45 days after the batch's public release date, then place it in the locked shredding bin. Do not put that receipt in ordinary paper recycling. The blue receipt is the temporary desk copy; the batch cover remains with the archive record. When closing a receipt entry, write the disposal date in the receipt register so another shift can see that disposal has already happened. A delayed release also delays the start of this retention period.",
+        "source_hash": "0895bd12051df9145b82d52063dece8d31373af2af92aaa841620bfac93ed97f",
+        "indexing_version": "v1|chunk=400|overlap=50|embed=qwen3-embedding:0.6b|tokenizer=Qwen/Qwen3-Embedding-0.6B@97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3"
+      },
+      {
+        "note_id": 8,
+        "chunk_index": 2,
+        "tokens": 155,
+        "text": "The blue receipt is the temporary desk copy; the batch cover remains with the archive record. When closing a receipt entry, write the disposal date in the receipt register so another shift can see that disposal has already happened. A delayed release also delays the start of this retention period.\n\nFor handover, return protective sleeves to their labelled trays and leave the scanner glass clean. The next shift should find a short written description of any unresolved mismatch rather than an unexplained stack of loose pages. Put the intake sheet back with its batch and leave the temporary folder numbers visible. A volunteer who did not work on the batch should be able to reconstruct the sequence from the inventory and shift sheet. This handbook concerns workshop archive records only; equipment reservations and seed packets follow their own desk procedures.",
+        "source_hash": "0895bd12051df9145b82d52063dece8d31373af2af92aaa841620bfac93ed97f",
+        "indexing_version": "v1|chunk=400|overlap=50|embed=qwen3-embedding:0.6b|tokenizer=Qwen/Qwen3-Embedding-0.6B@97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3"
+      },
+      {
+        "note_id": 9,
+        "chunk_index": 0,
+        "tokens": 301,
+        "text": "Courtyard garden weekly observation handbook\n\nThe courtyard garden is a shared observation space rather than a production allotment. Its log helps volunteers notice changes from week to week without turning every visit into a measurement exercise. Each bed has a wooden marker and a matching page in the green binder. At the start of a visit, check that the marker is still legible and that the binder page names the same bed. Do not move markers to make a photograph look tidier, because later volunteers use their positions to compare observations.\n\nA useful observation describes what can be seen rather than assigning an immediate cause. For example, write that the leaves on the north side are pale instead of declaring that the plant needs a particular treatment. Include the date and whether the surface soil feels dry, damp or wet. Volunteers may use the same small wooden probe kept beside the binder. Return it clean after each bed so that a later observation does not simply describe soil carried over from the previous one. The log is a record, not a diagnosis.\n\nWatering decisions begin with the soil check and the current shift instructions on the board. Avoid watering just because the surface looks lighter in a photograph. When watering is requested, use the can marked for garden water and keep it separate from cleaning buckets. Apply water slowly near the soil instead of spraying the leaves for the photograph. Record that watering happened and which bed was watered. Do not create a new fixed watering timetable in the binder; the board is where the current shift instructions belong.",
+        "source_hash": "8495f880144f0fcd2b67a279aef77b00cdae991de1eb6e101e76a0e11d1c8484",
+        "indexing_version": "v1|chunk=400|overlap=50|embed=qwen3-embedding:0.6b|tokenizer=Qwen/Qwen3-Embedding-0.6B@97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3"
+      },
+      {
+        "note_id": 9,
+        "chunk_index": 1,
+        "tokens": 369,
+        "text": "and keep it separate from cleaning buckets. Apply water slowly near the soil instead of spraying the leaves for the photograph. Record that watering happened and which bed was watered. Do not create a new fixed watering timetable in the binder; the board is where the current shift instructions belong.\n\nPhotographs should be taken from the marked paving stone whenever that spot is accessible. Include the bed marker in the frame so the picture can be matched to the correct binder page. A second close-up is useful for a change that would be hard to see in the overview. Keep both pictures and give them the same visit date. Avoid including visitors in the background. If the paving stone is blocked by a class, write down that the angle changed rather than trying to move the group or pretending the view is directly comparable.\n\nThe small tray near the wall is for temporarily holding detached plant labels. It is not a place to leave unlabelled seed packets. A loose label should be recorded with the place where it was found, even if a volunteer thinks its original bed is obvious. Compare the label with the binder before putting it back. Similar-looking young plants are a reason to wait for confirmation, not a reason to guess. This garden observation system is separate from the seed library borrowing rules; taking seeds does not automatically assign a garden bed.\n\nAt the end of the visit, close the binder and return it to the dry shelf. Empty the observation tray only when every loose label has been reconciled with a bed or listed as unresolved. Wipe the wooden probe and put it beside the binder. If a can is damaged, leave a written notice for the next shift so nobody discovers the leak halfway through watering. Routine handover notes belong on the board, while permanent observations belong on the dated binder page. Keeping those two records distinct makes old observations easier to interpret.",
+        "source_hash": "8495f880144f0fcd2b67a279aef77b00cdae991de1eb6e101e76a0e11d1c8484",
+        "indexing_version": "v1|chunk=400|overlap=50|embed=qwen3-embedding:0.6b|tokenizer=Qwen/Qwen3-Embedding-0.6B@97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3"
+      },
+      {
+        "note_id": 9,
+        "chunk_index": 2,
+        "tokens": 150,
+        "text": "the binder. If a can is damaged, leave a written notice for the next shift so nobody discovers the leak halfway through watering. Routine handover notes belong on the board, while permanent observations belong on the dated binder page. Keeping those two records distinct makes old observations easier to interpret.\n\nA monthly group walk compares the dated photographs and binder entries. The group chooses two visible changes to discuss and leaves other entries as records for later. Volunteers are encouraged to distinguish observations from interpretations during the discussion. Nobody is expected to identify every plant or explain every mark on a leaf. The walk ends with a short list of questions for the next month, not a ranking of the beds. The courtyard project values a consistent record more than polished photographs or confident guesses.",
+        "source_hash": "8495f880144f0fcd2b67a279aef77b00cdae991de1eb6e101e76a0e11d1c8484",
+        "indexing_version": "v1|chunk=400|overlap=50|embed=qwen3-embedding:0.6b|tokenizer=Qwen/Qwen3-Embedding-0.6B@97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3"
+      },
+      {
+        "note_id": 10,
+        "chunk_index": 0,
+        "tokens": 315,
+        "text": "Lantern festival volunteer desk handbook\n\nThe Lantern festival volunteer desk coordinates a fictional neighbourhood evening event. It is not the Willow equipment loan desk or the Harbor workshop counter. The festival desk uses a purple tablecloth and a large paper map so visitors can identify it without reading a small sign. Before opening the desk, two volunteers walk the route marked on the map and compare its arrows with the signs placed on the ground. If a sign points the wrong way, correct the sign and record the change on the desk copy of the map.\n\nEach shift has a welcome volunteer and a map volunteer. The welcome volunteer greets visitors and asks which activity they are looking for. The map volunteer marks the route on a small handout rather than sending everyone to the nearest busy table. Volunteers can swap roles at handover, but the desk should not be left empty while both go to look for an activity. Unresolved questions go on the handover sheet with a short description of what has already been checked. Do not record a visitor's personal details just to remember a route question.\n\nActivity cards list the table name, the kind of activity and the materials available there. They do not guarantee a free place at the moment someone reads them. When a table pauses, its volunteer brings a pause card to the festival desk. The map volunteer puts that card beside the table name until the table sends an update. Do not erase the activity from the printed map, because visitors may be returning to meet friends there. A temporary pause should stay visibly temporary rather than being mistaken for a permanent relocation.",
+        "source_hash": "df0302bb01eae60e90f4f4728b719c2e3d4a4219f44b1742f1e6714b1db9f162",
+        "indexing_version": "v1|chunk=400|overlap=50|embed=qwen3-embedding:0.6b|tokenizer=Qwen/Qwen3-Embedding-0.6B@97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3"
+      },
+      {
+        "note_id": 10,
+        "chunk_index": 1,
+        "tokens": 362,
+        "text": "desk. The map volunteer puts that card beside the table name until the table sends an update. Do not erase the activity from the printed map, because visitors may be returning to meet friends there. A temporary pause should stay visibly temporary rather than being mistaken for a permanent relocation.\n\nThe lantern display uses reusable holders supplied by the display team. Desk volunteers direct questions about fitting a holder to that team instead of improvising instructions. Visitors may watch the display preparation from behind the marked line. Keep the route between the display and the desk clear so groups can move without blocking the information table. A clear route is more useful than arranging a decorative queue around the desk. If handouts run low, the map volunteer asks the storage volunteer for another bundle rather than leaving the desk to search through boxes.\n\nThe festival keeps a simple tally of questions about routes, paused activities and missing signs. Place one mark in the matching column after the conversation, without trying to capture every sentence. The tally helps the next team improve its signs. It is not an attendance count and must not be reported as the number of unique visitors. A person who asks about two routes may produce two marks. At handover, explain any unusual cluster of marks so the next shift understands whether it came from a missing sign or a temporary activity pause.\n\nLost objects brought to the festival desk go in the covered tray behind the purple tablecloth. Describe the object on the handover sheet using ordinary visible features, but keep it out of public photographs. A person claiming an object should describe it before the tray is opened. Desk volunteers should not announce the full contents of the tray to everyone passing by. The purpose of this local procedure is to avoid accidental mix-ups during the event. It does not establish a general retention period for workshop records or archive intake receipts.",
+        "source_hash": "df0302bb01eae60e90f4f4728b719c2e3d4a4219f44b1742f1e6714b1db9f162",
+        "indexing_version": "v1|chunk=400|overlap=50|embed=qwen3-embedding:0.6b|tokenizer=Qwen/Qwen3-Embedding-0.6B@97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3"
+      },
+      {
+        "note_id": 10,
+        "chunk_index": 2,
+        "tokens": 260,
+        "text": "it before the tray is opened. Desk volunteers should not announce the full contents of the tray to everyone passing by. The purpose of this local procedure is to avoid accidental mix-ups during the event. It does not establish a general retention period for workshop records or archive intake receipts.\n\nWhen a shift ends, count remaining map handouts and leave the count on the handover sheet. Check that pause cards still match the latest messages from activity tables. Return unused activity cards to their envelope so the incoming map volunteer does not mistake them for live updates. The outgoing welcome volunteer briefly explains any unresolved route question. Written notes should be sufficient if the next team arrives late; the desk should not depend on remembering a hurried conversation. Keep the purple tablecloth in place until the final closing walk has returned.\n\nAfter the closing walk, remove arrows and table signs in the reverse order of the opening route. Stack reusable holders separately from printed handouts so they are not crushed in a paper box. The final tally and annotated map go into the event folder for the next planning session. Clean the covered tray and check that any remaining object is listed on the closing sheet. The handbook intentionally describes desk organisation rather than budgets, travel reimbursements or workshop opening hours. Those subjects must not be inferred from this festival's volunteer arrangements.",
+        "source_hash": "df0302bb01eae60e90f4f4728b719c2e3d4a4219f44b1742f1e6714b1db9f162",
+        "indexing_version": "v1|chunk=400|overlap=50|embed=qwen3-embedding:0.6b|tokenizer=Qwen/Qwen3-Embedding-0.6B@97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3"
+      }
+    ]
+  },
+  "warmup": {
+    "model": "qwen3:4b",
+    "created_at": "2026-10-17T16:07:23.8225046Z",
+    "message": {
+      "role": "assistant",
+      "content": "Okay, the user just said \"Reply with Ready.\" Hmm, that's pretty straightforward. They want me to confirm I'm ready to proceed. \n\nLet me think about the context... Since they didn't specify any task or follow-up, this is probably just a test to see if I respond as expected. Maybe they're checking if I'm functional or setting up for a future interaction. \n\nI should keep it simple and precise - no extra fluff since they said \"Ready\" not \"Hello\" or anything. Just the word \"Ready\" as requested. \n\nWait... is there any chance they meant something else? Like \"ready\" as in prepared for a specific task? But no, the phrasing is very direct: \"Reply with Ready.\" So literal interpretation is best here. \n\n*checks previous messages* Oh right, this is the first message so no history to consider. \n\nBetter not overcomplicate it. Just output \"Ready\" exactly as instructed. No smileys, no explanations - they want minimal response. \n\n...Though part of me wants to add \"I'm here to help!\" but no, they said \"Reply with Ready\" so I'll strictly follow. \n\nFinal decision: Send just \"Ready\" with no additional text. Clean and precise.\n</think>\n\nReady."
+    },
+    "done": true,
+    "done_reason": "stop",
+    "total_duration": 23811392600,
+    "load_duration": 19626729500,
+    "prompt_eval_count": 14,
+    "prompt_eval_cached_count": 0,
+    "prompt_eval_duration": 251607000,
+    "eval_count": 263,
+    "eval_duration": 3867906000
+  },
+  "models_after": {
+    "models": [
+      {
+        "name": "qwen3:4b",
+        "model": "qwen3:4b",
+        "modified_at": "2026-10-16T14:45:58.4439302+02:00",
+        "size": 2497293931,
+        "digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen3",
+          "families": [
+            "qwen3"
+          ],
+          "parameter_size": "4.0B",
+          "quantization_level": "Q4_K_M",
+          "context_length": 262144,
+          "embedding_length": 2560,
+          "runner": "ggml"
+        },
+        "capabilities": [
+          "completion",
+          "tools",
+          "thinking"
+        ]
+      },
+      {
+        "name": "qwen3-embedding:0.6b",
+        "model": "qwen3-embedding:0.6b",
+        "modified_at": "2026-10-15T17:50:43.4501175+02:00",
+        "size": 639150858,
+        "digest": "ac6da0dfba84a81fdbfbaf330198c33cd77c4cdfc53e8bc50eb581914a15621d",
+        "details": {
+          "parent_model": "/Users/ollama/.ollama/models/blobs/sha256-06507c7b42688469c4e7298b0a1e16deff06caf291cf0a5b278c308249c3e439",
+          "format": "gguf",
+          "family": "qwen3",
+          "families": [
+            "qwen3"
+          ],
+          "parameter_size": "595.78M",
+          "quantization_level": "Q8_0",
+          "context_length": 32768,
+          "embedding_length": 1024,
+          "runner": "ggml"
+        },
+        "capabilities": [
+          "tools",
+          "thinking",
+          "embedding"
+        ]
+      },
+      {
+        "name": "qwen3:1.7b",
+        "model": "qwen3:1.7b",
+        "modified_at": "2026-10-12T12:45:57.3817045+02:00",
+        "size": 1359293444,
+        "digest": "8f68893c685c3ddff2aa3fffce2aa60a30bb2da65ca488b61fff134a4d1730e7",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen3",
+          "families": [
+            "qwen3"
+          ],
+          "parameter_size": "2.0B",
+          "quantization_level": "Q4_K_M",
+          "context_length": 40960,
+          "embedding_length": 2048,
+          "runner": "ggml"
+        },
+        "capabilities": [
+          "completion",
+          "tools",
+          "thinking"
+        ]
+      }
+    ]
+  },
+  "cleanup": {
+    "containers_remaining": "",
+    "volumes_remaining": ""
+  },
+  "finished_at": "2026-10-17T16:11:20.554281+00:00"
+}
