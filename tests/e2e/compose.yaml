@@ -41,6 +41,7 @@ services:
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_USERNAME: e2e
       SPRING_RABBITMQ_PASSWORD: e2e-only
+      MNEMO_RESET_API_KEY: e2e-reset-key-that-is-long-enough-for-test
       SPRING_AI_OLLAMA_BASE_URL: http://ollama:11434
       LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
       SPRING_MAIN_BANNER_MODE: "off"

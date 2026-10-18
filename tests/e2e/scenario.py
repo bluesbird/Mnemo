@@ -7,9 +7,11 @@ import urllib.error
 import urllib.request
 
 MS1 = "http://ms1:8080/api/v1/notes"
+ADMIN_RESET = "http://ms1:8080/api/v1/admin/reset-database"
 MS2 = "http://ms2:8000/api/v1"
 BROKER = "http://rabbitmq:15672/api/queues/%2F/"
 AUTH = "Basic " + base64.b64encode(b"e2e:e2e-only").decode()
+RESET_KEY = "e2e-reset-key-that-is-long-enough-for-test"
 NO_ANSWER = "I don't know based on the provided notes."
 
 
@@ -131,9 +133,43 @@ def main():
     eventually("delete event acknowledged, no dead letters", broker_drained)
     # Check again after the consumer has acknowledged deletion.
     assert_removed()
+
     print("PASS: full event-driven lifecycle (no reconcile/rebuild calls)", flush=True)
     from proxy_smoke import run
     run(request, eventually)
+
+    request(ADMIN_RESET, "POST", expected=401)
+    request(ADMIN_RESET, "POST", headers={"X-Mnemo-Reset-Key": "wrong"}, expected=401)
+    reset = request(
+        ADMIN_RESET,
+        "POST",
+        headers={"X-Mnemo-Reset-Key": RESET_KEY},
+        expected=202,
+    )
+    assert reset == {
+        "status": "reset",
+        "restoredNoteCount": 10,
+        "indexRebuild": "queued",
+    }, reset
+
+    def starter_data_restored():
+        restored = request(MS1)
+        assert len(restored) == 10, restored
+        assert any(note["title"] == "Attention Is All You Need" for note in restored), restored
+        return True
+
+    eventually("authenticated reset restores the starter notes", starter_data_restored)
+    eventually("reset rebuild event acknowledged without dead letters", broker_drained)
+
+    def reset_rebuild_indexed():
+        result = request(MS2 + "/index/reconcile", "POST")
+        assert result["total_ms1_notes"] == 10, result
+        assert result["deleted_note_ids"] == [], result
+        assert len(result["skipped_note_ids"]) == 10, result
+        return True
+
+    eventually("reset rebuild event refreshes index", reset_rebuild_indexed)
+    print("PASS: authenticated reset and rebuild trigger", flush=True)
 
 
 if __name__ == "__main__":

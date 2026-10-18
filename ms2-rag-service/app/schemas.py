@@ -24,7 +24,7 @@ class NoteEvent(BaseModel):
     event_id: str
     event_type: str
     occurred_at: str
-    note_id: int
+    note_id: int | None = None
 
 
 class NoteSyncResult(BaseModel):

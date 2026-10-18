@@ -49,6 +49,7 @@ services:
       SPRING_DATASOURCE_USERNAME: bluesbird
       SPRING_DATASOURCE_PASSWORD: password
       SPRING_RABBITMQ_HOST: rabbitmq
+      MNEMO_RESET_API_KEY: ${MNEMO_RESET_API_KEY:-local-dev-reset-key-only-do-not-use-in-production}
       SPRING_AI_OLLAMA_BASE_URL: http://host.docker.internal:11434
       LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
       SPRING_MAIN_BANNER_MODE: "off"
@@ -91,6 +92,24 @@ services:
       - services
     restart: unless-stopped
 
+  starter-data:
+    image: python:3.12-slim
+    command: ["python", "/opt/mnemo/seed.py"]
+    restart: "no"
+    environment:
+      MS1_BASE_URL: http://ms1-knowledge-service:8080
+      STARTER_NOTES_FILE: /opt/mnemo/starter-notes.json
+    volumes:
+      - ./deploy/seed.py:/opt/mnemo/seed.py:ro
+      - ./ms1-knowledge-service/src/main/resources/starter-notes.json:/opt/mnemo/starter-notes.json:ro
+    depends_on:
+      ms1-knowledge-service:
+        condition: service_started
+      ms2-rag-service:
+        condition: service_healthy
+    networks:
+      - services
+
   ui:
     build:
       context: ./ui
@@ -106,6 +125,8 @@ services:
         condition: service_started
       ms2-rag-service:
         condition: service_started
+      starter-data:
+        condition: service_completed_successfully
     networks:
       - services
     restart: unless-stopped

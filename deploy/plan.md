@@ -22,20 +22,21 @@ No login, users, read-only mode or deployment-specific backend mode.
    minute globally. Keep configuration small; no custom limiting service.
 5. [x] **Starter data:** load ten fictional notes with varied topics and lengths on
    an empty database only. Normal deployment must not overwrite existing notes.
-   One note is "Attention Is All You Need"; the rest include private philosophical
-   reflections and other fictional personal notes.
-6. **Deploy and verify:** confirm server permissions/firewall, deploy, then check
+   One note is "Attention Is All You Need"; the rest are humorous fictional notes.
+6. [x] **Authenticated reset:** add an admin endpoint that clears notes/tags,
+   restores the same ten starter notes, and best-effort triggers an MS2 full
+   rebuild event. If MS2/RabbitMQ is unavailable, data reset still succeeds.
+7. **Deploy and verify:** confirm server permissions/firewall, deploy, then check
    HTTPS, all user actions, limits, private ports and persistence after restart.
    Document the commands needed to start, update and troubleshoot the deployment.
 
 ## Boundaries
 
 - Add only necessary configuration, small helpers and focused regression tests.
-- No custom deployment framework, new authentication system or unrelated refactoring.
+- No custom deployment framework, general login system or unrelated refactoring.
 - Public index operations do not need a key injected by the proxy.
-- **Later, separate phase:** add an authenticated **reset database** endpoint that
-  clears application data, restores the ten starter notes and rebuilds the index.
-  Do not implement reset or its authentication in phase 18.
+- The reset endpoint must stay authenticated by a server-side secret and is not
+  exposed as a public UI action.
 
 ## Done
 

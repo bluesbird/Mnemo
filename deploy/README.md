@@ -38,13 +38,28 @@ embedding model. If keeping both loaded exceeds the VPS memory budget, lower the
 loaded-model limit and expect extra model reload latency. MS1 and MS2 chat calls
 also cap context at 4,096 tokens.
 
-Create a private deployment environment file and set both passwords to strong,
-unique values. Compose refuses to run while either value is empty:
+Create a private deployment environment file and set both passwords plus the
+reset key to strong, unique values. Compose refuses to run while any value is
+empty:
 
 ```sh
 cp deploy/.env.example deploy/.env
 ${EDITOR:-vi} deploy/.env
 ```
+
+The reset key stays server-side only. Never inject it through Nginx/Caddy or
+the browser. To run the reset from a trusted shell on the host:
+
+```sh
+MNEMO_RESET_API_KEY="$(sed -n 's/^MNEMO_RESET_API_KEY=//p' deploy/.env)"
+curl --fail-with-body -X POST http://127.0.0.1:8081/api/v1/admin/reset-database \
+  -H "X-Mnemo-Reset-Key: $MNEMO_RESET_API_KEY"
+```
+
+The endpoint returns `202 Accepted` after replacing notes/tags and requesting an
+MS2 full rebuild event. Event publication is best effort: if RabbitMQ/MS2 is
+currently unavailable, the reset still succeeds and an operator should run index
+rebuild/reconcile once dependencies are healthy.
 
 Start or update the deployment from the repository root:
 
@@ -58,9 +73,10 @@ stop/start and image updates preserve them. Do not use `down --volumes` unless
 deleting all stored application/index data and TLS state is intended. Keep
 `deploy/.env` private and out of version control.
 
-On first startup, the `starter-data` job checks MS1's note list and creates the
-ten fictional notes only if it is empty. Existing notes are left untouched. The
-UI waits for this one-shot job to complete before accepting public requests;
+On first startup, the `starter-data` job reads the same canonical note catalog
+used by reset and creates the ten fictional notes only if MS1's note list is
+empty. Existing notes are left untouched. The UI waits for this one-shot job to
+complete before accepting public requests;
 inspect its result with:
 
 ```sh

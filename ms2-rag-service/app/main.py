@@ -21,7 +21,8 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
     consumer: NoteEventConsumer | None = None
     if settings.rabbitmq_enabled:
-        consumer = NoteEventConsumer(settings, get_indexing_service().sync_note)
+        indexing_service = get_indexing_service()
+        consumer = NoteEventConsumer(settings, indexing_service.sync_note, indexing_service.rebuild_index)
         consumer.start()
     yield
     if consumer is not None:

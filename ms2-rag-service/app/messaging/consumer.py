@@ -12,7 +12,9 @@ from app.schemas import NoteEvent
 
 logger = logging.getLogger(__name__)
 
-SUPPORTED_EVENT_TYPES = {"NoteCreated", "NoteUpdated", "NoteDeleted"}
+NOTE_EVENT_TYPES = {"NoteCreated", "NoteUpdated", "NoteDeleted"}
+REBUILD_EVENT_TYPE = "IndexRebuildRequested"
+SUPPORTED_EVENT_TYPES = NOTE_EVENT_TYPES | {REBUILD_EVENT_TYPE}
 ROUTING_KEY_PATTERN = "note.*"
 MAX_RECONNECT_DELAY_SECONDS = 30.0
 
@@ -24,9 +26,15 @@ class NoteEventConsumer:
     makes duplicate and out-of-order deliveries harmless.
     """
 
-    def __init__(self, settings: Settings, handler: Callable[[int], object]) -> None:
+    def __init__(
+        self,
+        settings: Settings,
+        note_handler: Callable[[int], object],
+        rebuild_handler: Callable[[], object],
+    ) -> None:
         self._settings = settings
-        self._handler = handler
+        self._note_handler = note_handler
+        self._rebuild_handler = rebuild_handler
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
         self._connection: pika.BlockingConnection | None = None
@@ -109,6 +117,11 @@ class NoteEventConsumer:
             exchange=settings.events_exchange,
             routing_key=ROUTING_KEY_PATTERN,
         )
+        channel.queue_bind(
+            queue=settings.events_queue,
+            exchange=settings.events_exchange,
+            routing_key="index.rebuild",
+        )
 
     def _on_message(
         self,
@@ -125,7 +138,12 @@ class NoteEventConsumer:
         max_attempts = max(1, self._settings.events_max_attempts)
         for attempt in range(1, max_attempts + 1):
             try:
-                self._handler(event.note_id)
+                if event.event_type == REBUILD_EVENT_TYPE:
+                    self._rebuild_handler()
+                elif event.note_id is not None:
+                    self._note_handler(event.note_id)
+                else:
+                    raise ValueError(f"{event.event_type} event is missing its note_id")
             except Exception as exc:  # noqa: BLE001
                 logger.warning(
                     "Handling %s for note %s failed (attempt %s/%s): %s",
@@ -161,5 +179,11 @@ class NoteEventConsumer:
             return None
         if event.event_type not in SUPPORTED_EVENT_TYPES:
             logger.error("Unsupported event type '%s'; dead-lettering", event.event_type)
+            return None
+        if event.event_type == REBUILD_EVENT_TYPE and event.note_id is not None:
+            logger.error("Index rebuild event must not include note_id; dead-lettering")
+            return None
+        if event.event_type in NOTE_EVENT_TYPES and event.note_id is None:
+            logger.error("Note event '%s' is missing note_id; dead-lettering", event.event_type)
             return None
         return event

@@ -46,6 +46,21 @@ Example requests: `ms2-rag-service/requests.http`.
 
 MS2 options (env vars, prefix `MS2_`): `RABBITMQ_ENABLED=false` runs without the broker, `LOG_FORMAT=json` enables JSON logs, `RETRIEVAL_MIN_SCORE` sets the relevance cut-off.
 
+The root Compose stack seeds the ten starter notes on an empty database. You can
+also trigger an authenticated reset that replaces notes/tags with starter data
+and sends a best-effort rebuild event to MS2:
+
+```powershell
+$resetKey = $env:MNEMO_RESET_API_KEY
+if (-not $resetKey) { $resetKey = "local-dev-reset-key-only-do-not-use-in-production" }
+Invoke-RestMethod -Method Post -Uri http://localhost:8080/api/v1/admin/reset-database `
+  -Headers @{ "X-Mnemo-Reset-Key" = $resetKey }
+```
+
+The endpoint returns `202 Accepted` when reset completes and rebuild was requested.
+If RabbitMQ/MS2 is unavailable at that moment, trigger reconcile/rebuild manually
+after services recover.
+
 ## Tests
 
 - MS1: `cd ms1-knowledge-service; .\mvnw.cmd test`

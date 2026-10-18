@@ -39,6 +39,7 @@ services:
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_USERNAME: ${RABBITMQ_USER:?Set RABBITMQ_USER in deploy/.env}
       SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:?Set RABBITMQ_PASSWORD in deploy/.env}
+      MNEMO_RESET_API_KEY: ${MNEMO_RESET_API_KEY:?Set MNEMO_RESET_API_KEY in deploy/.env}
       SPRING_AI_OLLAMA_BASE_URL: http://host.docker.internal:11434
       SPRING_AI_OLLAMA_CHAT_OPTIONS_NUM_CTX: 4096
       SPRING_AI_OLLAMA_CHAT_OPTIONS_NUM_PREDICT: 256
@@ -85,8 +86,10 @@ services:
     restart: "no"
     environment:
       MS1_BASE_URL: http://ms1-knowledge-service:8080
+      STARTER_NOTES_FILE: /opt/mnemo/starter-notes.json
     volumes:
       - ./seed.py:/opt/mnemo/seed.py:ro
+      - ../ms1-knowledge-service/src/main/resources/starter-notes.json:/opt/mnemo/starter-notes.json:ro
     depends_on:
       ms1-knowledge-service:
         condition: service_started
