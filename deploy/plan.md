@@ -15,7 +15,7 @@ No login, users, read-only mode or deployment-specific backend mode.
 2. [x] **Deployment configuration:** use a separate Compose file, persistent volumes,
    external database/broker credentials, and private backend ports. Keep local
    development working as before.
-3. **HTTPS and routing:** Caddy handles Let's Encrypt certificates; the existing
+3. [x] **HTTPS and routing:** Caddy handles Let's Encrypt certificates; the existing
    UI Nginx serves frontend files and proxies the supported API routes.
 4. **Resource limits:** bound chat/enrichment traffic and concurrency, request
    sizes and Ollama resources. Reconcile and rebuild each allow one request per

@@ -91,8 +91,25 @@ services:
         condition: service_started
     restart: unless-stopped
 
+  caddy:
+    image: caddy:2
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      ui:
+        condition: service_started
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   rabbitmq_data:
   ms2_data:
   ms2_hf_cache:
+  caddy_data:
+  caddy_config:

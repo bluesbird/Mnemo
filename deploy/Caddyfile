@@ -1,0 +1,4 @@
+mnemo-hub.duckdns.org {
+	encode zstd gzip
+	reverse_proxy ui:80
+}
