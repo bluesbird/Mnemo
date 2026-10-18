@@ -58,6 +58,15 @@ stop/start and image updates preserve them. Do not use `down --volumes` unless
 deleting all stored application/index data and TLS state is intended. Keep
 `deploy/.env` private and out of version control.
 
+On first startup, the `starter-data` job checks MS1's note list and creates the
+ten fictional notes only if it is empty. Existing notes are left untouched. The
+UI waits for this one-shot job to complete before accepting public requests;
+inspect its result with:
+
+```sh
+docker compose --env-file deploy/.env -f deploy/compose.yaml logs starter-data
+```
+
 Inspect service status and logs with:
 
 ```sh

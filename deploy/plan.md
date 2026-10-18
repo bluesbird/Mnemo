@@ -20,8 +20,10 @@ No login, users, read-only mode or deployment-specific backend mode.
 4. [x] **Resource limits:** bound chat/enrichment traffic and concurrency, request
    sizes and Ollama resources. Reconcile and rebuild each allow one request per
    minute globally. Keep configuration small; no custom limiting service.
-5. **Starter data:** load ten fictional notes with varied topics and lengths on
+5. [x] **Starter data:** load ten fictional notes with varied topics and lengths on
    an empty database only. Normal deployment must not overwrite existing notes.
+   One note is "Attention Is All You Need"; the rest include private philosophical
+   reflections and other fictional personal notes.
 6. **Deploy and verify:** confirm server permissions/firewall, deploy, then check
    HTTPS, all user actions, limits, private ports and persistence after restart.
    Document the commands needed to start, update and troubleshoot the deployment.

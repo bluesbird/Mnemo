@@ -79,6 +79,20 @@ services:
         condition: service_started
     restart: unless-stopped
 
+  starter-data:
+    image: python:3.12-slim
+    command: ["python", "/opt/mnemo/seed.py"]
+    restart: "no"
+    environment:
+      MS1_BASE_URL: http://ms1-knowledge-service:8080
+    volumes:
+      - ./seed.py:/opt/mnemo/seed.py:ro
+    depends_on:
+      ms1-knowledge-service:
+        condition: service_started
+      ms2-rag-service:
+        condition: service_healthy
+
   ui:
     build:
       context: ../ui
@@ -93,10 +107,10 @@ services:
       default:
       proxy:
     depends_on:
-      ms1-knowledge-service:
-        condition: service_started
       ms2-rag-service:
         condition: service_started
+      starter-data:
+        condition: service_completed_successfully
     restart: unless-stopped
 
   caddy:
