@@ -1,0 +1,98 @@
+services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER in deploy/.env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in deploy/.env}
+      POSTGRES_DB: ${POSTGRES_DB:-mnemo}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:?Set RABBITMQ_USER in deploy/.env}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?Set RABBITMQ_PASSWORD in deploy/.env}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+  ms1-knowledge-service:
+    build:
+      context: ../ms1-knowledge-service
+    image: mnemo-ms1:deployment
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-mnemo}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:?Set POSTGRES_USER in deploy/.env}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in deploy/.env}
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_USERNAME: ${RABBITMQ_USER:?Set RABBITMQ_USER in deploy/.env}
+      SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:?Set RABBITMQ_PASSWORD in deploy/.env}
+      SPRING_AI_OLLAMA_BASE_URL: http://host.docker.internal:11434
+      LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
+      SPRING_MAIN_BANNER_MODE: "off"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
+  ms2-rag-service:
+    build:
+      context: ../ms2-rag-service
+    image: mnemo-ms2:deployment
+    environment:
+      MS2_APP_ENV: production
+      MS2_MS1_BASE_URL: http://ms1-knowledge-service:8080
+      MS2_OLLAMA_BASE_URL: http://host.docker.internal:11434
+      MS2_RABBITMQ_HOST: rabbitmq
+      MS2_RABBITMQ_USERNAME: ${RABBITMQ_USER:?Set RABBITMQ_USER in deploy/.env}
+      MS2_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:?Set RABBITMQ_PASSWORD in deploy/.env}
+      MS2_LOG_FORMAT: json
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ms2_data:/app/data
+      - ms2_hf_cache:/app/.cache
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      ms1-knowledge-service:
+        condition: service_started
+    restart: unless-stopped
+
+  ui:
+    build:
+      context: ../ui
+    image: mnemo-ui:deployment
+    ports:
+      - "127.0.0.1:8081:80"
+    environment:
+      UI_MS1_UPSTREAM: http://ms1-knowledge-service:8080
+      UI_MS2_UPSTREAM: http://ms2-rag-service:8000
+    depends_on:
+      ms1-knowledge-service:
+        condition: service_started
+      ms2-rag-service:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
+  ms2_data:
+  ms2_hf_cache:

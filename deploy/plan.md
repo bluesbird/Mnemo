@@ -12,7 +12,7 @@ No login, users, read-only mode or deployment-specific backend mode.
 1. [x] **Public index operations:** move reconcile/rebuild from `/api/v1/admin/index/*`
    to `/api/v1/index/*`. Remove their obsolete admin-key checks and configuration;
    update callers and tests. No compatibility aliases.
-2. **Deployment configuration:** use a separate Compose file, persistent volumes,
+2. [x] **Deployment configuration:** use a separate Compose file, persistent volumes,
    external database/broker credentials, and private backend ports. Keep local
    development working as before.
 3. **HTTPS and routing:** Caddy handles Let's Encrypt certificates; the existing

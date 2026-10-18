@@ -40,3 +40,6 @@ __pycache__/
 *.pyc
 .pytest_cache/
 tests/e2e/artifacts/
+
+# Deployment credentials
+/deploy/.env
