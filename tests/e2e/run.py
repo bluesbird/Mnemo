@@ -67,6 +67,7 @@ def verify_ui_configuration(command, env):
         "UI_MS1_UPSTREAM=http://ms1:8080;include /etc/passwd",
         "UI_MS1_UPSTREAM=http://ms1:8080/api",
         "UI_MS2_UPSTREAM=http://ms2:8000\nhttp://ms2:8000",
+        "UI_RATE_LIMITS=enabled",
     ):
         result = subprocess.run(
             command + ["run", "--rm", "--no-deps", "-T", "-e", setting, "ui", "true"],

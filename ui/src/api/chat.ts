@@ -9,6 +9,9 @@ const CHAT_API_BASE_URL = (
 ).replace(/\/$/, "");
 
 function describeFailure(status: number, action: string): string {
+  if (status === 429) {
+    return `${action} was rate-limited. Please wait a moment and try again.`;
+  }
   if (status === 422) return "Please enter a shorter, valid question.";
   if (status === 502 || status === 503 || status === 504) {
     return `${action} failed: a dependent service (notes or Ollama) is unavailable. Try again shortly.`;

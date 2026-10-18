@@ -2,6 +2,7 @@
 
 import json
 import re
+from concurrent.futures import ThreadPoolExecutor
 import urllib.error
 import urllib.request
 
@@ -38,6 +39,7 @@ def check_proxy():
     cases = [
         ("/api", "/api", []),
         ("/api/v1/notes?q=a%20b&tag=x", "/api/v1/notes?q=a%20b&tag=x", []),
+        ("/api/v1/notes/1/ai-enrich", "/api/v1/notes/1/ai-enrich", []),
         ("/api/v1/index/rebuild", "/api/v1/index/rebuild", []),
         ("/rag-api", "/", []),
         ("/rag-api/api/v1/chat/query", "/api/v1/chat/query", []),
@@ -54,7 +56,10 @@ def check_proxy():
         ("/rag-api/api/v1/Admin/index/rebuild", "/api/v1/Admin/index/rebuild", []),
     ]
     for path, forwarded, keys in cases:
-        for supplied in (None, "browser-supplied"):
+        supplies = (None,) if (
+            path.startswith("/rag-api/api/v1/index/")
+        ) else (None, "browser-supplied")
+        for supplied in supplies:
             headers = {"Content-Type": "application/json"}
             if supplied:
                 headers["X-API-Key"] = supplied
@@ -76,6 +81,51 @@ def check_proxy():
         assert result == status and json.loads(body)["admin_key"] == [], (result, body)
     assert fetch("http://ui-probe/rag-api/api/v1/chat/query?status=204", "DELETE")[0] == 204
     print("PASS: proxy paths, query strings, methods, bodies, statuses and API-key header isolation",
+          flush=True)
+
+
+def check_rate_limits():
+    chat = "http://ui-probe/rag-api/api/v1/chat/query"
+    payload = b'{"question":"test"}'
+
+    oversized = fetch(
+        chat,
+        "POST",
+        b"x" * (256 * 1024 + 1),
+        {"Content-Type": "application/json"},
+    )[0]
+    assert oversized == 413, oversized
+
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        concurrent = list(pool.map(
+            lambda _: fetch(chat + "?hold=1", "POST", payload,
+                            {"Content-Type": "application/json"})[0],
+            range(3),
+        ))
+    assert concurrent.count(200) == 2 and concurrent.count(429) == 1, concurrent
+
+    chat_statuses = [
+        fetch(chat, "POST", payload, {"Content-Type": "application/json"})[0]
+        for _ in range(30)
+    ]
+    assert 200 in chat_statuses and 429 in chat_statuses, chat_statuses
+
+    enrich = "http://ui-probe/api/v1/notes/1/ai-enrich"
+    enrich_statuses = [
+        fetch(enrich, "POST", b"", {})[0]
+        for _ in range(12)
+    ]
+    assert 200 in enrich_statuses and 429 in enrich_statuses, enrich_statuses
+
+    for operation in ("reconcile", "rebuild"):
+        status = fetch(
+            f"http://ui-probe/rag-api/api/v1/index/{operation}",
+            "POST",
+            b"",
+            {},
+        )[0]
+        assert status == 429, (operation, status)
+    print("PASS: per-IP rates, global model concurrency/index rates and request-size cap",
           flush=True)
 
 
@@ -117,4 +167,5 @@ def run(request, eventually):
     eventually("UI static readiness", check_static)
     eventually("UI probe readiness", lambda: fetch("http://ui-probe/api")[0] == 200)
     check_proxy()
+    check_rate_limits()
     check_real_backends(request, eventually)

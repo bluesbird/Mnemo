@@ -54,6 +54,7 @@ class OllamaClient:
             "options": {
                 "temperature": self._settings.chat_temperature,
                 "num_ctx": self._settings.chat_num_ctx,
+                "num_predict": self._settings.chat_num_predict,
             },
         }
         response = self._client.post(f"{self._base_url}/api/chat", json=payload)

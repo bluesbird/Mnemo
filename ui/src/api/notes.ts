@@ -12,6 +12,9 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   });
 
   if (!response.ok) {
+    if (response.status === 429) {
+      throw new Error("Too many requests. Please wait a moment and try again.");
+    }
     const message = await response.text();
     throw new Error(message || `Request failed (${response.status})`);
   }

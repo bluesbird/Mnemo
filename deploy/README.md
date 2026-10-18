@@ -12,6 +12,32 @@ address and allow inbound TCP ports 80/443 through the host firewall and any
 provider firewall. Caddy cannot issue certificates until the domain resolves
 to that server and those ports are reachable.
 
+## Resource limits
+
+Deployment Nginx limits each client IP to 30 chat requests/minute (burst 20)
+and 10 enrichment requests/minute (burst 5). It allows at most two concurrent
+model-backed HTTP operations across all clients. Reconcile and rebuild are each
+limited globally to one request/minute. Requests larger than 256 KiB are rejected;
+chat questions are limited to 4,000 characters and generated answers to 256 tokens.
+These deployment-only limits are disabled in the root local-development Compose
+stack. Caddy replaces the forwarded client-IP header, and Nginx trusts it only
+from Caddy's fixed address on the private proxy network.
+
+Ollama runs on the VPS host and is not managed by this Compose project. Configure
+its service with bounded parallelism and queueing; for systemd, for example:
+
+```ini
+[Service]
+Environment="OLLAMA_NUM_PARALLEL=1"
+Environment="OLLAMA_MAX_LOADED_MODELS=2"
+Environment="OLLAMA_MAX_QUEUE=16"
+```
+
+Apply the environment to the Ollama service and restart it. The deployment uses two models: the chat model (shared by MS1 and MS2) and MS2's
+embedding model. If keeping both loaded exceeds the VPS memory budget, lower the
+loaded-model limit and expect extra model reload latency. MS1 and MS2 chat calls
+also cap context at 4,096 tokens.
+
 Create a private deployment environment file and set both passwords to strong,
 unique values. Compose refuses to run while either value is empty:
 

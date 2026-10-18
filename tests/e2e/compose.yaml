@@ -99,6 +99,7 @@ services:
     environment:
       UI_MS1_UPSTREAM: http://proxy-probe:8080
       UI_MS2_UPSTREAM: http://proxy-probe:8080
+      UI_RATE_LIMITS: "on"
     depends_on:
       proxy-probe:
         condition: service_started

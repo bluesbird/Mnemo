@@ -17,7 +17,7 @@ No login, users, read-only mode or deployment-specific backend mode.
    development working as before.
 3. [x] **HTTPS and routing:** Caddy handles Let's Encrypt certificates; the existing
    UI Nginx serves frontend files and proxies the supported API routes.
-4. **Resource limits:** bound chat/enrichment traffic and concurrency, request
+4. [x] **Resource limits:** bound chat/enrichment traffic and concurrency, request
    sizes and Ollama resources. Reconcile and rebuild each allow one request per
    minute globally. Keep configuration small; no custom limiting service.
 5. **Starter data:** load ten fictional notes with varied topics and lengths on

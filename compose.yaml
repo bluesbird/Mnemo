@@ -100,6 +100,7 @@ services:
     environment:
       UI_MS1_UPSTREAM: http://ms1-knowledge-service:8080
       UI_MS2_UPSTREAM: http://ms2-rag-service:8000
+      UI_RATE_LIMITS: "off"
     depends_on:
       ms1-knowledge-service:
         condition: service_started

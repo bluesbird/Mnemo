@@ -39,6 +39,11 @@ describe("chat api", () => {
     );
   });
 
+  it("explains rate-limited requests", async () => {
+    mockFetch({ ok: false, status: 429 });
+    await expect(reconcileIndex()).rejects.toThrow(/rate-limited/);
+  });
+
   it("reports an unreachable service", async () => {
     mockFetch(new TypeError("Failed to fetch"));
     await expect(queryChat({ question: "x" })).rejects.toThrow(

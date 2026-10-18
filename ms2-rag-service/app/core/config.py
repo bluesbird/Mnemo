@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     embedding_model: str = "qwen3-embedding:0.6b"
     chat_model: str = "qwen3:4b"
     chat_num_ctx: int = 4096
+    chat_num_predict: int = 256
     chat_temperature: float = 0.1
     chat_think: bool = False
     query_instruction_prefix: str = (
