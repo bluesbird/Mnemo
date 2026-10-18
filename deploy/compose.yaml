@@ -109,6 +109,8 @@ services:
     networks:
       default:
       proxy:
+        aliases:
+          - ui
     depends_on:
       ms2-rag-service:
         condition: service_started
