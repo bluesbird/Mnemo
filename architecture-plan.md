@@ -123,7 +123,7 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
 
 Phase numbers are retained for reference; use the order below for the remaining work.
 
-- **Phase 16 — RAG evaluation:** [ ] Small real-model evaluation set with expected source references and unanswerable questions, separate from deterministic CI E2E. First real-model run and provisional assistant review saved in [evaluation/results.md](evaluation/results.md); project-author acceptance remains pending. Scope and procedure: [evaluation-plan.md](evaluation-plan.md).
+- **Phase 16 — RAG evaluation:** [x] Small real-model sanity check completed: 10 fixed notes and 10 questions, with documented scoring and limitations in [evaluation/results.md](evaluation/results.md). Scores are assistant-reviewed, not independently human-validated. Scope and procedure: [evaluation-plan.md](evaluation-plan.md).
 - **Phase 18 — Public deployment safeguards:** [ ] Required before public hosting: access control, HTTPS, production secret management, and restricted exposure of backend/infrastructure ports. Keep authentication deployment-focused rather than adding account management to the app. Current deployment remains local/trusted only.
 - **Phase 15 — Release polish:** [ ] Keep startup instructions and model prerequisites accurate throughout development; finalize screenshots, architecture/limitations documentation, and a clean-start walkthrough after evaluation and any intended deployment safeguards are finished. Public hosting is not required for a repository-only release.
 
