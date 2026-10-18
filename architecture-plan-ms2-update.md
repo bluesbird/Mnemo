@@ -70,11 +70,11 @@ No LangChain, separate chunk database, or sparse retrieval in V1.
 
 ## API
 
-- `POST /api/v1/admin/index/reconcile` — compare MS1 notes and ChromaDB; index missing or changed notes and remove deleted notes.
-- `POST /api/v1/admin/index/rebuild` — rebuild the entire vector index.
+- `POST /api/v1/index/reconcile` — compare MS1 notes and ChromaDB; index missing or changed notes and remove deleted notes.
+- `POST /api/v1/index/rebuild` — rebuild the entire vector index.
 - `POST /api/v1/chat/query` — retrieve relevant chunks, generate an answer, and return source references.
 - `GET /api/v1/health` — health check.
-- Admin endpoints are protected in V1 by a static API key sent in an `X-API-Key` header and read from an environment variable (never committed). Chat and health endpoints stay open.
+- Index operations, chat, and health are public endpoints.
 
 ## RAG Pipeline
 
@@ -102,7 +102,7 @@ No LangChain, separate chunk database, or sparse retrieval in V1.
 1. [x] Set up Python project, FastAPI, and configuration.
 2. [x] Integrate Ollama embeddings and ChromaDB.
 3. [x] Implement chunking and indexing for a small set of notes.
-4. [x] Implement admin reconcile/rebuild and note-fetch contracts for manual/scheduled sync.
+4. [x] Implement public reconcile/rebuild and note-fetch contracts for manual/scheduled sync.
 5. [x] Implement semantic retrieval and RAG answers with source references.
 6. [x] Integrate RabbitMQ events from MS1 for incremental updates.
    - Exchange `notes.events` (topic), routing keys `note.created|updated|deleted`; MS2 queue `ms2.note-events` with DLX `notes.events.dlx` and DLQ `ms2.note-events.dlq`.
@@ -114,11 +114,11 @@ No LangChain, separate chunk database, or sparse retrieval in V1.
    - pytest suite in `ms2-rag-service/tests` (chunker, sync/reconcile/rebuild, threshold, API errors).
 8. [x] Containerize MS2 and integrate it into Docker Compose.
    - Non-root image with healthcheck; `docker compose up -d --build ms2-rag-service`. Chroma data and the HF tokenizer cache live in named volumes.
-   - Ollama is expected on the host (`host.docker.internal:11434`); admin key via `MS2_ADMIN_API_KEY` (default `dev-admin-key`, local only).
+   - Ollama is expected on the host (`host.docker.internal:11434`).
 9. [x] Connect the frontend chatbot to MS2.
    - UI now sends chat queries to `POST /api/v1/chat/query` via Vite proxy (`/rag-api` rewrite).
    - UI supports source-note navigation without clearing the current chat; explicit reset is handled by a "Clear chat" action. The conversation is persisted in `sessionStorage`, and the empty state shows example questions derived from the notes (two most recent, one random).
-   - UI exposes manual reconcile/rebuild (confirm on rebuild) through MS2 admin endpoints; the Vite dev proxy injects `X-API-Key` (`MS2_ADMIN_API_KEY`, default `dev-admin-key`), so the key is never bundled into the browser.
+   - UI exposes manual reconcile/rebuild (confirm on rebuild) through MS2 public index endpoints.
 
 ## Deferred
 

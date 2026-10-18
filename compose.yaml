@@ -72,8 +72,6 @@ services:
     ports:
       - "8000:8000"
     environment:
-      # Local development values only; override via environment or an untracked .env file.
-      MS2_ADMIN_API_KEY: ${MS2_ADMIN_API_KEY:-dev-admin-key}
       MS2_MS1_BASE_URL: http://ms1-knowledge-service:8080
       MS2_OLLAMA_BASE_URL: http://host.docker.internal:11434
       MS2_RABBITMQ_HOST: rabbitmq
@@ -102,7 +100,6 @@ services:
     environment:
       UI_MS1_UPSTREAM: http://ms1-knowledge-service:8080
       UI_MS2_UPSTREAM: http://ms2-rag-service:8000
-      MS2_ADMIN_API_KEY: ${MS2_ADMIN_API_KEY:-dev-admin-key}
     depends_on:
       ms1-knowledge-service:
         condition: service_started

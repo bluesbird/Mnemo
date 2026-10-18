@@ -17,8 +17,6 @@ class Settings(BaseSettings):
     ms1_base_url: str = "http://localhost:8080"
     ms1_timeout_seconds: float = 10.0
 
-    admin_api_key: str | None = None
-
     ollama_base_url: str = "http://localhost:11434"
     embedding_model: str = "qwen3-embedding:0.6b"
     chat_model: str = "qwen3:4b"

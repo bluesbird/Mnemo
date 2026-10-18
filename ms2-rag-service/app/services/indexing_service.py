@@ -25,7 +25,7 @@ class IndexingService:
         self._ollama_client = ollama_client
         self._chunker = chunker
         self._store = store
-        # Serializes index writes between the event consumer thread and admin endpoints.
+        # Serializes index writes between the event consumer thread and API operations.
         self._index_lock = threading.Lock()
 
     def sync_note(self, note_id: int) -> NoteSyncResult:

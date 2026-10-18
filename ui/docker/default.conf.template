@@ -1,14 +1,3 @@
-# Both the original and normalized path must target admin. Encoded/dot-segment
-# aliases must not turn a browser-supplied header into privileged access.
-map $request_uri $literal_rag_admin {
-    default 0;
-    ~^/rag-api/api/v1/admin/ 1;
-}
-map "$literal_rag_admin:$uri" $rag_admin_key {
-    default "";
-    ~^1:/rag-api/api/v1/admin/ "${MS2_ADMIN_API_KEY}";
-}
-
 server {
     listen 80;
     server_name _;
@@ -35,7 +24,7 @@ server {
     }
     location /rag-api/ {
         proxy_pass ${UI_MS2_UPSTREAM}/;
-        proxy_set_header X-API-Key $rag_admin_key;
+        proxy_set_header X-API-Key "";
         proxy_set_header Connection "";
     }
 

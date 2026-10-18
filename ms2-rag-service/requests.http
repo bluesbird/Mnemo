@@ -1,23 +1,21 @@
 # Requires: MS1 on :8080, Ollama on :11434 (qwen3-embedding:0.6b, qwen3:4b), MS2 on :8000
 # Start MS2 (from ms2-rag-service):
 #   python -m venv .venv ; .\.venv\Scripts\python.exe -m pip install .
-#   $env:MS2_ADMIN_API_KEY='dev-admin-key' ; .\.venv\Scripts\python.exe -m uvicorn app.main:app --port 8000
+#   .\.venv\Scripts\python.exe -m uvicorn app.main:app --port 8000
 
 ### Health check
 GET http://localhost:8000/api/v1/health
 
 ###
 ### Reconcile index with MS1 (index missing/changed notes, remove deleted ones)
-POST http://localhost:8000/api/v1/admin/index/reconcile
-X-API-Key: dev-admin-key
+POST http://localhost:8000/api/v1/index/reconcile
 
 ###
 ### Rebuild the whole index from scratch
-POST http://localhost:8000/api/v1/admin/index/rebuild
-X-API-Key: dev-admin-key
+POST http://localhost:8000/api/v1/index/rebuild
 
 ###
-### Admin endpoint without key -> 401
+### Obsolete admin path -> 404
 POST http://localhost:8000/api/v1/admin/index/reconcile
 
 ###

@@ -3,7 +3,6 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 
 from app.api.deps import get_indexing_service, get_query_service
-from app.api.security import require_admin_api_key
 from app.core.config import Settings, get_settings
 from app.schemas import ChatQueryRequest, ChatQueryResponse, HealthResponse, IndexOperationResponse
 from app.services.indexing_service import IndexingService
@@ -19,9 +18,8 @@ def health() -> HealthResponse:
 
 
 @router.post(
-    "/admin/index/reconcile",
+    "/index/reconcile",
     response_model=IndexOperationResponse,
-    dependencies=[Depends(require_admin_api_key)],
 )
 def reconcile_index(
     indexing: Annotated[IndexingService, Depends(get_indexing_service)],
@@ -30,9 +28,8 @@ def reconcile_index(
 
 
 @router.post(
-    "/admin/index/rebuild",
+    "/index/rebuild",
     response_model=IndexOperationResponse,
-    dependencies=[Depends(require_admin_api_key)],
 )
 def rebuild_index(
     indexing: Annotated[IndexingService, Depends(get_indexing_service)],

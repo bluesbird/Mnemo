@@ -46,8 +46,23 @@ describe("chat api", () => {
     );
   });
 
-  it("explains rejected admin calls", async () => {
-    mockFetch({ ok: false, status: 401 });
-    await expect(reconcileIndex()).rejects.toThrow(/admin key/);
+  it("posts public index operations without credentials", async () => {
+    const fetchMock = mockFetch({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        indexed_note_ids: [],
+        deleted_note_ids: [],
+        skipped_note_ids: [],
+        total_ms1_notes: 0,
+      }),
+    });
+
+    await reconcileIndex();
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/rag-api/api/v1/index/reconcile",
+      expect.objectContaining({ method: "POST" }),
+    );
   });
 });

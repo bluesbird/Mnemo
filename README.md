@@ -37,10 +37,9 @@ Prerequisites: Docker, Java 25, Python 3.12+, [Ollama](https://ollama.com).
    - `cd ms2-rag-service`
    - `python -m venv .venv`
    - `.\.venv\Scripts\python.exe -m pip install ".[dev]"`
-   - `$env:MS2_ADMIN_API_KEY = "dev-admin-key"`
    - `.\.venv\Scripts\python.exe -m uvicorn app.main:app --port 8000`
 5. Build the initial index (afterwards RabbitMQ events keep it current):
-   - `POST http://localhost:8000/api/v1/admin/index/reconcile` with header `X-API-Key: dev-admin-key`
+   - `POST http://localhost:8000/api/v1/index/reconcile`
 6. Ask a question: `POST http://localhost:8000/api/v1/chat/query` with `{"question": "..."}`.
 
 Example requests: `ms2-rag-service/requests.http`.
@@ -126,9 +125,9 @@ event acknowledgements and an empty dead-letter queue are also checked.
 The runner also verifies MS1's emitted JSON logs contain timestamp, severity, logger,
 message and service name.
 After the unchanged direct-service lifecycle, it checks the UI's static assets and
-hash route, real note CRUD/chat/admin actions through nginx, and a separate echo
+hash route, real note CRUD/chat/index actions through nginx, and a separate echo
 upstream for exact proxy paths, query strings, methods, bodies, error statuses and
-admin-header isolation (including browser-supplied headers and path aliases).
+API-key header isolation (including browser-supplied headers and path aliases).
 It validates nginx configuration and rejects unsafe runtime substitutions. This same
 CI job builds and smoke-tests the production UI container without model downloads.
 Polling is deadline-bounded and reports the last failed observation.
@@ -176,25 +175,16 @@ Runtime container settings (override via a Compose override file, or `docker run
 | --- | --- | --- |
 | `UI_MS1_UPSTREAM` | `http://ms1-knowledge-service:8080` | MS1 origin |
 | `UI_MS2_UPSTREAM` | `http://ms2-rag-service:8000` | MS2 origin |
-| `MS2_ADMIN_API_KEY` | empty | Server-side key for MS2 admin paths only |
 
 Upstreams must be HTTP(S) hostname/IPv4 origins with an optional port, without
-credentials, paths or trailing slashes. Keys accept letters, digits and
-`. _ ~ + / = -`; other characters fail startup rather than being interpreted as
-nginx syntax. Only these variables are substituted, preserving nginx variables.
+credentials, paths or trailing slashes. Only these variables are substituted,
+preserving nginx variables.
 Changing settings requires recreating the UI container, not rebuilding the assets.
-An empty key sends no admin header. Compose supplies the same `MS2_ADMIN_API_KEY`
-to UI and MS2 (local default `dev-admin-key`); override it in the root environment
-or an untracked root `.env`, **never** a `VITE_*` variable.
 
-**Local/trusted deployment only:** the key is held by nginx, not served as browser
-configuration or bundled assets, and browser `X-API-Key` headers are discarded. nginx injects
-its key only for `/rag-api/api/v1/admin/...` requests. However, this is **not user
-authentication**: anyone who can reach the UI can invoke its admin proxy, including
-rebuild/reconcile. The app still has unauthenticated note/chat APIs, local Compose
-credentials and published backend ports. Do not expose this stack to the Internet
-or untrusted users. A real public domain deployment needs access control, TLS,
-restricted backend ports and production secret management separately.
+The UI proxy discards browser-supplied `X-API-Key` headers. Index reconcile/rebuild
+are public operations; the app still has unauthenticated note/chat APIs, local
+Compose credentials and published backend ports. A real public domain deployment
+needs HTTPS, restricted backend ports and production secret management separately.
 
 ## Application logs
 
@@ -221,7 +211,7 @@ No additional dependencies or log-collection service are required.
 3. Open:
    - `http://localhost:5173`
 
-The UI defaults to `/api` and uses Vite proxy to reach MS1 at `http://localhost:8080`. Chat requests go to `/rag-api`, which the proxy forwards to MS2 at `http://localhost:8000` and adds the admin key (`MS2_ADMIN_API_KEY`, default `dev-admin-key`) for the Index actions.
+The UI defaults to `/api` and uses Vite proxy to reach MS1 at `http://localhost:8080`. Chat requests go to `/rag-api`, which the proxy forwards to MS2 at `http://localhost:8000`. Index reconcile/rebuild are available at `/api/v1/index/reconcile` and `/api/v1/index/rebuild` without an API key.
 
 Chat tab: the empty state offers three example questions (the two most recently updated notes plus one random note, re-rolled on "Clear chat"). The conversation is kept in `sessionStorage` and survives a page reload. Tests: `npm test`.
 

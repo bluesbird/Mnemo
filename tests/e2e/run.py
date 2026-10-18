@@ -67,9 +67,6 @@ def verify_ui_configuration(command, env):
         "UI_MS1_UPSTREAM=http://ms1:8080;include /etc/passwd",
         "UI_MS1_UPSTREAM=http://ms1:8080/api",
         "UI_MS2_UPSTREAM=http://ms2:8000\nhttp://ms2:8000",
-        "MS2_ADMIN_API_KEY=unsafe$key",
-        'MS2_ADMIN_API_KEY=unsafe";',
-        "MS2_ADMIN_API_KEY=unsafe\nkey",
     ):
         result = subprocess.run(
             command + ["run", "--rm", "--no-deps", "-T", "-e", setting, "ui", "true"],

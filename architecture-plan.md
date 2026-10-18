@@ -35,9 +35,9 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
 - [x] Trigger AI enrichment from the UI for a saved note.
 - [x] RAG chatbot UI with Notes/Chat navigation, source references, and in-session chat history (kept in `sessionStorage`).
 - [x] Calls MS1 through REST; local development uses the Vite proxy, with direct CORS access configurable.
-- [x] Calls MS2 through REST (`/api/v1/chat/query`) and supports manual index actions (`/api/v1/admin/index/reconcile`, `/api/v1/admin/index/rebuild`).
+- [x] Calls MS2 through REST (`/api/v1/chat/query`) and supports public index actions (`/api/v1/index/reconcile`, `/api/v1/index/rebuild`).
 - [x] Multi-stage UI image: Node builds static assets; nginx serves them and proxies same-origin `/api` to MS1 and `/rag-api` to MS2 (prefix stripped). Hash routing and the Vite development workflow are unchanged.
-- [x] Validated runtime upstream origins and server-side admin-key injection only for MS2 admin paths; no key in the browser bundle. This proxy is not authentication: any UI caller can invoke admin actions, so deployment remains local/trusted-only.
+- [x] Validated runtime upstream origins; the UI proxy discards browser-supplied API-key headers.
 
 ## 2. MS1 — Knowledge Service (core done; MS2 integration work pending)
 
@@ -71,12 +71,12 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
 - [x] **Indexing scope:** Use note `title` and `content`; exclude summaries and tags initially.
 - [x] **Indexing versioning:** Reindex when note `source_hash` changes or when indexing configuration changes (chunk size, overlap, splitter strategy, embedding model).
 - [x] **RAG pipeline:** Embeddings, vector search, context construction, and LLM generation.
-- [x] **API scope:** Keep chat endpoint user-facing; place index rebuild/reconcile under admin endpoints with a static API key from an environment variable.
+- [x] **API scope:** Chat and index rebuild/reconcile are public user-facing endpoints.
 
 ## 4. Communication
 
 - **UI ↔ MS1:** [x] REST note CRUD and UI-triggered enrichment. [ ] UI tag filtering.
-- **UI ↔ MS2:** [x] REST for chat requests and manual admin index actions.
+- **UI ↔ MS2:** [x] REST for chat requests and manual index actions.
 - **MS1 → MS2:** [x] RabbitMQ events (`NoteCreated`, `NoteUpdated`, `NoteDeleted`).
 - **MS2 → MS1:** [x] REST for initial indexing and full reindexing.
 - **MS2 → Ollama:** [x] REST for embeddings and answer generation.

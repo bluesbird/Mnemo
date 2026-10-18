@@ -12,7 +12,7 @@ type ChatWorkspaceProps = {
   onClear?: () => void;
 };
 
-function summarizeAdminResult(
+function summarizeIndexResult(
   operation: "reconcile" | "rebuild",
   result: IndexOperationResponse,
 ): string {
@@ -28,8 +28,8 @@ export function ChatWorkspace({
 }: ChatWorkspaceProps) {
   const [question, setQuestion] = useState("");
   const [isAsking, setIsAsking] = useState(false);
-  const [isAdminActionRunning, setIsAdminActionRunning] = useState(false);
-  const [adminFeedback, setAdminFeedback] = useState("");
+  const [isIndexOperationRunning, setIsIndexOperationRunning] = useState(false);
+  const [indexFeedback, setIndexFeedback] = useState("");
   const threadEnd = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const indexMenu = useRef<HTMLDetailsElement>(null);
@@ -114,8 +114,8 @@ export function ChatWorkspace({
     await sendQuestion(question);
   }
 
-  async function runAdminAction(operation: "reconcile" | "rebuild") {
-    if (isAdminActionRunning || isAsking) return;
+  async function runIndexOperation(operation: "reconcile" | "rebuild") {
+    if (isIndexOperationRunning || isAsking) return;
     if (indexMenu.current) indexMenu.current.open = false;
     if (
       operation === "rebuild" &&
@@ -125,8 +125,8 @@ export function ChatWorkspace({
     ) {
       return;
     }
-    setIsAdminActionRunning(true);
-    setAdminFeedback(
+    setIsIndexOperationRunning(true);
+    setIndexFeedback(
       operation === "rebuild"
         ? "Rebuilding index… this may take a while."
         : "Reconciling index…",
@@ -134,24 +134,24 @@ export function ChatWorkspace({
     try {
       const result =
         operation === "reconcile" ? await reconcileIndex() : await rebuildIndex();
-      setAdminFeedback(summarizeAdminResult(operation, result));
+      setIndexFeedback(summarizeIndexResult(operation, result));
     } catch (cause) {
-      setAdminFeedback(
+      setIndexFeedback(
         cause instanceof Error
           ? cause.message
-          : "Admin action failed. Please check that the chat service is available and the API key is set.",
+          : "Index operation failed. Please check that the chat service is available.",
       );
     } finally {
-      setIsAdminActionRunning(false);
+      setIsIndexOperationRunning(false);
     }
   }
 
   function startNewChat() {
-    if (isAsking || isAdminActionRunning) return;
+    if (isAsking || isIndexOperationRunning) return;
     onMessagesChange([]);
     onClear?.();
     setQuestion("");
-    setAdminFeedback("");
+    setIndexFeedback("");
   }
 
   function onQuestionKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
@@ -176,7 +176,7 @@ export function ChatWorkspace({
             <button
               type="button"
               className="outline-button"
-              disabled={isAsking || isAdminActionRunning}
+              disabled={isAsking || isIndexOperationRunning}
               onClick={startNewChat}
             >
               Clear chat
@@ -187,16 +187,16 @@ export function ChatWorkspace({
                 <button
                   type="button"
                   className="text-button"
-                  disabled={isAsking || isAdminActionRunning}
-                  onClick={() => void runAdminAction("reconcile")}
+                  disabled={isAsking || isIndexOperationRunning}
+                  onClick={() => void runIndexOperation("reconcile")}
                 >
                   Reconcile (sync changes)
                 </button>
                 <button
                   type="button"
                   className="text-button delete-button"
-                  disabled={isAsking || isAdminActionRunning}
-                  onClick={() => void runAdminAction("rebuild")}
+                  disabled={isAsking || isIndexOperationRunning}
+                  onClick={() => void runIndexOperation("rebuild")}
                 >
                   Rebuild (re-embed all)
                 </button>
@@ -204,9 +204,9 @@ export function ChatWorkspace({
             </details>
           </div>
         </div>
-        {adminFeedback && (
-          <p className="chat-admin-feedback" role="status">
-            {adminFeedback}
+        {indexFeedback && (
+          <p className="chat-index-feedback" role="status">
+            {indexFeedback}
           </p>
         )}
       </header>

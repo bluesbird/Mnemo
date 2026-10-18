@@ -5,8 +5,6 @@ import re
 import urllib.error
 import urllib.request
 
-KEY = "e2e-ui-admin-key"
-
 
 def fetch(url, method="GET", body=None, headers=None):
     req = urllib.request.Request(url, method=method, data=body, headers=headers or {})
@@ -27,12 +25,12 @@ def check_static():
     for asset in assets:
         status, _, data = fetch("http://ui" + asset.decode())
         assert status == 200 and data, (asset, status)
-        assert KEY.encode() not in data and b"dev-admin-key" not in data, asset
+        assert b"MS2_ADMIN_API_KEY" not in data, asset
     # Hash routes remain browser-side; nginx only sees "/".
     assert fetch("http://ui/#/chat")[0] == 200
     for path in ("/.env", "/docker/default.conf.template", "/missing.js"):
         assert fetch("http://ui" + path)[0] == 404, path
-    print("PASS: static HTML/assets, hash route, no bundled admin key or exposed config", flush=True)
+    print("PASS: static HTML/assets, hash route and no exposed runtime config", flush=True)
     return True
 
 
@@ -40,23 +38,23 @@ def check_proxy():
     cases = [
         ("/api", "/api", []),
         ("/api/v1/notes?q=a%20b&tag=x", "/api/v1/notes?q=a%20b&tag=x", []),
-        ("/api/v1/admin/index/rebuild", "/api/v1/admin/index/rebuild", []),
+        ("/api/v1/index/rebuild", "/api/v1/index/rebuild", []),
         ("/rag-api", "/", []),
         ("/rag-api/api/v1/chat/query", "/api/v1/chat/query", []),
-        ("/rag-api/api/v1/admin/index/reconcile?dry=1",
-         "/api/v1/admin/index/reconcile?dry=1", [KEY]),
-        ("/rag-api/api/v1/admin/index/rebuild", "/api/v1/admin/index/rebuild", [KEY]),
+        ("/rag-api/api/v1/index/reconcile?dry=1",
+         "/api/v1/index/reconcile?dry=1", []),
+        ("/rag-api/api/v1/index/rebuild", "/api/v1/index/rebuild", []),
         ("/rag-api/api/v1/admin", "/api/v1/admin", []),
         ("/rag-api/api/v1/administrator/test", "/api/v1/administrator/test", []),
-        ("/rag-api/api/v1/chat/query?next=/api/v1/admin/index/rebuild",
-         "/api/v1/chat/query?next=/api/v1/admin/index/rebuild", []),
+        ("/rag-api/api/v1/chat/query?next=/api/v1/index/rebuild",
+         "/api/v1/chat/query?next=/api/v1/index/rebuild", []),
         ("/rag-api/api/v1/admin/../chat/query", "/api/v1/chat/query", []),
         ("/rag-api/api/v1/%61dmin/index/rebuild", "/api/v1/admin/index/rebuild", []),
         ("/rag-api/api/v1/chat/../admin/index/rebuild", "/api/v1/admin/index/rebuild", []),
         ("/rag-api/api/v1/Admin/index/rebuild", "/api/v1/Admin/index/rebuild", []),
     ]
     for path, forwarded, keys in cases:
-        for supplied in (None, "browser-supplied", KEY):
+        for supplied in (None, "browser-supplied"):
             headers = {"Content-Type": "application/json"}
             if supplied:
                 headers["X-API-Key"] = supplied
@@ -77,7 +75,7 @@ def check_proxy():
         result, _, body = fetch(f"http://ui-probe/rag-api/api/v1/chat/query?status={status}")
         assert result == status and json.loads(body)["admin_key"] == [], (result, body)
     assert fetch("http://ui-probe/rag-api/api/v1/chat/query?status=204", "DELETE")[0] == 204
-    print("PASS: proxy paths, query strings, methods, bodies, statuses and restricted admin headers",
+    print("PASS: proxy paths, query strings, methods, bodies, statuses and API-key header isolation",
           flush=True)
 
 
@@ -86,10 +84,9 @@ def check_real_backends(request, eventually):
     rag = "http://ui/rag-api/api/v1"
     assert request(notes) == []
     assert request(rag + "/health")["status"] == "ok"
-    # Direct backend remains key-protected; nginx adds its key only on the admin route.
-    request("http://ms2:8000/api/v1/admin/index/reconcile", "POST", expected=401)
-    request("http://ms2:8000/api/v1/admin/index/reconcile", "POST", expected=401,
-            headers={"X-API-Key": "browser-supplied"})
+    # Public index actions work directly and through nginx without credentials.
+    request("http://ms2:8000/api/v1/admin/index/reconcile", "POST", expected=404)
+    request("http://ms2:8000/api/v1/index/reconcile", "POST")
     note = request(notes, "POST", {"title": "UI proxy", "content": "Proxy access is indigo-2718."},
                    expected=201)
     note_url = notes + "/" + str(note["id"])
@@ -109,12 +106,11 @@ def check_real_backends(request, eventually):
         request(note_url, "DELETE", expected=204)
     request(note_url, expected=404)
     request(rag + "/chat/query", "POST", {"question": ""}, expected=422)
-    # Run admin actions only after the direct event-only lifecycle has passed.
+    # Run manual index actions only after the event-driven lifecycle has passed.
     for action in ("reconcile", "rebuild"):
-        result = request(rag + "/admin/index/" + action, "POST",
-                         headers={"X-API-Key": "browser-supplied"})
+        result = request(rag + "/index/" + action, "POST")
         assert isinstance(result, dict), result
-    print("PASS: real MS1/MS2 via UI, direct admin rejection, proxied admin actions", flush=True)
+    print("PASS: real MS1/MS2 via UI and public index actions", flush=True)
 
 
 def run(request, eventually):

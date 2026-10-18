@@ -48,7 +48,6 @@ def settings(tmp_path) -> Settings:
     return Settings(
         chroma_path=str(tmp_path / "chroma"),
         rabbitmq_enabled=False,
-        admin_api_key="test-key",
         tokenizer_name="does-not-exist/offline",  # forces word-based fallback
     )
 

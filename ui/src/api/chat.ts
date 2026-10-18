@@ -9,9 +9,6 @@ const CHAT_API_BASE_URL = (
 ).replace(/\/$/, "");
 
 function describeFailure(status: number, action: string): string {
-  if (status === 401 || status === 403) {
-    return `${action} was rejected (admin key missing or invalid).`;
-  }
   if (status === 422) return "Please enter a shorter, valid question.";
   if (status === 502 || status === 503 || status === 504) {
     return `${action} failed: a dependent service (notes or Ollama) is unavailable. Try again shortly.`;
@@ -48,11 +45,11 @@ export function queryChat(
 
 export function reconcileIndex(): Promise<IndexOperationResponse> {
   return post<IndexOperationResponse>(
-    "/api/v1/admin/index/reconcile",
+    "/api/v1/index/reconcile",
     "Reconcile",
   );
 }
 
 export function rebuildIndex(): Promise<IndexOperationResponse> {
-  return post<IndexOperationResponse>("/api/v1/admin/index/rebuild", "Rebuild");
+  return post<IndexOperationResponse>("/api/v1/index/rebuild", "Rebuild");
 }

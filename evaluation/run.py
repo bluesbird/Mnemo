@@ -51,7 +51,7 @@ for doc, meta in zip(page["documents"], page["metadatas"]):
                    "source_hash": meta["source_hash"],
                    "indexing_version": meta["indexing_version"]})
 settings_data = settings.model_dump()
-for key in ("admin_api_key", "rabbitmq_password"):
+for key in ("rabbitmq_password",):
     settings_data[key] = "[redacted]"
 print(json.dumps({"settings": settings_data, "indexing_version": settings.indexing_version,
     "tokenizer_fallback": tokenizer is None,
@@ -171,8 +171,7 @@ def main():
             result["notes"].append({"key": note["key"], "note_id": created["id"],
                                     "source_hash": created["sourceHash"]})
             save(result)
-        result["reconcile"] = request("http://localhost:8000/api/v1/admin/index/reconcile",
-                                      {}, {"X-API-Key": "e2e-ui-admin-key"})
+        result["reconcile"] = request("http://localhost:8000/api/v1/index/reconcile", {})
         success(result["reconcile"])
         result["index"] = json.loads(command(
             ["docker", "exec", container, "python", "-c", INSPECT],

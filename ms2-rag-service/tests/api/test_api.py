@@ -7,6 +7,24 @@ from app.api.deps import get_indexing_service, get_query_service
 from app.main import app
 
 
+class FakeIndexing:
+    def reconcile_index(self):
+        return {
+            "indexed_note_ids": [1],
+            "deleted_note_ids": [],
+            "skipped_note_ids": [],
+            "total_ms1_notes": 1,
+        }
+
+    def rebuild_index(self):
+        return {
+            "indexed_note_ids": [1],
+            "deleted_note_ids": [],
+            "skipped_note_ids": [],
+            "total_ms1_notes": 1,
+        }
+
+
 class BoomQuery:
     def answer_query(self, question, top_k):
         raise httpx.ConnectError("ollama down")
@@ -19,7 +37,6 @@ class BoomIndexing:
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.setenv("MS2_ADMIN_API_KEY", "test-key")
     monkeypatch.setenv("MS2_RABBITMQ_ENABLED", "false")
     get_settings.cache_clear()
     app.dependency_overrides[get_query_service] = lambda: BoomQuery()
@@ -33,12 +50,27 @@ def test_health(client):
     assert client.get("/api/v1/health").json()["status"] == "ok"
 
 
-def test_admin_requires_api_key(client):
-    assert client.post("/api/v1/admin/index/reconcile").status_code == 401
+def test_index_operations_are_public(client):
+    app.dependency_overrides[get_indexing_service] = lambda: FakeIndexing()
+
+    for operation in ("reconcile", "rebuild"):
+        response = client.post(f"/api/v1/index/{operation}")
+        assert response.status_code == 200
+        assert response.json() == {
+            "indexed_note_ids": [1],
+            "deleted_note_ids": [],
+            "skipped_note_ids": [],
+            "total_ms1_notes": 1,
+        }
+
+
+def test_admin_index_paths_are_not_aliased(client):
+    assert client.post("/api/v1/admin/index/reconcile").status_code == 404
+    assert client.post("/api/v1/admin/index/rebuild").status_code == 404
 
 
 def test_unhandled_error_returns_500_json(client):
-    response = client.post("/api/v1/admin/index/reconcile", headers={"X-API-Key": "test-key"})
+    response = client.post("/api/v1/index/reconcile")
     assert response.status_code == 500
     assert response.json() == {"detail": "Internal server error."}
 

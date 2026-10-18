@@ -901,7 +901,6 @@
       "app_env": "e2e",
       "ms1_base_url": "http://ms1:8080",
       "ms1_timeout_seconds": 10.0,
-      "admin_api_key": "[redacted]",
       "ollama_base_url": "http://host.docker.internal:11434",
       "embedding_model": "qwen3-embedding:0.6b",
       "chat_model": "qwen3:4b",
