@@ -30,6 +30,29 @@ No login, users, read-only mode or deployment-specific backend mode.
    HTTPS, all user actions, limits, private ports and persistence after restart.
    Document the commands needed to start, update and troubleshoot the deployment.
 
+### Step 7 preflight
+
+Preparation completed on the VPS:
+
+- SSH, repository ownership and Docker access work. The checkout was
+  fast-forwarded to `039ee6f`.
+- DNS resolves to the VPS address.
+- `deploy/.env` was generated on the VPS with random passwords/reset key and
+  mode `0600`; no credentials were printed or added to Git.
+- All three application images were built successfully. PostgreSQL, RabbitMQ,
+  starter-data and Caddy images were downloaded.
+
+Application startup remains blocked by host Ollama setup. No `ollama`
+executable or running service was found, and `mnemo-agent` has no passwordless
+sudo. An administrator must install the host service, bind it to the private
+Docker bridge address (`172.17.0.1` on this VPS), apply the documented resource
+limits and download `qwen3:4b` and `qwen3-embedding:0.6b`. See `deploy/README.md`.
+Do not expose port 11434 publicly.
+
+No application containers have been started. Container-to-Ollama connectivity,
+firewall/public port access, HTTPS, real-model behavior, application limits and
+restart persistence still need verification. Step 7 is not complete.
+
 ## Boundaries
 
 - Add only necessary configuration, small helpers and focused regression tests.
@@ -42,3 +65,18 @@ No login, users, read-only mode or deployment-specific backend mode.
 
 The public HTTPS deployment works with real models, the above checks pass, and
 the operating instructions are reproducible. Configuration alone is not completion.
+
+## VPS Info
+SSH access to my VPS:
+- Host alias: `mnemo-vps`
+- User: `mnemo-agent`
+- OS: Ubuntu 24.04
+- Project directory: `/opt/mnemo/Mnemo`
+- Docker and Docker Compose are installed.
+
+Connect using:
+```bash
+ssh mnemo-vps
+```
+
+The SSH key and configuration are already set up locally on my Windows machine. Do not ask for passwords, passphrases, or private keys.

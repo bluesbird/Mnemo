@@ -28,7 +28,7 @@ public class OllamaAiService {
 
     public AiNoteEnrichment enrichNote(String title, String content) {
         if (!enabled) {
-            return new AiNoteEnrichment(null, List.of());
+            throw new AiEnrichmentException("AI enrichment is disabled.");
         }
 
         try {
@@ -47,31 +47,45 @@ public class OllamaAiService {
                     + "Title: " + title + "\n"
                     + "Content: " + content;
 
-            String summary = toSummaryOrNull(callModel(summaryPrompt));
+            String summary = toSummary(callModel(summaryPrompt));
             String rawTags = callModel(tagsPrompt);
             List<String> parsedTags = parseTags(rawTags);
+            if (parsedTags.isEmpty()) {
+                throw new AiEnrichmentException("AI enrichment returned no usable tags. Please try again.");
+            }
 
             return new AiNoteEnrichment(summary, parsedTags);
+        } catch (AiEnrichmentException ex) {
+            logger.warn("AI enrichment failed: {}", ex.getMessage());
+            throw ex;
         } catch (RuntimeException ex) {
-            logger.warn("Spring AI Ollama call failed ({}). Leaving summary and tags empty", ex.getMessage());
-            return new AiNoteEnrichment(null, List.of());
+            logger.warn("Spring AI Ollama call failed", ex);
+            throw new AiEnrichmentException("AI enrichment could not complete. Please try again.", ex);
         }
     }
 
     private String callModel(String prompt) {
-        String response = chatClient.prompt(prompt).call().content();
-        return response == null ? "" : response;
+        var response = chatClient.prompt(prompt).call().chatResponse();
+        var result = response == null ? null : response.getResult();
+        if (result == null) {
+            throw new AiEnrichmentException("AI enrichment returned an empty answer. Please try again.");
+        }
+        String finishReason = result.getMetadata().getFinishReason();
+        if ("length".equalsIgnoreCase(finishReason)) {
+            throw new AiEnrichmentException("AI enrichment reached its token limit before finishing. Please try again.");
+        }
+        if (!"stop".equalsIgnoreCase(finishReason)) {
+            throw new AiEnrichmentException("AI enrichment did not finish normally. Please try again.");
+        }
+        String content = result.getOutput().getText();
+        if (content == null || content.isBlank()) {
+            throw new AiEnrichmentException("AI enrichment returned an empty answer. Please try again.");
+        }
+        return content;
     }
 
-    private String toSummaryOrNull(String rawSummary) {
-        if (rawSummary == null) {
-            return null;
-        }
-
+    private String toSummary(String rawSummary) {
         String summary = rawSummary.replaceAll("\\s+", " ").trim();
-        if (summary.isBlank()) {
-            return null;
-        }
 
         if (!summary.toLowerCase(Locale.ROOT).startsWith("this note")) {
             summary = "This note " + summary;

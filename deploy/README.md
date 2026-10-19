@@ -18,23 +18,58 @@ Deployment Nginx limits each client IP to 30 chat requests/minute (burst 20)
 and 10 enrichment requests/minute (burst 5). It allows at most two concurrent
 model-backed HTTP operations across all clients. Reconcile and rebuild are each
 limited globally to one request/minute. Requests larger than 256 KiB are rejected;
-chat questions are limited to 4,000 characters and generated answers to 256 tokens.
+chat questions are limited to 4,000 characters and chat answers to 256 tokens.
+MS1 enrichment allows 2,048 generated tokens per call (summary and tags are
+separate calls), including Qwen3's reasoning. This is a ceiling, not a target;
+CPU-only inference can still be slow. Empty or incomplete enrichment responses
+return an HTTP 502 error and leave the note's existing summary and tags unchanged.
 These deployment-only limits are disabled in the root local-development Compose
 stack. Caddy replaces the forwarded client-IP header, and Nginx trusts it only
-from Caddy's fixed address on the private proxy network.
+from Caddy's fixed address (`172.30.0.2`) on the private proxy network. Dynamic
+addresses, including the UI's, are allocated from `172.30.0.128/25` so they cannot
+claim Caddy's address. Existing deployments must recreate the proxy network
+with `docker compose --env-file deploy/.env -f deploy/compose.yaml down` before
+starting again; omit `--volumes` to preserve data.
 
-Ollama runs on the VPS host and is not managed by this Compose project. Configure
-its service with bounded parallelism and queueing; for systemd, for example:
+Ollama runs on the VPS host and is not managed by this Compose project. An
+administrator must install Ollama using its official Linux installation
+instructions before starting the application. Both backends connect through
+Docker's host gateway, so a loopback-only Ollama listener is not sufficient.
+Find the host's private Docker bridge address:
+
+```sh
+docker network inspect bridge --format '{{(index .IPAM.Config 0).Gateway}}'
+```
+
+On the current VPS this is `172.17.0.1`. Use `sudo systemctl edit ollama` to
+configure the listener and bounded parallelism/queueing (replace the address
+if the command above returns a different one):
 
 ```ini
 [Service]
+Environment="OLLAMA_HOST=172.17.0.1:11434"
 Environment="OLLAMA_NUM_PARALLEL=1"
 Environment="OLLAMA_MAX_LOADED_MODELS=2"
 Environment="OLLAMA_MAX_QUEUE=16"
 ```
 
-Apply the environment to the Ollama service and restart it. The deployment uses two models: the chat model (shared by MS1 and MS2) and MS2's
-embedding model. If keeping both loaded exceeds the VPS memory budget, lower the
+Do not bind to a public address or publish/forward port 11434. Host firewall
+rules must permit the application containers to reach this private listener
+while keeping the port inaccessible from the internet. After saving the
+override, restart Ollama and download both required models:
+
+```sh
+sudo systemctl daemon-reload
+sudo systemctl enable ollama
+sudo systemctl restart ollama
+export OLLAMA_HOST=http://172.17.0.1:11434
+ollama pull qwen3:4b
+ollama pull qwen3-embedding:0.6b
+curl --fail "$OLLAMA_HOST/api/tags"
+```
+
+The deployment uses the chat model for both MS1 and MS2, plus MS2's embedding
+model. If keeping both loaded exceeds the VPS memory budget, lower the
 loaded-model limit and expect extra model reload latency. MS1 and MS2 chat calls
 also cap context at 4,096 tokens.
 
