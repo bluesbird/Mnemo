@@ -6,6 +6,11 @@ Phase 16: **10 fixed notes, 10 questions, one real-model run, manual review.**
 No evaluation framework, LLM judge, model comparison, or statistical analysis.
 Separate from deterministic CI tests.
 
+The first run and provisional assistant-reviewed scores are recorded in
+[evaluation/results.md](evaluation/results.md). Independent author review remains
+outstanding. These results describe the recorded model/settings, not a separate
+evaluation of the subsequently deployed Groq chat provider.
+
 ## Notes and questions
 
 Prepare a fixed corpus with varied lengths:

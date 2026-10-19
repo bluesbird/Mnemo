@@ -9,16 +9,19 @@ Build a Python-based RAG service that indexes notes from MS1 and answers questio
 - **Python** — application language
 - **FastAPI** — REST API and automatic OpenAPI/Swagger documentation
 - **ChromaDB** — vector store for chunk texts, embeddings, and metadata
-- **Ollama** — local embedding model and chat LLM
+- **Ollama** — embedding model and local chat LLM
+- **Groq** — deployed chat LLM through its OpenAI-compatible API; embeddings remain on Ollama
 - **RabbitMQ** — asynchronous note-change events from MS1
 - **Docker** — containerization
 
-No LangChain, separate chunk database, or sparse retrieval in V1.
+No LangChain or separate chunk database in V1. Retrieval includes a lightweight
+keyword/vector fusion; a dedicated BM25 engine remains deferred.
 
 ## Model Stack (V1)
 
 - **Embedding model:** `qwen3-embedding:0.6b` via Ollama (multilingual, long context, small enough for local CPU/GPU).
 - **RAG LLM:** `qwen3:4b` via Ollama (also used by MS1 for enrichment). The model and temperature are fixed server-side configuration, not user-selectable in the UI.
+- **Public deployment:** `qwen/qwen3.8-27b` via Groq for both MS2 answers and MS1 enrichment, with reasoning disabled. Chat provider selection is independent of embeddings, so this switch does not require reindexing. Upstream failures are explicit; there is no automatic provider fallback.
 - **Tokenizer:** `Qwen/Qwen3-Embedding-0.6B` from Hugging Face, used only to count tokens for chunking (use the lightweight `tokenizers` package, not full `transformers`). Only the tokenizer files are downloaded; the model weights come from Ollama.
 - Pin the tokenizer to a specific Hugging Face revision and cache the files locally (also in the Docker image) so chunking is reproducible and works offline. Include the tokenizer revision in `indexing_version`.
 - Token counts are an approximation for the quantized Ollama model; keep headroom below the embedding context limit.
@@ -38,7 +41,7 @@ No LangChain, separate chunk database, or sparse retrieval in V1.
 - Generate embeddings through Ollama and store chunks in ChromaDB.
 - Detect missing, changed, and deleted notes.
 - Perform semantic vector search for user questions.
-- Construct context and generate answers through Ollama.
+- Construct context and generate answers through the configured Ollama/Groq chat provider.
 - Return answers with references to source notes.
 - Provide structured logging and API documentation.
 
@@ -82,7 +85,7 @@ No LangChain, separate chunk database, or sparse retrieval in V1.
 2. Generate a query embedding through Ollama.
 3. Retrieve the most relevant chunks from ChromaDB.
 4. Construct a context from the retrieved chunks.
-5. Send the question and context to the chat LLM through Ollama.
+5. Send the question and context to the configured Ollama/Groq chat LLM.
 6. Return the answer with references to the original notes.
 
 ## Synchronization
@@ -93,6 +96,8 @@ No LangChain, separate chunk database, or sparse retrieval in V1.
 - Use retry with bounded attempts and a dead-letter queue for poison messages.
 - Treat events as at-least-once and potentially out-of-order; this is safe because each event triggers a fetch of the current note and a `source_hash` comparison. A deleted note (404 from MS1) removes its chunks. Process events for the same note serially (e.g. a single consumer).
 - Reconcile provides a recovery mechanism for missed events and stale index entries.
+- MS1 currently publishes directly to RabbitMQ without an outbox. Missed events
+  require manual reconcile/rebuild; there is no scheduled or query-time recovery.
 - Rebuild recreates the index from scratch.
 - Keep MS1 as the source of truth; ChromaDB contains derived data.
 
@@ -122,7 +127,7 @@ No LangChain, separate chunk database, or sparse retrieval in V1.
 
 ## Deferred
 
-- Hybrid search / BM25
+- Dedicated BM25/sparse retrieval beyond the existing lightweight keyword/vector fusion
 - LangChain
 - Separate SQL database for chunks or index status
 - Reranking and advanced RAG techniques

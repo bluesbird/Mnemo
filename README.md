@@ -2,12 +2,21 @@
 
 **Your personal knowledge hub.**
 
-Self-hosted personal notes with a local RAG chatbot.
+Self-hosted notes with a RAG chatbot. Local development uses Ollama; the public
+demo uses Groq for text generation and host Ollama for embeddings.
+
+**Live demo:** https://mnemo-hub.duckdns.org — anonymous, shared, disposable data.
+Do not enter personal or confidential information.
+
+Public deployment is complete for the demo scope, with HTTPS, private backend
+ports, request limits and automatic deployment after CI passes on `main`.
+See [deployment instructions](deploy/README.md) and the
+[verification record](deploy/plan.md) for operating commands and limitations.
 
 Monorepo with three independent project modules:
 
 - `ms1-knowledge-service`: Java / Spring Boot knowledge API (current implementation)
-- `ms2-rag-service`: Python / FastAPI RAG service (Chroma + Ollama, RabbitMQ-driven indexing)
+- `ms2-rag-service`: Python / FastAPI RAG service (Chroma, Ollama embeddings, Ollama/Groq chat, RabbitMQ-driven indexing)
 - `ui`: React + TypeScript frontend for note management and the RAG chat
 
 ## Structure
@@ -197,9 +206,11 @@ preserving nginx variables.
 Changing settings requires recreating the UI container, not rebuilding the assets.
 
 The UI proxy discards browser-supplied `X-API-Key` headers. Index reconcile/rebuild
-are public operations; the app still has unauthenticated note/chat APIs, local
-Compose credentials and published backend ports. A real public domain deployment
-needs HTTPS, restricted backend ports and production secret management separately.
+are public operations. The root Compose stack is for local development: it uses
+local credentials and publishes backend/infrastructure ports. For public hosting,
+use the separate [deployment stack](deploy/README.md), not the root Compose file.
+The public demo intentionally keeps note/chat/index APIs anonymous; only database
+reset requires a server-side secret.
 
 ## Application logs
 

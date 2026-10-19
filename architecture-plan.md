@@ -22,10 +22,16 @@ Build a compact portfolio project demonstrating full-stack development, polyglot
                       |   Note events      |
                       +----> RabbitMQ -----+
 
-   MS1 --> Ollama (summaries, tags)    MS2 --> Ollama (embeddings, answers)
+   MS1 --> Ollama/Groq (summaries, tags)
+   MS2 --> Ollama (embeddings) + Ollama/Groq (answers)
 ```
 
 Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-update.md).
+
+Local development uses Ollama for all model calls. The
+[public demo](https://mnemo-hub.duckdns.org) uses Groq for text generation and
+host Ollama for embeddings. Deployment and verification:
+[deploy/README.md](deploy/README.md), [deploy/plan.md](deploy/plan.md).
 
 ## 1. Frontend
 
@@ -39,7 +45,7 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
 - [x] Multi-stage UI image: Node builds static assets; nginx serves them and proxies same-origin `/api` to MS1 and `/rag-api` to MS2 (prefix stripped). Hash routing and the Vite development workflow are unchanged.
 - [x] Validated runtime upstream origins; the UI proxy discards browser-supplied API-key headers.
 
-## 2. MS1 — Knowledge Service (core done; MS2 integration work pending)
+## 2. MS1 — Knowledge Service
 
 - **Stack:** Java 25, Spring Boot 4, Spring Data JPA / Hibernate.
 - **Database:** PostgreSQL; source of truth for notes and tags.
@@ -47,7 +53,7 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
   - [x] Note CRUD API (list, read, create, update, delete).
   - [x] Persisted tags and note-tag associations, including tags created by enrichment; standalone tag CRUD API is not implemented.
   - [x] Input validation and centralized exception handling.
-  - [x] AI enrichment through Ollama: generate summaries and suggest tags; persist results.
+  - [x] AI enrichment through Ollama locally or Groq in deployment: generate summaries and suggest tags; persist results. Failed or incomplete responses return explicit errors without replacing existing enrichment.
   - [x] Add a persisted `source_hash` (title + content), recomputed whenever title or content changes.
   - [x] Index-metadata endpoint (`note_id`, `source_hash`) for MS2 reconciliation (`GET /api/v1/notes/index-metadata`).
   - [x] Publish versioned events when notes are created, updated, or deleted.
@@ -58,7 +64,7 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
 ## 3. MS2 — RAG Service
 
 - **Status:** Implemented (indexing, RabbitMQ events, reconcile/rebuild, chat query); containerized in Compose; UI integration completed.
-- **Stack:** Python, FastAPI, Ollama (`qwen3-embedding:0.6b` embeddings, `qwen3:4b` answers), Qwen3-Embedding tokenizer (`tokenizers`) for chunking.
+- **Stack:** Python, FastAPI, Ollama (`qwen3-embedding:0.6b` embeddings, local `qwen3:4b` answers), Groq for deployed answers, Qwen3-Embedding tokenizer (`tokenizers`) for chunking.
 - **Database:** ChromaDB for embeddings and vector-index data.
 - **Responsibilities:**
   - [x] Consume note events and update the vector index.
@@ -79,7 +85,7 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
 - **UI ↔ MS2:** [x] REST for chat requests and manual index actions.
 - **MS1 → MS2:** [x] RabbitMQ events (`NoteCreated`, `NoteUpdated`, `NoteDeleted`).
 - **MS2 → MS1:** [x] REST for initial indexing and full reindexing.
-- **MS2 → Ollama:** [x] REST for embeddings and answer generation.
+- **MS2 → Ollama/Groq:** [x] REST for Ollama embeddings and provider-selected answer generation.
 - **Event contract:** Define a versioned payload with `event_id`, `event_type`, `occurred_at`, and `note_id`. The event is only a change trigger; MS2 fetches the current note state from MS1.
 - The vector index is derived data; MS1 remains the source of truth.
 - Index updates are eventually consistent with PostgreSQL.
@@ -95,7 +101,8 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
 - [x] Structured logs for debugging and operations (MS1 ECS JSON and MS2 JSON enabled in Compose; no centralized collection or cross-service tracing).
 - [x] Retry and dead-letter handling for RabbitMQ consumers in MS2.
 - [x] PostgreSQL persistent volume in Docker Compose; backup procedure is not set up.
-- [ ] HTTPS and production secret management.
+- [x] Public HTTPS deployment with Caddy, server-side secrets, private backend ports and request limits; anonymous shared-demo APIs, authenticated operator-only reset.
+- [x] GitHub Actions CD: deploy pushes to `main` after all four CI jobs pass, with SSH host verification and local/public health checks.
 - [ ] Consider the Transactional Outbox Pattern later for reliable event publishing.
 
 ## Design Principles
@@ -124,7 +131,7 @@ Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-upd
 Phase numbers are retained for reference; use the order below for the remaining work.
 
 - **Phase 16 — RAG evaluation:** [x] Small real-model sanity check completed: 10 fixed notes and 10 questions, with documented scoring and limitations in [evaluation/results.md](evaluation/results.md). Scores are assistant-reviewed, not independently human-validated. Scope and procedure: [evaluation-plan.md](evaluation-plan.md).
-- **Phase 18 — Public deployment safeguards:** [ ] Required before public hosting: access control, HTTPS, production secret management, and restricted exposure of backend/infrastructure ports. Keep authentication deployment-focused rather than adding account management to the app. Current deployment remains local/trusted only.
+- **Phase 18 — Public deployment:** [x] Public demo deployed and verified for the agreed scope: HTTPS, server-side secrets, restricted backend exposure, request limits, index recovery and reset authentication. Note/chat/index actions intentionally remain anonymous; no account management. Automatic deployment after CI is working. Verification details and intentionally omitted destructive/reset/restart checks: [deploy/plan.md](deploy/plan.md).
 - **Phase 15 — Release polish:** [ ] Keep startup instructions and model prerequisites accurate throughout development; finalize screenshots, architecture/limitations documentation, and a clean-start walkthrough after evaluation and any intended deployment safeguards are finished. Public hosting is not required for a repository-only release.
 
 ### Optional / deferred work
