@@ -40,7 +40,7 @@ class IndexOperationResponse(BaseModel):
 
 
 class ChatQueryRequest(BaseModel):
-    question: str = Field(min_length=1, max_length=4000)
+    question: str = Field(min_length=1, max_length=500)
     top_k: int | None = Field(default=None, ge=1, le=20)
 
 

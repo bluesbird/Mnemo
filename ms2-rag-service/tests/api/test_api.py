@@ -95,3 +95,12 @@ def test_provider_quota_returns_explicit_unavailable_error(client):
 
 def test_empty_question_is_rejected(client):
     assert client.post("/api/v1/chat/query", json={"question": ""}).status_code == 422
+
+
+def test_question_length_boundary():
+    from pydantic import ValidationError
+    from app.schemas import ChatQueryRequest
+
+    assert len(ChatQueryRequest(question="q" * 500).question) == 500
+    with pytest.raises(ValidationError):
+        ChatQueryRequest(question="q" * 501)

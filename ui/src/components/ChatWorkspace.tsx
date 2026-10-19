@@ -290,6 +290,7 @@ export function ChatWorkspace({
           ref={textareaRef}
           rows={1}
           aria-label="Question for the chatbot"
+          maxLength={500}
           placeholder="Ask about your notes…"
           value={question}
           onChange={(event) => setQuestion(event.target.value)}

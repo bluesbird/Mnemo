@@ -109,6 +109,7 @@ export function NoteEditor({
             <input
               className="title-input"
               aria-label="Note title"
+              maxLength={100}
               placeholder="Untitled note"
               value={draft.title}
               onChange={(event) =>
@@ -122,10 +123,11 @@ export function NoteEditor({
                   ? `Updated ${new Date(note.updatedAt).toLocaleString()}`
                   : "A new note"}
               </span>
-              <span>{draft.content.length} characters</span>
+              <span>{draft.content.length} / 5000 characters</span>
             </div>
             <textarea
               aria-label="Note content"
+              maxLength={5000}
               placeholder="Start writing…"
               value={draft.content}
               onChange={(event) =>
