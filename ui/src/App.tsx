@@ -365,18 +365,22 @@ function App() {
           <summary>Privacy</summary>
           <div className="privacy-content">
             <h2>Privacy notice</h2>
-            <p><strong>Operator and contact:</strong> [TODO: public operator name and privacy contact]</p>
+            <p>
+              <strong>Operator and privacy contact:</strong> Lorenz Moser,{" "}
+              <a href="mailto:lorenz.moser.bw@gmail.com">lorenz.moser.bw@gmail.com</a>.
+            </p>
             <p>
               This is a public, shared demo, not private storage. Notes, summaries
               and tags are stored on the server; anyone can read, edit or delete
               them. A derived search index is also stored there. Do not enter
-              personal, confidential or sensitive information.
+              personal, confidential or sensitive information. Notes and their
+              index entries remain until deleted or the demo is reset.
             </p>
             <p>
               The server processes request information, including IP addresses,
               request paths and timestamps, to deliver the app, apply rate limits
-              and diagnose problems. [TODO: hosting provider, server location and
-              actual log retention period]
+              and diagnose problems. Hosting is provided by Contabo in
+              Lauterbourg, France.
             </p>
             <p>
               Chat history is saved in your browser&apos;s session storage.
@@ -390,18 +394,15 @@ function App() {
               search run on the server using Ollama and Chroma.
             </p>
             <p>
-              Groq may retain inputs and outputs for reliability or abuse
-              investigations, depending on the operator&apos;s data-control settings;
-              retained customer data is stored in the United States. See{" "}
+              Groq states that inference inputs and outputs are not retained by
+              default, but may be logged for reliability or abuse investigations
+              for up to 30 days, unless legally required for longer. Usage metadata
+              is retained. Retained customer data is stored in the United States.
+              Zero Data Retention is disabled for this deployment, including
+              inference APIs. See{" "}
               <a href="https://console.groq.com/docs/your-data">
                 Groq&apos;s data information
               </a>.
-              {" "}[TODO: verify Groq retention settings, processing agreement and
-              international-transfer safeguards]
-            </p>
-            <p>
-              [TODO: specify the applicable legal bases and retention/deletion
-              periods for stored notes, the index and AI processing.]
             </p>
             <p>
               Where applicable, you may request access, correction, deletion,

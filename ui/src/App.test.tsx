@@ -19,7 +19,11 @@ describe("demo privacy information", () => {
     expect(screen.getByText(/Public demo: notes are shared/)).toBeTruthy();
     const summary = screen.getByText("Privacy");
     expect(summary.closest("details")).not.toBeNull();
-    expect(screen.getByText(/TODO: public operator name and privacy contact/)).toBeTruthy();
+    expect(screen.getByText(/Lorenz Moser/)).toBeTruthy();
+    expect(screen.getByRole("link", { name: "lorenz.moser.bw@gmail.com" }).getAttribute("href"))
+      .toBe("mailto:lorenz.moser.bw@gmail.com");
+    expect(screen.getByText(/Hosting is provided by Contabo/)).toBeTruthy();
+    expect(screen.queryByText(/TODO/)).toBeNull();
     expect(screen.getByText(/Chat history is saved in your browser/)).toBeTruthy();
     expect(screen.getByRole("link", { name: "Groq's data information" }).getAttribute("href"))
       .toBe("https://console.groq.com/docs/your-data");
