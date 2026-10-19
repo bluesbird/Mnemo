@@ -109,7 +109,8 @@ export function NoteEditor({
             <input
               className="title-input"
               aria-label="Note title"
-              maxLength={100}
+              maxLength={70}
+              aria-describedby={draft.title.length >= 70 ? "title-limit" : undefined}
               placeholder="Untitled note"
               value={draft.title}
               onChange={(event) =>
@@ -117,17 +118,23 @@ export function NoteEditor({
               }
               required
             />
+            {draft.title.length >= 70 && (
+              <span id="title-limit" className="limit-hint" role="status">
+                Title limit reached (70 characters).
+              </span>
+            )}
             <div className="editor-meta">
               <span>
                 {note
                   ? `Updated ${new Date(note.updatedAt).toLocaleString()}`
                   : "A new note"}
               </span>
-              <span>{draft.content.length} / 5000 characters</span>
+              <span>{draft.content.length} characters</span>
             </div>
             <textarea
               aria-label="Note content"
               maxLength={5000}
+              aria-describedby={draft.content.length >= 5000 ? "content-limit" : undefined}
               placeholder="Start writing…"
               value={draft.content}
               onChange={(event) =>
@@ -135,6 +142,11 @@ export function NoteEditor({
               }
               required
             />
+            {draft.content.length >= 5000 && (
+              <span id="content-limit" className="limit-hint" role="status">
+                Note limit reached (5,000 characters).
+              </span>
+            )}
           </form>
           {note && (note.summary || note.tags.length > 0) && (
             <div className="note-extras">

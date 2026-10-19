@@ -18,7 +18,7 @@ Deployment Nginx limits each client IP to 30 chat requests/minute (burst 20)
 and 10 enrichment requests/minute (burst 5). It allows at most two concurrent
 model-backed HTTP operations across all clients. Reconcile and rebuild are each
 limited globally to one request/minute. Requests larger than 256 KiB are rejected;
-Note titles are limited to 100 characters, note bodies to 5,000 and chat questions
+Note titles are limited to 70 characters, note bodies to 5,000 and chat questions
 to 500 in both local and deployed apps. Chat answers are limited to 256 tokens.
 MS1 enrichment allows 2,048 generated tokens per call (summary and tags are
 separate calls). Groq reasoning is disabled for both services. Empty or

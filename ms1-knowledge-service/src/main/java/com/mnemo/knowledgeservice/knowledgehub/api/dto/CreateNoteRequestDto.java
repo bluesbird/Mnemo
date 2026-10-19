@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Size;
 
 public record CreateNoteRequestDto(
         @NotBlank(message = "Title cannot be blank")
-        @Size(max = 100, message = "Title must be at most 100 characters")
+        @Size(max = 70, message = "Title must be at most 70 characters")
         String title,
 
         @NotBlank(message = "Content cannot be blank")

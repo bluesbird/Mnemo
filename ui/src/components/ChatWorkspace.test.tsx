@@ -23,6 +23,16 @@ function renderChat(onMessagesChange = vi.fn()) {
 }
 
 describe("ChatWorkspace input", () => {
+  it("shows a hint at the question limit and removes it after shortening", () => {
+    const { box } = renderChat();
+    expect(box.getAttribute("maxlength")).toBe("500");
+    expect(screen.queryByText(/Question limit reached/)).toBeNull();
+    fireEvent.change(box, { target: { value: "q".repeat(500) } });
+    expect(screen.getByText("Question limit reached (500 characters).")).toBeTruthy();
+    fireEvent.change(box, { target: { value: "q".repeat(499) } });
+    expect(screen.queryByText(/Question limit reached/)).toBeNull();
+  });
+
   it("sends on Enter", async () => {
     const spy = vi
       .spyOn(chatApi, "queryChat")

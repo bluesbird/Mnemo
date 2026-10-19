@@ -450,6 +450,15 @@ button {
   height: 42px;
   padding: 0 20px;
 }
+.limit-hint {
+  margin-top: 6px;
+  color: #80663e;
+  font-size: 11px;
+  line-height: 1.4;
+}
+.chat-limit-hint {
+  margin: 0 24px 12px;
+}
 .note-sidebar {
   min-width: 0;
   display: flex;

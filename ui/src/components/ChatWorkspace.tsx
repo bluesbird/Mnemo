@@ -291,6 +291,7 @@ export function ChatWorkspace({
           rows={1}
           aria-label="Question for the chatbot"
           maxLength={500}
+          aria-describedby={question.length >= 500 ? "question-limit" : undefined}
           placeholder="Ask about your notes…"
           value={question}
           onChange={(event) => setQuestion(event.target.value)}
@@ -302,6 +303,11 @@ export function ChatWorkspace({
           {isAsking ? "Asking…" : "Ask"}
         </button>
       </form>
+      {question.length >= 500 && (
+        <span id="question-limit" className="limit-hint chat-limit-hint" role="status">
+          Question limit reached (500 characters).
+        </span>
+      )}
     </section>
   );
 }
