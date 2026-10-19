@@ -1,5 +1,6 @@
 package com.mnemo.knowledgeservice.knowledgehub.application;
 
+import com.openai.errors.RateLimitException;
 import org.springframework.ai.chat.client.ChatClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,8 +59,11 @@ public class OllamaAiService {
         } catch (AiEnrichmentException ex) {
             logger.warn("AI enrichment failed: {}", ex.getMessage());
             throw ex;
+        } catch (RateLimitException ex) {
+            logger.warn("AI provider quota exceeded");
+            throw new AiEnrichmentException("AI provider quota exceeded. Please try again later.", ex);
         } catch (RuntimeException ex) {
-            logger.warn("Spring AI Ollama call failed", ex);
+            logger.warn("AI provider call failed ({})", ex.getClass().getSimpleName());
             throw new AiEnrichmentException("AI enrichment could not complete. Please try again.", ex);
         }
     }

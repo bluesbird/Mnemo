@@ -40,8 +40,13 @@ app.include_router(router)
 
 @app.exception_handler(httpx.HTTPError)
 def upstream_error_handler(_: Request, exc: httpx.HTTPError) -> JSONResponse:
-    logger.error("Upstream call failed: %s", exc)
-    return JSONResponse(status_code=502, content={"detail": "An upstream dependency (MS1 or Ollama) failed or is unavailable."})
+    logger.error("Upstream call failed (%s)", type(exc).__name__)
+    if isinstance(exc, httpx.HTTPStatusError) and exc.response.status_code == 429:
+        return JSONResponse(
+            status_code=503,
+            content={"detail": "AI provider quota exceeded. Please try again later."},
+        )
+    return JSONResponse(status_code=502, content={"detail": "An upstream dependency (notes or AI provider) failed or is unavailable."})
 
 
 @app.exception_handler(Exception)

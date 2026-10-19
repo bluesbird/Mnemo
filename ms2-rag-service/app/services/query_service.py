@@ -1,6 +1,7 @@
 import logging
 
 from app.clients.ollama_client import OllamaClient
+from app.clients.chat_client import ChatClient
 from app.core.config import Settings
 from app.rag.retrieval import Candidate, fuse, keyword_score, keywords, normalize_query
 from app.schemas import ChatQueryResponse, ChatSourceReference
@@ -12,9 +13,13 @@ NO_ANSWER = "I don't know based on the provided notes."
 
 
 class QueryService:
-    def __init__(self, settings: Settings, ollama_client: OllamaClient, store: IndexStore) -> None:
+    def __init__(
+        self, settings: Settings, ollama_client: OllamaClient, store: IndexStore,
+        chat_client: ChatClient | None = None,
+    ) -> None:
         self._settings = settings
         self._ollama_client = ollama_client
+        self._chat_client = chat_client if chat_client is not None else ollama_client
         self._store = store
 
     def answer_query(self, question: str, top_k: int) -> ChatQueryResponse:
@@ -72,7 +77,7 @@ class QueryService:
                 )
             )
 
-        answer = self._ollama_client.chat_answer(question, "\n\n".join(context_parts))
+        answer = self._chat_client.chat_answer(question, "\n\n".join(context_parts))
         if answer.lower().startswith("i don't know"):
             return ChatQueryResponse(answer=answer, sources=[])
         return ChatQueryResponse(answer=answer, sources=sources)

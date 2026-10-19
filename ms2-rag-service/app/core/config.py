@@ -1,5 +1,7 @@
 from functools import lru_cache
+from typing import Literal
 
+from pydantic import SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -20,6 +22,9 @@ class Settings(BaseSettings):
     ollama_base_url: str = "http://localhost:11434"
     embedding_model: str = "qwen3-embedding:0.6b"
     chat_model: str = "qwen3:4b"
+    chat_provider: Literal["ollama", "groq"] = "ollama"
+    groq_api_key: SecretStr = SecretStr("")
+    groq_model: str = "qwen/qwen3.8-27b"
     chat_num_ctx: int = 4096
     chat_num_predict: int = 256
     chat_temperature: float = 0.1
@@ -52,6 +57,12 @@ class Settings(BaseSettings):
     events_dead_letter_queue: str = "ms2.note-events.dlq"
     events_max_attempts: int = 3
     events_retry_backoff_seconds: float = 2.0
+
+    @model_validator(mode="after")
+    def validate_chat_provider(self) -> "Settings":
+        if self.chat_provider == "groq" and not self.groq_api_key.get_secret_value().strip():
+            raise ValueError("MS2_GROQ_API_KEY is required when MS2_CHAT_PROVIDER=groq")
+        return self
 
     @property
     def indexing_version(self) -> str:

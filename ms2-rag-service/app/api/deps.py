@@ -2,6 +2,7 @@ from functools import lru_cache
 
 from app.clients.ms1_client import Ms1Client
 from app.clients.ollama_client import OllamaClient
+from app.clients.groq_client import GroqClient
 from app.core.config import get_settings
 from app.rag.chunker import NoteChunker
 from app.services.index_store import IndexStore
@@ -33,4 +34,6 @@ def get_indexing_service() -> IndexingService:
 
 @lru_cache
 def get_query_service() -> QueryService:
-    return QueryService(get_settings(), get_ollama_client(), get_index_store())
+    settings = get_settings()
+    chat_client = GroqClient(settings) if settings.chat_provider == "groq" else get_ollama_client()
+    return QueryService(settings, get_ollama_client(), get_index_store(), chat_client)

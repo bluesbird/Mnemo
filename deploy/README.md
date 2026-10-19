@@ -20,9 +20,9 @@ model-backed HTTP operations across all clients. Reconcile and rebuild are each
 limited globally to one request/minute. Requests larger than 256 KiB are rejected;
 chat questions are limited to 4,000 characters and chat answers to 256 tokens.
 MS1 enrichment allows 2,048 generated tokens per call (summary and tags are
-separate calls), including Qwen3's reasoning. This is a ceiling, not a target;
-CPU-only inference can still be slow. Empty or incomplete enrichment responses
-return an HTTP 502 error and leave the note's existing summary and tags unchanged.
+separate calls). Groq reasoning is disabled for both services. Empty or
+incomplete enrichment responses return an HTTP 502 error and leave the note's
+existing summary and tags unchanged.
 These deployment-only limits are disabled in the root local-development Compose
 stack. Caddy replaces the forwarded client-IP header, and Nginx trusts it only
 from Caddy's fixed address (`172.30.0.2`) on the private proxy network. Dynamic
@@ -31,10 +31,30 @@ claim Caddy's address. Existing deployments must recreate the proxy network
 with `docker compose --env-file deploy/.env -f deploy/compose.yaml down` before
 starting again; omit `--volumes` to preserve data.
 
+## AI providers
+
+Local development keeps Ollama for enrichment, chat and embeddings; no Groq
+key is needed. Deployment uses GroqCloud (`qwen/qwen3.8-27b`) for MS1 enrichment
+and MS2 RAG answer generation. MS1 activates the `groq` Spring profile; MS2 sets
+`MS2_CHAT_PROVIDER=groq`. Both read the same `GROQ_API_KEY` from `deploy/.env`
+(mapped to `MS2_GROQ_API_KEY` for MS2). Keys never belong in browser assets,
+committed configuration or logs.
+
+Groq receives the title/content of notes being enriched, and questions plus
+retrieved note excerpts for RAG answers. Only use synthetic/non-sensitive data
+in this public deployment. Requests are subject to your organization's shared
+Groq quota: each enrichment uses two requests, each grounded RAG answer one.
+Failures are reported explicitly, with no automatic fallback to local inference
+or application-level retries. Check the account's Limits page for current quotas.
+
+Embeddings remain on host Ollama (`qwen3-embedding:0.6b`) in both environments.
+This preserves Chroma's embedding dimensions and indexing version; switching
+generation providers needs no rebuild or data migration.
+
 Ollama runs on the VPS host and is not managed by this Compose project. An
 administrator must install Ollama using its official Linux installation
-instructions before starting the application. Both backends connect through
-Docker's host gateway, so a loopback-only Ollama listener is not sufficient.
+instructions before starting the application. MS2 connects through Docker's host
+gateway, so a loopback-only Ollama listener is not sufficient.
 Find the host's private Docker bridge address:
 
 ```sh
@@ -56,26 +76,23 @@ Environment="OLLAMA_MAX_QUEUE=16"
 Do not bind to a public address or publish/forward port 11434. Host firewall
 rules must permit the application containers to reach this private listener
 while keeping the port inaccessible from the internet. After saving the
-override, restart Ollama and download both required models:
+override, restart Ollama and download the required embedding model:
 
 ```sh
 sudo systemctl daemon-reload
 sudo systemctl enable ollama
 sudo systemctl restart ollama
 export OLLAMA_HOST=http://172.17.0.1:11434
-ollama pull qwen3:4b
 ollama pull qwen3-embedding:0.6b
 curl --fail "$OLLAMA_HOST/api/tags"
 ```
 
-The deployment uses the chat model for both MS1 and MS2, plus MS2's embedding
-model. If keeping both loaded exceeds the VPS memory budget, lower the
-loaded-model limit and expect extra model reload latency. MS1 and MS2 chat calls
-also cap context at 4,096 tokens.
+The VPS no longer needs the Ollama chat model for application requests.
 
 Create a private deployment environment file and set both passwords plus the
-reset key to strong, unique values. Compose refuses to run while any value is
-empty:
+reset key to strong, unique values, and add your Groq API key as `GROQ_API_KEY`.
+Preserve existing values when updating a deployment. Compose refuses to run
+while any required value is empty:
 
 ```sh
 cp deploy/.env.example deploy/.env

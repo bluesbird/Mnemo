@@ -80,5 +80,18 @@ def test_upstream_failure_returns_502(client):
     assert response.status_code == 502
 
 
+def test_provider_quota_returns_explicit_unavailable_error(client):
+    class QuotaQuery:
+        def answer_query(self, question, top_k):
+            request = httpx.Request("POST", "https://api.groq.com/openai/v1/chat/completions")
+            response = httpx.Response(429, request=request)
+            raise httpx.HTTPStatusError("quota exceeded", request=request, response=response)
+
+    app.dependency_overrides[get_query_service] = lambda: QuotaQuery()
+    response = client.post("/api/v1/chat/query", json={"question": "hi"})
+    assert response.status_code == 503
+    assert response.json() == {"detail": "AI provider quota exceeded. Please try again later."}
+
+
 def test_empty_question_is_rejected(client):
     assert client.post("/api/v1/chat/query", json={"question": ""}).status_code == 422

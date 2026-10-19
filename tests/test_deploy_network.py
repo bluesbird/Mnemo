@@ -16,7 +16,7 @@ def assert_proxy_network():
         name: "compose-validation-only"
         for name in (
             "POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_DB",
-            "RABBITMQ_USER", "RABBITMQ_PASSWORD", "MNEMO_RESET_API_KEY",
+            "RABBITMQ_USER", "RABBITMQ_PASSWORD", "MNEMO_RESET_API_KEY", "GROQ_API_KEY",
         )
     })
     result = subprocess.run(

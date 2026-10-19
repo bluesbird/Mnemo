@@ -41,9 +41,8 @@ services:
       SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:?Set RABBITMQ_PASSWORD in deploy/.env}
       MNEMO_RESET_API_KEY: ${MNEMO_RESET_API_KEY:?Set MNEMO_RESET_API_KEY in deploy/.env}
       APP_CORS_ALLOWED_ORIGINS: https://mnemo-hub.duckdns.org
-      SPRING_AI_OLLAMA_BASE_URL: http://host.docker.internal:11434
-      SPRING_AI_OLLAMA_CHAT_OPTIONS_NUM_CTX: 4096
-      SPRING_AI_OLLAMA_CHAT_OPTIONS_NUM_PREDICT: 2048
+      SPRING_PROFILES_ACTIVE: groq
+      GROQ_API_KEY: ${GROQ_API_KEY:?Set GROQ_API_KEY in deploy/.env}
       LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
       SPRING_MAIN_BANNER_MODE: "off"
     extra_hosts:
@@ -63,7 +62,9 @@ services:
       MS2_APP_ENV: production
       MS2_MS1_BASE_URL: http://ms1-knowledge-service:8080
       MS2_OLLAMA_BASE_URL: http://host.docker.internal:11434
-      MS2_CHAT_NUM_CTX: 4096
+      MS2_CHAT_PROVIDER: groq
+      MS2_GROQ_API_KEY: ${GROQ_API_KEY:?Set GROQ_API_KEY in deploy/.env}
+      MS2_GROQ_MODEL: qwen/qwen3.8-27b
       MS2_CHAT_NUM_PREDICT: 256
       MS2_RABBITMQ_HOST: rabbitmq
       MS2_RABBITMQ_USERNAME: ${RABBITMQ_USER:?Set RABBITMQ_USER in deploy/.env}

@@ -14,7 +14,7 @@ function describeFailure(status: number, action: string): string {
   }
   if (status === 422) return "Please enter a shorter, valid question.";
   if (status === 502 || status === 503 || status === 504) {
-    return `${action} failed: a dependent service (notes or Ollama) is unavailable. Try again shortly.`;
+    return `${action} failed: a dependent service (notes or AI provider) is unavailable. Try again shortly.`;
   }
   if (status === 404) return `${action} failed: the chat service was not found.`;
   return `${action} failed (HTTP ${status}).`;

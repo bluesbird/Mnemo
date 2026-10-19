@@ -2,6 +2,7 @@ import logging
 
 import httpx
 
+from app.clients.chat_client import chat_messages
 from app.core.config import Settings
 
 logger = logging.getLogger(__name__)
@@ -34,23 +35,11 @@ class OllamaClient:
         if context.strip() == "":
             return "I don't know based on the provided notes."
 
-        system_prompt = (
-            "You answer questions about the user's personal notes. "
-            "Use only facts from the NOTES section; some notes may be irrelevant, so ignore those. "
-            "Answer directly in one to three complete sentences of plain text without markdown formatting, in the language of the question. "
-            "Never mention the notes, the context or the note numbers in your answer. "
-            "If the notes do not contain the answer, reply exactly: "
-            "I don't know based on the provided notes."
-        )
-        user_prompt = f"NOTES:\n{context}\n\nQUESTION: {question}"
         payload = {
             "model": self._settings.chat_model,
             "stream": False,
             "think": self._settings.chat_think,
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
+            "messages": chat_messages(question, context),
             "options": {
                 "temperature": self._settings.chat_temperature,
                 "num_ctx": self._settings.chat_num_ctx,
