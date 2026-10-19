@@ -26,32 +26,60 @@ No login, users, read-only mode or deployment-specific backend mode.
 6. [x] **Authenticated reset:** add an admin endpoint that clears notes/tags,
    restores the same ten starter notes, and best-effort triggers an MS2 full
    rebuild event. If MS2/RabbitMQ is unavailable, data reset still succeeds.
-7. **Deploy and verify:** confirm server permissions/firewall, deploy, then check
-   HTTPS, all user actions, limits, private ports and persistence after restart.
+7. [x] **Deploy and verify:** confirm server permissions and effective public port
+   exposure, deploy, then check HTTPS, user actions, limits and index recovery.
+   A destructive live reset and full-stack restart are optional for this demo.
    Document the commands needed to start, update and troubleshoot the deployment.
 
-### Step 7 preflight
+### Step 7 status
 
-Preparation completed on the VPS:
+The application is deployed at `https://mnemo-hub.duckdns.org`.
+The earlier host Ollama/startup blocker is resolved. Production uses Groq for
+text generation and host Ollama for embeddings; local development remains
+Ollama-only.
 
-- SSH, repository ownership and Docker access work. The checkout was
-  fast-forwarded to `039ee6f`.
-- DNS resolves to the VPS address.
-- `deploy/.env` was generated on the VPS with random passwords/reset key and
-  mode `0600`; no credentials were printed or added to Git.
-- All three application images were built successfully. PostgreSQL, RabbitMQ,
-  starter-data and Caddy images were downloaded.
+Completed:
 
-Application startup remains blocked by host Ollama setup. No `ollama`
-executable or running service was found, and `mnemo-agent` has no passwordless
-sudo. An administrator must install the host service, bind it to the private
-Docker bridge address (`172.17.0.1` on this VPS), apply the documented resource
-limits and download `qwen3:4b` and `qwen3-embedding:0.6b`. See `deploy/README.md`.
-Do not expose port 11434 publicly.
+- SSH, repository ownership and Docker access work.
+- DNS, public HTTPS and application/API routing work.
+- Server-side deployment credentials were configured without committing them.
+- Note create/update/delete and real-model enrichment/chat work.
+- Note lifecycle events and matching MS2 index updates were verified.
+- Input-length validation was checked through the public APIs.
+- Existing data survived application container recreation during updates.
+- Start, update, reset and troubleshooting commands are in `deploy/README.md`.
+- GitHub Actions automatically deploys pushes to `main` after CI passes.
+  The first automatic deployment passed local and public HTTPS checks.
 
-No application containers have been started. Container-to-Ollama connectivity,
-firewall/public port access, HTTPS, real-model behavior, application limits and
-restart persistence still need verification. Step 7 is not complete.
+### Live verification (2026-10-20)
+
+- External TCP probes of the published IPv4 address reached SSH (22), HTTP (80)
+  and HTTPS (443). PostgreSQL (5432), RabbitMQ (4369, 5671/5672,
+  15671/15672, 15691/15692, 25672), backends (8000, 8080), UI diagnostic port
+  (8081), Ollama (11434) and Caddy admin (2019) were closed or filtered.
+  Host listeners and Docker port bindings agree: UI is loopback-only and
+  Ollama listens on the private Docker bridge. Direct UFW rule inspection
+  requires administrator privileges and was not performed; this verifies
+  observed exposure, not the complete firewall ruleset or external IPv6 access.
+- Missing and incorrect reset keys both returned HTTP 401. No authenticated
+  reset was executed and no source notes were deleted.
+- Controlled bursts using invalid requests returned HTTP 429 for chat and
+  enrichment. No valid AI requests or Groq inference calls were needed.
+- Two incomplete chat request bodies occupied the shared model-backed request
+  slots; a third request returned HTTP 429. Connections were then closed.
+- A request exceeding 256 KiB returned HTTP 413.
+- Reconcile returned HTTP 200 and skipped all 13 current notes, confirming
+  their index state was already current. Rebuild returned HTTP 200 and indexed
+  all 13 notes. Immediate follow-up GETs to each operation returned HTTP 429,
+  verifying their global request limits without executing a second operation.
+- Source notes were identical before and after index verification. Final public
+  UI, notes API and MS2 health checks all returned HTTP 200.
+
+Step 7 is complete for the agreed demo scope. Full-stack restart persistence
+and a successful authenticated live reset were intentionally not exercised;
+application recreation has preserved data and automated reset tests exist.
+Do not expose Ollama port 11434 publicly or use `down --volumes` for restart
+verification.
 
 ## Boundaries
 
