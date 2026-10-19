@@ -96,3 +96,79 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm test
+
+  deploy:
+    name: Deploy to VPS
+    needs: [e2e, ms1, ms2, ui]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    concurrency:
+      group: vps-production
+      cancel-in-progress: false
+    steps:
+      - name: Configure SSH
+        env:
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          test -n "$VPS_SSH_KEY"
+          test -n "$VPS_KNOWN_HOSTS"
+          install -m 700 -d "$HOME/.ssh"
+          printf '%s\n' "$VPS_SSH_KEY" > "$HOME/.ssh/id_ed25519"
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/id_ed25519" "$HOME/.ssh/known_hosts"
+      - name: Build and deploy tested commit
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          DEPLOY_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          test -n "$VPS_HOST"
+          test -n "$VPS_USER"
+          [[ "$DEPLOY_SHA" =~ ^[0-9a-f]{40}$ ]]
+          ssh -i "$HOME/.ssh/id_ed25519" \
+            -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o ConnectTimeout=15 -o ServerAliveInterval=30 \
+            -o ServerAliveCountMax=6 \
+            "$VPS_USER@$VPS_HOST" bash -s -- "$DEPLOY_SHA" <<'REMOTE'
+          set -euo pipefail
+          cd /opt/mnemo/Mnemo
+          exec 9>/opt/mnemo/Mnemo/.git/deploy.lock
+          flock -w 1200 9
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Deployment stopped: VPS checkout has local changes."
+            exit 1
+          fi
+          git fetch origin main
+          if [ "$(git rev-parse origin/main)" != "$1" ]; then
+            echo "Skipping superseded commit $1."
+            exit 0
+          fi
+          git merge --ff-only "$1"
+          docker compose --env-file deploy/.env -f deploy/compose.yaml config --quiet
+          docker compose --env-file deploy/.env -f deploy/compose.yaml build
+          docker compose --env-file deploy/.env -f deploy/compose.yaml up -d --no-build
+          docker compose --env-file deploy/.env -f deploy/compose.yaml ps
+          for path in / /api/v1/notes /rag-api/api/v1/health; do
+            curl --fail --silent --show-error --output /dev/null \
+              --retry 30 --retry-delay 2 --retry-all-errors --max-time 10 \
+              "http://127.0.0.1:8081$path"
+          done
+          echo "Deployed $1."
+          REMOTE
+      - name: Verify public HTTPS
+        run: |
+          set -euo pipefail
+          for path in / /api/v1/notes /rag-api/api/v1/health; do
+            curl --fail --silent --show-error --output /dev/null \
+              --retry 10 --retry-delay 3 --retry-all-errors --max-time 15 \
+              "https://mnemo-hub.duckdns.org$path"
+          done
+      - name: Remove SSH credentials
+        if: always()
+        run: rm -f "$HOME/.ssh/id_ed25519" "$HOME/.ssh/known_hosts"

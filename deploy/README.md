@@ -120,6 +120,29 @@ Start or update the deployment from the repository root:
 docker compose --env-file deploy/.env -f deploy/compose.yaml up -d --build
 ```
 
+## Automatic deployment
+
+The GitHub Actions `CI` workflow deploys pushes to `main` only after all four
+test jobs pass. Pull requests never deploy. Repository secrets required:
+`VPS_HOST` (hostname/IP only), `VPS_USER`, `VPS_SSH_KEY` (a dedicated,
+non-interactive SSH private key), and `VPS_KNOWN_HOSTS` (the verified OpenSSH
+known-hosts entry for that host). Host verification is mandatory; do not use
+an unverified key scanned during the workflow.
+
+The SSH user must have write access to `/opt/mnemo/Mnemo` and Docker access.
+The server's existing `deploy/.env` supplies application credentials, including
+the Groq key; Actions neither prints nor replaces it. Deployments are serialized
+and skip commits superseded on `main`. A dirty checkout or non-fast-forward
+update fails rather than discarding server changes.
+
+Images build before containers are updated. Normal updates preserve volumes,
+but container recreation can briefly interrupt requests. The job checks the UI,
+notes API and MS2 health locally and over public HTTPS without invoking AI.
+There is no automatic rollback: a failed deployment/check is visible in Actions;
+inspect container status/logs on the VPS before retrying. CI failures leave the
+running deployment untouched. View deployment output in the workflow's
+`Deploy to VPS` job.
+
 The Compose project creates named volumes for PostgreSQL, RabbitMQ, ChromaDB,
 the MS2 tokenizer cache, and Caddy's TLS certificates and state. Normal
 stop/start and image updates preserve them. Do not use `down --volumes` unless
