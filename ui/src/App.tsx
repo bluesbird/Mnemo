@@ -321,6 +321,11 @@ function App() {
         </nav>
       </header>
 
+      <p className="demo-notice">
+        Public demo: notes are shared and anyone can change or delete them.
+        Use fictional data only. AI requests send note content to Groq; answers may be wrong.
+      </p>
+
       <div className={view === "notes" ? "view" : "view is-hidden"}>
         <NotesWorkspace
           notes={notes}
@@ -356,6 +361,57 @@ function App() {
 
       <footer className="page-footer">
         <span>MNEMO</span>
+        <details className="privacy-notice">
+          <summary>Privacy</summary>
+          <div className="privacy-content">
+            <h2>Privacy notice</h2>
+            <p><strong>Operator and contact:</strong> [TODO: public operator name and privacy contact]</p>
+            <p>
+              This is a public, shared demo, not private storage. Notes, summaries
+              and tags are stored on the server; anyone can read, edit or delete
+              them. A derived search index is also stored there. Do not enter
+              personal, confidential or sensitive information.
+            </p>
+            <p>
+              The server processes request information, including IP addresses,
+              request paths and timestamps, to deliver the app, apply rate limits
+              and diagnose problems. [TODO: hosting provider, server location and
+              actual log retention period]
+            </p>
+            <p>
+              Chat history is saved in your browser&apos;s session storage.
+              Clearing the chat removes it from that storage. The app does not
+              use analytics or advertising trackers.
+            </p>
+            <p>
+              When you use AI enrichment, the note title and content are sent
+              to GroqCloud. Chat sends your question and relevant excerpts from
+              shared notes to GroqCloud to generate an answer. Embeddings and
+              search run on the server using Ollama and Chroma.
+            </p>
+            <p>
+              Groq may retain inputs and outputs for reliability or abuse
+              investigations, depending on the operator&apos;s data-control settings;
+              retained customer data is stored in the United States. See{" "}
+              <a href="https://console.groq.com/docs/your-data">
+                Groq&apos;s data information
+              </a>.
+              {" "}[TODO: verify Groq retention settings, processing agreement and
+              international-transfer safeguards]
+            </p>
+            <p>
+              [TODO: specify the applicable legal bases and retention/deletion
+              periods for stored notes, the index and AI processing.]
+            </p>
+            <p>
+              Where applicable, you may request access, correction, deletion,
+              restriction or portability of your personal data, object to
+              processing, withdraw consent if processing relies on it, and
+              complain to a data-protection authority. Contact the operator
+              above for privacy requests.
+            </p>
+          </div>
+        </details>
         <span>{view === "notes" ? "NOTES" : "CHAT"}</span>
       </footer>
     </main>

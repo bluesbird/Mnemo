@@ -89,6 +89,39 @@ button {
   font-size: 11px;
   line-height: 1.3;
 }
+.demo-notice {
+  width: 100%;
+  max-width: 1240px;
+  margin: 12px auto 0;
+  color: var(--green);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.privacy-notice {
+  max-width: 760px;
+  margin: 0 16px;
+  font-size: 12px;
+  font-weight: 400;
+}
+.privacy-notice summary {
+  cursor: pointer;
+  color: var(--green);
+}
+.privacy-content {
+  padding: 12px 0;
+  max-height: 50vh;
+  overflow-y: auto;
+  color: var(--ink);
+  line-height: 1.6;
+}
+.privacy-content h2 {
+  font-size: 18px;
+}
+.privacy-content a {
+  color: var(--green);
+}
+
 .topbar-label,
 .eyebrow,
 .editor-toolbar,
