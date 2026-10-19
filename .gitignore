@@ -41,5 +41,7 @@ __pycache__/
 .pytest_cache/
 tests/e2e/artifacts/
 
-# Deployment credentials
-/deploy/.env
+# Local environment configuration and credentials
+.env
+.env.*
+!.env.example
