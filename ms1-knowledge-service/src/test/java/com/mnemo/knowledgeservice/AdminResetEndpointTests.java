@@ -7,12 +7,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SpringBootTest(properties = "app.reset.api-key=test-reset-key-that-is-long-enough-for-tests")
+@SpringBootTest(properties = {
+        "app.reset.api-key=test-reset-key-that-is-long-enough-for-tests", "app.events.outbox.enabled=false"
+})
 class AdminResetEndpointTests {
 
     @Autowired
@@ -21,8 +24,12 @@ class AdminResetEndpointTests {
     @Autowired
     private NoteRepository noteRepository;
 
+    @Autowired
+    private JdbcTemplate jdbc;
+
     @AfterEach
     void cleanup() {
+        jdbc.update("DELETE FROM note_outbox");
         noteRepository.deleteAllInBatch();
     }
 

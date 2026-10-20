@@ -58,7 +58,8 @@ host Ollama for embeddings. Deployment and verification:
   - [x] Publish versioned events when notes are created, updated, or deleted.
   - [x] Structured application logging (Spring Boot ECS JSON output in Compose; readable text for host-run development).
   - [x] OpenAPI / Swagger API documentation.
-  - [ ] Optional API pagination and server-side text search (the UI currently searches its loaded notes locally).
+  - The UI searches the loaded notes locally. With a 100-note collection limit,
+    backend pagination and server-side search are not planned.
 
 ## 3. MS2 — RAG Service
 
@@ -102,14 +103,15 @@ host Ollama for embeddings. Deployment and verification:
 - [x] PostgreSQL persistent volume in Docker Compose; backup procedure is not set up.
 - [x] Public HTTPS deployment with Caddy, server-side secrets, private backend ports and request limits; anonymous shared-demo APIs, authenticated operator-only reset.
 - [x] GitHub Actions CD: deploy pushes to `main` after all four CI jobs pass, with SSH host verification and local/public health checks.
-- [ ] Consider the Transactional Outbox Pattern later for reliable event publishing.
+- [x] Transactional outbox for reliable event publishing; broker-outage/restart recovery verified in the isolated E2E stack.
 
 ## Design Principles
 
 - Clear domain boundaries and independent deployability.
 - Each service owns its data; no direct cross-service database access.
 - Keep the initial RAG implementation simple.
-- Defer advanced RAG, Kubernetes, and additional infrastructure until needed.
+- Keep the existing PostgreSQL/RabbitMQ/Compose stack; no Kubernetes, CDC platform,
+  centralized logging service or additional deployment services are planned.
 
 ## Phases of Implementation
 
@@ -131,12 +133,41 @@ Phase numbers are retained for reference; use the order below for the remaining 
 
 - **Phase 16 — RAG evaluation:** [x] Small real-model sanity check completed: 10 fixed notes and 10 questions, with documented scoring and limitations in [evaluation/results.md](evaluation/results.md). Scores are assistant-reviewed, not independently human-validated. Scope and procedure: [evaluation-plan.md](evaluation-plan.md).
 - **Phase 18 — Public deployment:** [x] Public demo deployed and verified for the agreed scope: HTTPS, server-side secrets, restricted backend exposure, request limits, index recovery and reset authentication. Note/chat/index actions intentionally remain anonymous; no account management. Automatic deployment after CI is working. Verification details and intentionally omitted destructive/reset/restart checks: [deploy/plan.md](deploy/plan.md).
+- **Phases 12/13 — Transactional outbox and recovery verification:** [x] Implemented and verified locally in the isolated E2E stack: committed CRUD/reset events survive broker outages and MS1 restarts, then update the index without manual reconciliation. Public deployment of this change is pending.
 - **Phase 15 — Release polish:** [ ] Keep startup instructions and model prerequisites accurate throughout development; finalize screenshots, architecture/limitations documentation, and a clean-start walkthrough after evaluation and any intended deployment safeguards are finished. Public hosting is not required for a repository-only release.
+
+### Transactional outbox
+
+- Flyway V3 adds `note_outbox`; V1/V2 are unchanged. Stored events include their
+  stable event ID, routing key, attempt count and next-attempt timestamp.
+  Nullable `note_id` has no foreign key, so deletion and reset events survive
+  removal of notes. Reset does not delete pending events.
+- Note create/update/delete and reset atomically commit their data and outbox
+  events. Enqueue failure rolls back the mutation. Request handling never sends
+  to RabbitMQ. The 100-note creation lock participates in this transaction;
+  summarization still has no event or open transaction during the AI call.
+- A one-second scheduler processes at most 20 due events per tick, each in its
+  own transaction using `FOR UPDATE SKIP LOCKED`. It sends persistent messages
+  with correlated confirms and mandatory returns. Only an ACK without a return
+  deletes the row. Failures retain the event and retry indefinitely with
+  exponential delays capped at five minutes and a bounded attempt counter.
+- The row lock is held through the five-second confirmation wait. A crash
+  releases it; acceptance before database commit can cause duplicate delivery.
+  Transport correlations are unique per attempt; payload event IDs stay stable.
+  This briefly occupies one database connection but avoids claim tokens/leases.
+- MS2's existing durable queue, acknowledgements, retries/DLQ and current-state
+  hashing handle duplicate/out-of-order events. Delivery is at-least-once, not
+  exactly-once; publisher confirmation does not prove successful indexing.
+  Consumer failures or lost index data still need manual reconcile/rebuild.
+- Focused tests cover transaction rollback, enqueue failure, confirms/returns/
+  timeout, retries and row locking. The existing E2E runner also checks CRUD and
+  reset during real broker outages, MS1 restarts, retained earlier reset events,
+  drained queues and matching index metadata without repair calls.
+- No new dependency, infrastructure service, API, UI or event archive.
+  Pending-count/oldest-event queries and log/DLQ inspection are documented in
+  [deploy/README.md](deploy/README.md#outbox-and-index-recovery).
 
 ### Optional / deferred work
 
-- **Phase 12 — Transactional Outbox:** [ ] Optional reliability extension, preserved on `feature/transactional-outbox`, not included in `main`. Atomic note/event persistence, scheduled publishing with publisher confirms and retries, and idempotent MS2 consumption.
-- **Phase 13 — Outbox recovery E2E:** [ ] Only needed if phase 12 is adopted: save a note while RabbitMQ is unavailable, restore the broker, and verify eventual indexing.
 - **Phase 14 — Backup and restore:** [ ] Defer while data is disposable; revisit before relying on Mnemo for real notes. Document and verify PostgreSQL restoration, then rebuild the derived Chroma index from MS1.
-- **Phase 17 — Collection scaling:** [ ] MS1 pagination and server-side search when collection size or usage justifies them.
 - **Optional release automation:** [ ] Publish versioned container images to GHCR through CI; not required for phase 15 or a complete portfolio release.

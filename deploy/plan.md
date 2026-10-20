@@ -24,8 +24,9 @@ No login, users, read-only mode or deployment-specific backend mode.
    an empty database only. Normal deployment must not overwrite existing notes.
    One note is "Attention Is All You Need"; the rest are humorous fictional notes.
 6. [x] **Authenticated reset:** add an admin endpoint that clears notes,
-   restores the same ten starter notes, and best-effort triggers an MS2 full
-   rebuild event. If MS2/RabbitMQ is unavailable, data reset still succeeds.
+   restores the same ten starter notes, and durably queues an MS2 full
+   rebuild event in the transactional outbox. If MS2/RabbitMQ is unavailable,
+   data reset succeeds and delivery retries automatically.
 7. [x] **Deploy and verify:** confirm server permissions and effective public port
    exposure, deploy, then check HTTPS, user actions, limits and index recovery.
    A destructive live reset and full-stack restart are optional for this demo.

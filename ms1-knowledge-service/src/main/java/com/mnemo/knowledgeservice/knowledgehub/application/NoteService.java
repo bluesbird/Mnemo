@@ -13,6 +13,7 @@ import com.mnemo.knowledgeservice.knowledgehub.persistence.NoteRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -45,6 +46,7 @@ public class NoteService {
         return notes;
     }
 
+    @Transactional
     public NoteResponseDto addNote(CreateNoteRequestDto request) {
         Note note = new Note(request.title(), request.content());
         note.setSummary(null);
@@ -77,6 +79,7 @@ public class NoteService {
         return metadata;
     }
 
+    @Transactional
     public NoteResponseDto updateNote(Long id, UpdateNoteRequestDto request) {
         Note note = findNote(id);
 
@@ -106,6 +109,7 @@ public class NoteService {
         return toDto(updatedNote);
     }
 
+    @Transactional
     public void deleteNote(Long id) {
         noteRepository.delete(findNote(id));
         logger.info("Deleted note with id {}", id);

@@ -22,7 +22,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SpringBootTest
+@SpringBootTest(properties = "app.events.outbox.enabled=false")
 class FlywayMigrationTests {
 
     @Autowired
@@ -34,7 +34,7 @@ class FlywayMigrationTests {
         try {
             Flyway flyway = flywayFor(schema, false);
 
-            assertEquals(2, flyway.migrate().migrationsExecuted);
+            assertEquals(3, flyway.migrate().migrationsExecuted);
             assertEquals(0, flyway.migrate().migrationsExecuted);
             assertEquals("SQL", historyType(schema));
             assertHibernateValidates(schema);
@@ -54,7 +54,7 @@ class FlywayMigrationTests {
             }
 
             Flyway flyway = flywayFor(schema, true);
-            assertEquals(1, flyway.migrate().migrationsExecuted);
+            assertEquals(2, flyway.migrate().migrationsExecuted);
             assertEquals("BASELINE", historyType(schema));
             assertEquals(1, scalar("SELECT count(*) FROM " + schema + ".note "
                     + "WHERE title = 'Legacy note' AND content = 'Keep this content' "

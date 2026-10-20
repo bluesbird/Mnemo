@@ -42,21 +42,21 @@ def verify_ms1_migrations(command, env):
             command + ["exec", "-T", "db", "psql", "-U", "e2e", "-d", "mnemo_e2e",
                        "-At", "-c",
                        "SELECT count(*) || ':' || COALESCE(bool_and(success), false)::text "
-                       "FROM flyway_schema_history WHERE version IN ('1', '2') AND type = 'SQL'"],
+                       "FROM flyway_schema_history WHERE version IN ('1', '2', '3') AND type = 'SQL'"],
             env=env, capture_output=True, text=True, timeout=30,
         )
         last_observation = result.stdout.strip() or result.stderr.strip()
-        if result.returncode == 0 and result.stdout.strip() == "2:true":
+        if result.returncode == 0 and result.stdout.strip() == "3:true":
             break
-        if result.returncode == 0 and result.stdout.strip() not in ("0:false", "1:true", ""):
+        if result.returncode == 0 and result.stdout.strip() not in ("0:false", "1:true", "2:true", ""):
             raise AssertionError(
-                "Expected successful fresh Flyway V1 and V2 migrations: " + last_observation)
+                "Expected successful fresh Flyway V1/V2/V3 migrations: " + last_observation)
         time.sleep(1)
     else:
-        raise AssertionError("Timed out waiting for Flyway V1/V2; last observation: "
+        raise AssertionError("Timed out waiting for Flyway V1/V2/V3; last observation: "
                              + last_observation)
     subprocess.run(command + ["restart", "ms1"], env=env, check=True, timeout=60)
-    print("PASS: fresh Flyway V1/V2 applied and MS1 restarted with validated schema", flush=True)
+    print("PASS: fresh Flyway V1/V2/V3 applied and MS1 restarted with validated schema", flush=True)
 
 
 def verify_ui_configuration(command, env):
@@ -100,6 +100,8 @@ def main():
         with scenario_log.open("w", encoding="utf-8") as log:
             subprocess.run(command + ["run", "--rm", "-T", "tests"], env=env,
                            stdout=log, stderr=subprocess.STDOUT, check=True, timeout=420)
+        from recovery import run as verify_recovery
+        verify_recovery(command, env)
         logs = subprocess.run(command + ["logs", "--no-color", "--no-log-prefix", "ms1"],
                               env=env, capture_output=True, text=True, errors="replace",
                               check=True, timeout=30)

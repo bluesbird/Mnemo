@@ -96,8 +96,11 @@ keyword/vector fusion; a dedicated BM25 engine remains deferred.
 - Use retry with bounded attempts and a dead-letter queue for poison messages.
 - Treat events as at-least-once and potentially out-of-order; this is safe because each event triggers a fetch of the current note and a `source_hash` comparison. A deleted note (404 from MS1) removes its chunks. Process events for the same note serially (e.g. a single consumer).
 - Reconcile provides a recovery mechanism for missed events and stale index entries.
-- MS1 currently publishes directly to RabbitMQ without an outbox. Missed events
-  require manual reconcile/rebuild; there is no scheduled or query-time recovery.
+- MS1 atomically queues note/reset events in a PostgreSQL transactional outbox.
+  Confirmed, persistent RabbitMQ delivery retries automatically after broker
+  outages and MS1 restarts. Duplicates are expected and handled by fetching current
+  note state. Consumer/DLQ failures and lost index data still require manual
+  reconcile/rebuild; there is no scheduled or query-time reconciliation.
 - Rebuild recreates the index from scratch.
 - Keep MS1 as the source of truth; ChromaDB contains derived data.
 
@@ -131,7 +134,6 @@ keyword/vector fusion; a dedicated BM25 engine remains deferred.
 - LangChain
 - Separate SQL database for chunks or index status
 - Reranking and advanced RAG techniques
-- Transactional Outbox Pattern
 - Kubernetes
 
 ## Design Principles

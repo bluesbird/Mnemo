@@ -64,7 +64,7 @@ MS2 options (env vars, prefix `MS2_`): `RABBITMQ_ENABLED=false` runs without the
 
 The root Compose stack seeds the ten starter notes on an empty database. You can
 also trigger an authenticated reset that replaces notes with starter data
-and sends a best-effort rebuild event to MS2:
+and durably queues an index-rebuild event for MS2:
 
 ```powershell
 $resetKey = $env:MNEMO_RESET_API_KEY
@@ -73,9 +73,18 @@ Invoke-RestMethod -Method Post -Uri http://localhost:8080/api/v1/admin/reset-dat
   -Headers @{ "X-Mnemo-Reset-Key" = $resetKey }
 ```
 
-The endpoint returns `202 Accepted` when reset completes and rebuild was requested.
-If RabbitMQ/MS2 is unavailable at that moment, trigger reconcile/rebuild manually
-after services recover.
+The endpoint returns `202 Accepted` when reset and its outbox event have committed.
+Rebuilding is asynchronous: broker outages and MS1 restarts retain pending events
+for automatic delivery when RabbitMQ and the MS2 queue recover.
+
+Note create/update/delete use the same transactional outbox in PostgreSQL.
+The dispatcher sends persistent messages and removes pending rows only after a
+positive broker confirmation without an unroutable-message return. Failed sends
+retry indefinitely with delays capped at five minutes. Delivery is at-least-once;
+MS2 fetches current note state, so duplicate/out-of-order events converge.
+This does not guarantee successful indexing: consumer failures can reach MS2's
+dead-letter queue. Manual reconcile/rebuild remain available for those failures
+or lost index data. See [outbox operations](deploy/README.md#outbox-and-index-recovery).
 
 ## Tests
 
@@ -157,6 +166,10 @@ and checks the new content/hash replaces the old one, then deletes it and verifi
 there are no stale chat sources. This direct-service lifecycle never calls
 reconcile/rebuild. Consumer readiness,
 event acknowledgements and an empty dead-letter queue are also checked.
+It then stops RabbitMQ, commits creates/updates/deletes and a separate reset,
+restarts MS1 with pending work, and restores the broker. Read-only index checks
+verify automatic convergence to MS1 and drained outbox/queues without calling
+reconcile/rebuild during recovery.
 The runner also verifies MS1's emitted JSON logs contain timestamp, severity, logger,
 message and service name.
 After the unchanged direct-service lifecycle, it checks the UI's static assets and

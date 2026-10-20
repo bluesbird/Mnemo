@@ -161,15 +161,8 @@ def main():
     eventually("authenticated reset restores the starter notes", starter_data_restored)
     eventually("reset rebuild event acknowledged without dead letters", broker_drained)
 
-    def reset_rebuild_indexed():
-        result = request(MS2 + "/index/reconcile", "POST")
-        assert result["total_ms1_notes"] == 10, result
-        assert result["deleted_note_ids"] == [], result
-        assert len(result["skipped_note_ids"]) == 10, result
-        return True
-
-    eventually("reset rebuild event refreshes index", reset_rebuild_indexed)
-    print("PASS: authenticated reset and rebuild trigger", flush=True)
+    # The host runner verifies index contents read-only; reconciliation here could mask a missed event.
+    print("PASS: authenticated reset and rebuild trigger queued", flush=True)
 
 
 if __name__ == "__main__":

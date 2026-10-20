@@ -111,10 +111,9 @@ curl --fail-with-body -X POST http://127.0.0.1:8081/api/v1/admin/reset-database 
   -H "X-Mnemo-Reset-Key: $MNEMO_RESET_API_KEY"
 ```
 
-The endpoint returns `202 Accepted` after replacing notes and requesting an
-MS2 full rebuild event. Event publication is best effort: if RabbitMQ/MS2 is
-currently unavailable, the reset still succeeds and an operator should run index
-rebuild/reconcile once dependencies are healthy.
+The endpoint returns `202 Accepted` after committing the replacement notes and
+an outbox event requesting an MS2 full rebuild. Broker outages do not block reset;
+the event remains in PostgreSQL for automatic delivery. Rebuilding is asynchronous.
 
 Start or update the deployment from the repository root:
 
@@ -127,6 +126,7 @@ does not invoke AI and updating clears the previous summary. The old
 `/ai-enrich` route is removed. Deploy MS1 and UI together. Flyway V2 drops the
 old tag tables at MS1 startup without changing notes, summaries or the derived
 index. Tag data cannot be recovered without a pre-update database backup.
+Flyway V3 adds the transactional event outbox; existing migrations stay unchanged.
 
 ## Automatic deployment
 
@@ -173,3 +173,31 @@ Inspect service status and logs with:
 docker compose --env-file deploy/.env -f deploy/compose.yaml ps
 docker compose --env-file deploy/.env -f deploy/compose.yaml logs --tail 100
 ```
+
+## Outbox and index recovery
+
+Note create/update/delete and reset atomically commit pending events in PostgreSQL.
+The dispatcher polls every second, holds one pending row lock while sending, and
+deletes only after a positive RabbitMQ confirmation with no mandatory return.
+Persistent messages and unique per-attempt correlations preserve at-least-once
+delivery; duplicates can occur after broker acceptance and before database commit.
+MS2 handles them by fetching the current note state. Failed sends retry indefinitely,
+with exponential delays from two seconds up to five minutes. No extra service is needed.
+
+Inspect pending work without changing it:
+
+```sh
+docker compose --env-file deploy/.env -f deploy/compose.yaml exec -T db \
+  sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT count(*) AS pending, min(occurred_at) AS oldest_event, max(attempts) AS max_attempts FROM note_outbox;"'
+docker compose --env-file deploy/.env -f deploy/compose.yaml logs --tail 100 ms1-knowledge-service ms2-rag-service
+docker compose --env-file deploy/.env -f deploy/compose.yaml exec -T rabbitmq \
+  rabbitmqctl list_queues name messages_ready messages_unacknowledged consumers
+```
+
+Pending rows survive MS1/broker restarts and reset never clears them. Check broker
+connectivity and the MS2 queue/bindings if rows keep retrying. Do not delete pending
+rows to clear an error. Once delivery succeeds, an empty outbox means broker
+acceptance, not finished indexing. Check `ms2.note-events.dlq` and MS2 logs for
+consumer failures; after fixing the cause, use the UI's reconcile/rebuild to repair
+the derived index. The outbox does not replace PostgreSQL/RabbitMQ volume backups,
+recover a lost index automatically, or provide exactly-once delivery.
