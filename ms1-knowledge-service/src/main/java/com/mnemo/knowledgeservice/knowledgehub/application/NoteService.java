@@ -5,6 +5,7 @@ import com.mnemo.knowledgeservice.knowledgehub.api.dto.NoteIndexMetadataDto;
 import com.mnemo.knowledgeservice.knowledgehub.api.dto.NoteResponseDto;
 import com.mnemo.knowledgeservice.knowledgehub.api.dto.UpdateNoteRequestDto;
 import com.mnemo.knowledgeservice.knowledgehub.domain.Note;
+import com.mnemo.knowledgeservice.knowledgehub.domain.NoteLimitReachedException;
 import com.mnemo.knowledgeservice.knowledgehub.domain.NoteNotFoundException;
 import com.mnemo.knowledgeservice.knowledgehub.messaging.NoteEventPublisher;
 import com.mnemo.knowledgeservice.knowledgehub.messaging.NoteEventType;
@@ -48,7 +49,10 @@ public class NoteService {
         Note note = new Note(request.title(), request.content());
         note.setSummary(null);
 
-        Note savedNote = noteRepository.save(note);
+        Note savedNote = noteRepository.saveBelowLimit(note, 100).orElseThrow(() -> {
+            logger.warn("Note creation rejected: the 100-note limit has been reached");
+            return new NoteLimitReachedException();
+        });
         logger.info("Created note with id {}", savedNote.getId());
         noteEventPublisher.publish(NoteEventType.CREATED, savedNote.getId());
         return toDto(savedNote);

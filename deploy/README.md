@@ -14,6 +14,9 @@ to that server and those ports are reachable.
 
 ## Resource limits
 
+The shared collection allows at most 100 notes, including starter notes.
+Creation at the limit returns HTTP 409; editing and deleting remain available.
+
 Deployment Nginx limits each client IP to 30 chat requests/minute (burst 20)
 and 10 summarization requests/minute (burst 5). It allows at most two concurrent
 model-backed HTTP operations across all clients. Reconcile and rebuild are each

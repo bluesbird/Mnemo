@@ -21,6 +21,16 @@ beforeEach(() => {
   vi.mocked(notesApi.listNotes).mockResolvedValue([]);
 });
 
+it("explains the collection limit and disables creation at 100 notes", async () => {
+  vi.mocked(notesApi.listNotes).mockResolvedValue(Array.from({ length: 100 }, (_, id) => ({
+    id, title: `Note ${id}`, content: "Content", summary: null,
+    createdAt: "2026-10-20T00:00:00", updatedAt: "2026-10-20T00:00:00",
+  })));
+  render(<App />);
+  await screen.findByText("100-note limit reached. Delete a note to add another.");
+  expect((screen.getByRole("button", { name: "Create note" }) as HTMLButtonElement).disabled).toBe(true);
+});
+
 it.each([false, true])("confirms and discards changes before opening chat (new note: %s)", async (isNew) => {
   const note = {
     id: 1, title: "Saved note", content: "Saved content", summary: null,

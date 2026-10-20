@@ -139,6 +139,10 @@ function App() {
   }
 
   function startNewNoteGuarded() {
+    if (notes.length >= 100) {
+      setError("The 100-note limit has been reached. Delete a note before adding another.");
+      return;
+    }
     if (!confirmDiscardChanges()) return;
     startNewNote();
   }

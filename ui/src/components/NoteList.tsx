@@ -36,6 +36,8 @@ export function NoteList({
           type="button"
           onClick={onCreate}
           aria-label="Create note"
+          disabled={totalCount >= 100}
+          title={totalCount >= 100 ? "Delete a note before adding another (100-note limit)." : undefined}
         >
           <span aria-hidden="true">+</span> New note
         </button>
@@ -71,7 +73,9 @@ export function NoteList({
         ))}
       </div>
       <div className="sidebar-footer">
-        {totalCount} {totalCount === 1 ? "note" : "notes"} in your library
+        {totalCount >= 100
+          ? "100-note limit reached. Delete a note to add another."
+          : `${totalCount} ${totalCount === 1 ? "note" : "notes"} in your library`}
       </div>
     </aside>
   );

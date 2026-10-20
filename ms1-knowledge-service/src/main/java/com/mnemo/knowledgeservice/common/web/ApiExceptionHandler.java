@@ -2,6 +2,7 @@ package com.mnemo.knowledgeservice.common.web;
 
 import com.mnemo.knowledgeservice.knowledgehub.application.NoteSummaryException;
 import com.mnemo.knowledgeservice.knowledgehub.domain.NoteNotFoundException;
+import com.mnemo.knowledgeservice.knowledgehub.domain.NoteLimitReachedException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -15,6 +16,14 @@ import java.util.List;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+
+    @ExceptionHandler(NoteLimitReachedException.class)
+    public ProblemDetail handleNoteLimit(NoteLimitReachedException exception, HttpServletRequest request) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+        problemDetail.setTitle("Note limit reached");
+        problemDetail.setInstance(URI.create(request.getRequestURI()));
+        return problemDetail;
+    }
 
     @ExceptionHandler(NoteSummaryException.class)
     public ProblemDetail handleNoteSummary(NoteSummaryException exception, HttpServletRequest request) {

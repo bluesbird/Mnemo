@@ -12,6 +12,9 @@ import jakarta.persistence.PersistenceContext;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -26,6 +29,30 @@ class KnowledgeServiceApplicationTests {
 
     @Test
     void contextLoads() {
+    }
+
+    @Test
+    void noteLimitSerializesConcurrentCreatesAndDeletionFreesSpace() throws Exception {
+        var fixtures = noteRepository.saveAll(IntStream.range(0, 99)
+                .mapToObj(i -> new Note("Limit " + i, "Content")).toList());
+        var created = new java.util.ArrayList<Note>();
+        try (var executor = Executors.newFixedThreadPool(2)) {
+            var first = executor.submit(() -> noteRepository.saveBelowLimit(new Note("First", "Content"), 100));
+            var second = executor.submit(() -> noteRepository.saveBelowLimit(new Note("Second", "Content"), 100));
+            var firstResult = first.get(10, TimeUnit.SECONDS);
+            var secondResult = second.get(10, TimeUnit.SECONDS);
+            firstResult.ifPresent(created::add);
+            secondResult.ifPresent(created::add);
+            assertEquals(1, created.size());
+            assertEquals(100, noteRepository.count());
+            noteRepository.delete(created.removeFirst());
+            var replacement = noteRepository.saveBelowLimit(new Note("Replacement", "Content"), 100);
+            replacement.ifPresent(created::add);
+            assertEquals(true, replacement.isPresent());
+        } finally {
+            noteRepository.deleteAll(created);
+            noteRepository.deleteAll(fixtures);
+        }
     }
 
     @Test

@@ -54,6 +54,8 @@ Prerequisites: Docker, Java 25, Python 3.12+, [Ollama](https://ollama.com).
 Example requests: `ms2-rag-service/requests.http`.
 
 Notes contain a title, content and an optional AI summary; there are no tags.
+The shared collection is limited to 100 notes, including starter notes; delete
+a note to make room when the limit is reached.
 Use **Summarize note** on a saved note to generate a summary with one model call
 (`POST /api/v1/notes/{id}/summarize`). Saving never invokes AI. Updating a note
 clears its summary; a failed summarization preserves the previous summary.

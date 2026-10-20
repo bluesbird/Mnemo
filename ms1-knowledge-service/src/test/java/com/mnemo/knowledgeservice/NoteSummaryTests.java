@@ -7,6 +7,7 @@ import com.mnemo.knowledgeservice.knowledgehub.application.NoteSummaryException;
 import com.mnemo.knowledgeservice.knowledgehub.application.NoteService;
 import com.mnemo.knowledgeservice.knowledgehub.application.NoteSummaryService;
 import com.mnemo.knowledgeservice.knowledgehub.domain.Note;
+import com.mnemo.knowledgeservice.knowledgehub.domain.NoteLimitReachedException;
 import com.mnemo.knowledgeservice.knowledgehub.messaging.NoteEventPublisher;
 import com.mnemo.knowledgeservice.knowledgehub.messaging.NoteEventType;
 import com.mnemo.knowledgeservice.knowledgehub.persistence.NoteRepository;
@@ -46,6 +47,19 @@ class NoteSummaryTests {
     }
 
     @Test
+    void fullCollectionRejectsCreationWithoutPublishingAnEvent() {
+        when(notes.saveBelowLimit(any(Note.class), eq(100))).thenReturn(Optional.empty());
+        var error = assertThrows(NoteLimitReachedException.class,
+                () -> noteService.addNote(new CreateNoteRequestDto("Title", "Content")));
+        var request = mock(HttpServletRequest.class);
+        when(request.getRequestURI()).thenReturn("/api/v1/notes");
+        var problem = new ApiExceptionHandler().handleNoteLimit(error, request);
+        assertEquals(409, problem.getStatus());
+        assertTrue(problem.getDetail().contains("100-note limit"));
+        verifyNoInteractions(publisher);
+    }
+
+    @Test
     void summarizesWithOneModelCallAndDoesNotChangeIndexedContent() {
         when(model.call(any(Prompt.class))).thenReturn(response("A short summary.", "stop"));
         var note = existingNote();
@@ -67,6 +81,8 @@ class NoteSummaryTests {
     @Test
     void createAndUpdateNeverCallAiAndUpdateClearsSummary() {
         when(notes.save(any(Note.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(notes.saveBelowLimit(any(Note.class), eq(100)))
+                .thenAnswer(invocation -> Optional.of(invocation.getArgument(0)));
         assertNull(noteService.addNote(new CreateNoteRequestDto("New", "Content")).summary());
         var note = existingNote();
 
