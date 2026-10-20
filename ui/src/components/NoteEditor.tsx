@@ -7,13 +7,13 @@ type NoteEditorProps = {
   isNew: boolean;
   draft: NoteDraft;
   saving: boolean;
-  enriching: boolean;
+  summarizing: boolean;
   hasUnsavedChanges: boolean;
   error: string;
   onDraftChange: (draft: NoteDraft) => void;
   onSave: FormEventHandler<HTMLFormElement>;
   onDelete: () => void;
-  onEnrich: () => void;
+  onSummarize: () => void;
   onCreate: () => void;
 };
 
@@ -22,13 +22,13 @@ export function NoteEditor({
   isNew,
   draft,
   saving,
-  enriching,
+  summarizing,
   hasUnsavedChanges,
   error,
   onDraftChange,
   onSave,
   onDelete,
-  onEnrich,
+  onSummarize,
   onCreate,
 }: NoteEditorProps) {
   const hasEditor = isNew || note !== null;
@@ -75,21 +75,21 @@ export function NoteEditor({
                   <button
                     className="outline-button"
                     type="button"
-                    onClick={onEnrich}
-                    disabled={saving || enriching || hasUnsavedChanges}
+                    onClick={onSummarize}
+                    disabled={saving || summarizing || hasUnsavedChanges}
                     title={
                       hasUnsavedChanges
-                        ? "Save your changes before enriching"
-                        : "Generate a summary and suggested tags"
+                        ? "Save your changes before summarizing"
+                        : "Generate an AI summary of this saved note"
                     }
                   >
-                    {enriching ? "Enriching…" : "Enrich with AI"}
+                    {summarizing ? "Summarizing…" : "Summarize note"}
                   </button>
                   <button
-                    className=                    "outline-button danger-button"
+                    className="outline-button danger-button"
                     type="button"
                     onClick={onDelete}
-                    disabled={saving || enriching}
+                    disabled={saving || summarizing}
                   >
                     Delete
                   </button>
@@ -99,7 +99,7 @@ export function NoteEditor({
                 className="save-button"
                 type="submit"
                 form="note-form"
-                disabled={!canSave || saving || enriching}
+                disabled={!canSave || saving || summarizing}
               >
                 {saving ? "Saving…" : "Save note"}
               </button>
@@ -148,17 +148,11 @@ export function NoteEditor({
               </span>
             )}
           </form>
-          {note && (note.summary || note.tags.length > 0) && (
-            <div className="note-extras">
-              {note.summary && <p>{note.summary}</p>}
-              {note.tags.length > 0 && (
-                <div className="tags">
-                  {note.tags.map((tag) => (
-                    <span key={tag}>{tag}</span>
-                  ))}
-                </div>
-              )}
-            </div>
+          {note?.summary && !hasUnsavedChanges && (
+            <section className="note-summary" aria-label="AI summary">
+              <h3>AI summary</h3>
+              <p>{note.summary}</p>
+            </section>
           )}
         </>
       ) : (

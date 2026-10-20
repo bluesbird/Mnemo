@@ -1,7 +1,7 @@
 package com.mnemo.knowledgeservice;
 
-import com.mnemo.knowledgeservice.knowledgehub.application.AiEnrichmentException;
-import com.mnemo.knowledgeservice.knowledgehub.application.OllamaAiService;
+import com.mnemo.knowledgeservice.knowledgehub.application.NoteSummaryException;
+import com.mnemo.knowledgeservice.knowledgehub.application.NoteSummaryService;
 import com.sun.net.httpserver.HttpServer;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.client.ChatClient;
@@ -26,7 +26,6 @@ import tools.jackson.databind.ObjectMapper;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -75,7 +74,7 @@ class AiProviderConfigurationTests {
             requests.add(mapper.readTree(exchange.getRequestBody().readAllBytes()));
             authorizations.add(exchange.getRequestHeaders().getFirst("Authorization"));
             int call = requests.size();
-            if (call == 4) {
+            if (call == 3) {
                 byte[] error = """
                         {"error":{"message":"Test quota exceeded","type":"rate_limit_error","code":"rate_limit_exceeded"}}
                         """.getBytes(StandardCharsets.UTF_8);
@@ -85,8 +84,8 @@ class AiProviderConfigurationTests {
                 exchange.close();
                 return;
             }
-            String finishReason = call == 3 ? "length" : "stop";
-            String content = call == 1 ? "This note describes a cactus." : "gardening, cactus";
+            String finishReason = call == 2 ? "length" : "stop";
+            String content = "This note describes a cactus.";
             byte[] response = ("""
                     {"id":"test-completion","object":"chat.completion","created":1,
                      "model":"qwen/qwen3.8-27b",
@@ -111,17 +110,17 @@ class AiProviderConfigurationTests {
                 var model = context.getBean(ChatModel.class);
                 assertThat(model).isInstanceOf(OpenAiChatModel.class);
                 assertThat(context).doesNotHaveBean(OllamaChatModel.class);
-                var service = new OllamaAiService(ChatClient.builder(model), true);
-                var result = service.enrichNote("Cactus", "A cactus wears a hat.");
-                assertThat(result.summary()).isEqualTo("This note describes a cactus.");
-                assertThat(result.tagNames()).isEqualTo(List.of("gardening", "cactus"));
-                assertThrows(AiEnrichmentException.class,
-                        () -> service.enrichNote("Cactus", "A cactus wears a hat."));
-                assertThat(requests).hasSize(3);
-                var quotaError = assertThrows(AiEnrichmentException.class,
-                        () -> service.enrichNote("Cactus", "A cactus wears a hat."));
+                var service = new NoteSummaryService(ChatClient.builder(model), true);
+                var result = service.summarizeNote("Cactus", "A cactus wears a hat.");
+                assertThat(result).isEqualTo("This note describes a cactus.");
+                assertThat(requests).hasSize(1);
+                assertThrows(NoteSummaryException.class,
+                        () -> service.summarizeNote("Cactus", "A cactus wears a hat."));
+                assertThat(requests).hasSize(2);
+                var quotaError = assertThrows(NoteSummaryException.class,
+                        () -> service.summarizeNote("Cactus", "A cactus wears a hat."));
                 assertThat(quotaError.getMessage()).contains("quota exceeded");
-                assertThat(requests).hasSize(4);
+                assertThat(requests).hasSize(3);
                 for (var request : requests) {
                     assertThat(request.path("model").asText()).isEqualTo("qwen/qwen3.8-27b");
                     assertThat(request.path("max_completion_tokens").asInt()).isEqualTo(2048);

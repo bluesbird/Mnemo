@@ -38,8 +38,8 @@ def check_static():
 def check_proxy():
     cases = [
         ("/api", "/api", []),
-        ("/api/v1/notes?q=a%20b&tag=x", "/api/v1/notes?q=a%20b&tag=x", []),
-        ("/api/v1/notes/1/ai-enrich", "/api/v1/notes/1/ai-enrich", []),
+        ("/api/v1/notes?q=a%20b&page=1", "/api/v1/notes?q=a%20b&page=1", []),
+        ("/api/v1/notes/1/summarize", "/api/v1/notes/1/summarize", []),
         ("/api/v1/index/rebuild", "/api/v1/index/rebuild", []),
         ("/rag-api", "/", []),
         ("/rag-api/api/v1/chat/query", "/api/v1/chat/query", []),
@@ -110,12 +110,12 @@ def check_rate_limits():
     ]
     assert 200 in chat_statuses and 429 in chat_statuses, chat_statuses
 
-    enrich = "http://ui-probe/api/v1/notes/1/ai-enrich"
-    enrich_statuses = [
-        fetch(enrich, "POST", b"", {})[0]
+    summarize = "http://ui-probe/api/v1/notes/1/summarize"
+    summarize_statuses = [
+        fetch(summarize, "POST", b"", {})[0]
         for _ in range(12)
     ]
-    assert 200 in enrich_statuses and 429 in enrich_statuses, enrich_statuses
+    assert 200 in summarize_statuses and 429 in summarize_statuses, summarize_statuses
 
     for operation in ("reconcile", "rebuild"):
         status = fetch(
@@ -141,8 +141,16 @@ def check_real_backends(request, eventually):
                    expected=201)
     note_url = notes + "/" + str(note["id"])
     try:
+        assert note["summary"] is None and "tags" not in note, note
+        request(note_url + "/ai-enrich", "POST", expected=404)
+        summarized = request(note_url + "/summarize", "POST")
+        assert summarized["summary"] == "This note records access details.", summarized
+        assert summarized["sourceHash"] == note["sourceHash"], summarized
+        assert "tags" not in summarized, summarized
+        assert request(note_url)["summary"] == summarized["summary"]
         updated = request(note_url, "PUT",
                           {"title": "UI proxy revised", "content": "Proxy access is indigo-3141."})
+        assert updated["summary"] is None and "tags" not in updated, updated
         assert request(note_url)["sourceHash"] == updated["sourceHash"]
 
         def indexed():

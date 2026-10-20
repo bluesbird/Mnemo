@@ -53,10 +53,15 @@ Prerequisites: Docker, Java 25, Python 3.12+, [Ollama](https://ollama.com).
 
 Example requests: `ms2-rag-service/requests.http`.
 
+Notes contain a title, content and an optional AI summary; there are no tags.
+Use **Summarize note** on a saved note to generate a summary with one model call
+(`POST /api/v1/notes/{id}/summarize`). Saving never invokes AI. Updating a note
+clears its summary; a failed summarization preserves the previous summary.
+
 MS2 options (env vars, prefix `MS2_`): `RABBITMQ_ENABLED=false` runs without the broker, `LOG_FORMAT=json` enables JSON logs, `RETRIEVAL_MIN_SCORE` sets the relevance cut-off.
 
 The root Compose stack seeds the ten starter notes on an empty database. You can
-also trigger an authenticated reset that replaces notes/tags with starter data
+also trigger an authenticated reset that replaces notes with starter data
 and sends a best-effort rebuild event to MS2:
 
 ```powershell
@@ -87,7 +92,11 @@ instructions; it never loads or clears the development notes/index.
 
 MS1 applies versioned PostgreSQL migrations from
 `ms1-knowledge-service/src/main/resources/db/migration` at startup. New databases
-receive `V1__create_knowledge_schema.sql`; Hibernate uses `ddl-auto=validate` and
+apply V1 followed by `V2__remove_note_tags.sql`; V2 removes the old tag tables
+while preserving notes and summaries. Existing V1 databases apply V2 at startup.
+Tag data is intentionally discarded; the old `/ai-enrich` endpoint is replaced
+by `/summarize` with no compatibility alias. Deploy MS1 and UI together.
+Hibernate uses `ddl-auto=validate` and
 does not create or update tables. Keep future schema changes in new versioned
 migrations; do not edit a migration after it has been applied.
 

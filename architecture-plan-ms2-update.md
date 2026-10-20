@@ -20,8 +20,8 @@ keyword/vector fusion; a dedicated BM25 engine remains deferred.
 ## Model Stack (V1)
 
 - **Embedding model:** `qwen3-embedding:0.6b` via Ollama (multilingual, long context, small enough for local CPU/GPU).
-- **RAG LLM:** `qwen3:4b` via Ollama (also used by MS1 for enrichment). The model and temperature are fixed server-side configuration, not user-selectable in the UI.
-- **Public deployment:** `qwen/qwen3.8-27b` via Groq for both MS2 answers and MS1 enrichment, with reasoning disabled. Chat provider selection is independent of embeddings, so this switch does not require reindexing. Upstream failures are explicit; there is no automatic provider fallback.
+- **RAG LLM:** `qwen3:4b` via Ollama (also used by MS1 for manual summarization). The model and temperature are fixed server-side configuration, not user-selectable in the UI.
+- **Public deployment:** `qwen/qwen3.8-27b` via Groq for both MS2 answers and MS1 manual summaries, with reasoning disabled. Chat provider selection is independent of embeddings, so this switch does not require reindexing. Upstream failures are explicit; there is no automatic provider fallback.
 - **Tokenizer:** `Qwen/Qwen3-Embedding-0.6B` from Hugging Face, used only to count tokens for chunking (use the lightweight `tokenizers` package, not full `transformers`). Only the tokenizer files are downloaded; the model weights come from Ollama.
 - Pin the tokenizer to a specific Hugging Face revision and cache the files locally (also in the Docker image) so chunking is reproducible and works offline. Include the tokenizer revision in `indexing_version`.
 - Token counts are an approximation for the quantized Ollama model; keep headroom below the embedding context limit.

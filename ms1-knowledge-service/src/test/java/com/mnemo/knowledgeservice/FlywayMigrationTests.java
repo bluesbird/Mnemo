@@ -34,7 +34,7 @@ class FlywayMigrationTests {
         try {
             Flyway flyway = flywayFor(schema, false);
 
-            assertEquals(1, flyway.migrate().migrationsExecuted);
+            assertEquals(2, flyway.migrate().migrationsExecuted);
             assertEquals(0, flyway.migrate().migrationsExecuted);
             assertEquals("SQL", historyType(schema));
             assertHibernateValidates(schema);
@@ -44,7 +44,40 @@ class FlywayMigrationTests {
     }
 
     @Test
-    void explicitlyBaselinedLegacySchemaKeepsItsDataAndRelationships() throws Exception {
+    void versionedUpgradeRemovesTagsWithoutChangingNotesOrSummaries() throws SQLException {
+        String schema = createSchema();
+        try {
+            Flyway.configure()
+                    .dataSource(schemaDataSource())
+                    .locations("classpath:db/migration")
+                    .schemas(schema)
+                    .defaultSchema(schema)
+                    .target("1")
+                    .load()
+                    .migrate();
+            try (Connection connection = schemaDataSource().getConnection();
+                 var statement = connection.createStatement()) {
+                connection.setSchema(schema);
+                statement.execute("INSERT INTO note (id, title, content, summary, source_hash) "
+                        + "VALUES (1, 'Keep title', 'Keep content', 'Keep summary', 'keep-hash')");
+                statement.execute("INSERT INTO tag (id, name) VALUES (1, 'obsolete')");
+                statement.execute("INSERT INTO note_tags (note_id, tag_id) VALUES (1, 1)");
+            }
+
+            assertEquals(1, flywayFor(schema, false).migrate().migrationsExecuted);
+            assertEquals(1, scalar("SELECT count(*) FROM " + schema + ".note "
+                    + "WHERE id = 1 AND title = 'Keep title' AND content = 'Keep content' "
+                    + "AND summary = 'Keep summary' AND source_hash = 'keep-hash'"));
+            assertEquals(0, scalar("SELECT count(*) FROM information_schema.tables "
+                    + "WHERE table_schema = '" + schema + "' AND table_name IN ('tag', 'note_tags')"));
+            assertHibernateValidates(schema);
+        } finally {
+            dropSchema(schema);
+        }
+    }
+
+    @Test
+    void explicitlyBaselinedLegacySchemaKeepsNotesAndSummariesButRemovesTags() throws Exception {
         String schema = createSchema();
         try {
             try (Connection connection = schemaDataSource().getConnection()) {
@@ -54,15 +87,13 @@ class FlywayMigrationTests {
             }
 
             Flyway flyway = flywayFor(schema, true);
-            assertEquals(0, flyway.migrate().migrationsExecuted);
+            assertEquals(1, flyway.migrate().migrationsExecuted);
             assertEquals("BASELINE", historyType(schema));
             assertEquals(1, scalar("SELECT count(*) FROM " + schema + ".note "
                     + "WHERE title = 'Legacy note' AND content = 'Keep this content' "
                     + "AND summary = 'Keep this summary' AND source_hash = 'legacy-hash'"));
-            assertEquals(1, scalar("SELECT count(*) FROM " + schema + ".note_tags nt "
-                    + "JOIN " + schema + ".note n ON n.id = nt.note_id "
-                    + "JOIN " + schema + ".tag t ON t.id = nt.tag_id "
-                    + "WHERE n.title = 'Legacy note' AND t.name = 'legacy-phase11'"));
+            assertEquals(0, scalar("SELECT count(*) FROM information_schema.tables "
+                    + "WHERE table_schema = '" + schema + "' AND table_name IN ('tag', 'note_tags')"));
             assertEquals(0, flyway.migrate().migrationsExecuted);
             assertHibernateValidates(schema);
         } finally {

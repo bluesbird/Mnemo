@@ -3,7 +3,7 @@
 ## Scope
 
 Deploy Mnemo at `https://mnemo-hub.duckdns.org` on the VPS using Docker Compose.
-Anonymous visitors can use all current functionality: note CRUD, enrichment,
+Anonymous visitors can use all current functionality: note CRUD, manual summarization,
 chat, reconcile and rebuild. Data is shared, synthetic and disposable.
 No login, users, read-only mode or deployment-specific backend mode.
 
@@ -17,13 +17,13 @@ No login, users, read-only mode or deployment-specific backend mode.
    development working as before.
 3. [x] **HTTPS and routing:** Caddy handles Let's Encrypt certificates; the existing
    UI Nginx serves frontend files and proxies the supported API routes.
-4. [x] **Resource limits:** bound chat/enrichment traffic and concurrency, request
+4. [x] **Resource limits:** bound chat/summarization traffic and concurrency, request
    sizes and Ollama resources. Reconcile and rebuild each allow one request per
    minute globally. Keep configuration small; no custom limiting service.
 5. [x] **Starter data:** load ten fictional notes with varied topics and lengths on
    an empty database only. Normal deployment must not overwrite existing notes.
    One note is "Attention Is All You Need"; the rest are humorous fictional notes.
-6. [x] **Authenticated reset:** add an admin endpoint that clears notes/tags,
+6. [x] **Authenticated reset:** add an admin endpoint that clears notes,
    restores the same ten starter notes, and best-effort triggers an MS2 full
    rebuild event. If MS2/RabbitMQ is unavailable, data reset still succeeds.
 7. [x] **Deploy and verify:** confirm server permissions and effective public port
@@ -52,6 +52,10 @@ Completed:
   The first automatic deployment passed local and public HTTPS checks.
 
 ### Live verification (2026-10-20)
+
+These checks preceded the change from enrichment to manual summarization.
+The new `/summarize` route replaces `/ai-enrich` and retains its request limits;
+the historical results below are not a live verification of the renamed route.
 
 - External TCP probes of the published IPv4 address reached SSH (22), HTTP (80)
   and HTTPS (443). PostgreSQL (5432), RabbitMQ (4369, 5671/5672,

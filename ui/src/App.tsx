@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   createNote,
   deleteNote as deleteNoteRequest,
-  enrichNote as enrichNoteRequest,
+  summarizeNote as summarizeNoteRequest,
   listNotes,
   updateNote,
 } from "./api/notes";
@@ -37,7 +37,7 @@ function App() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [enriching, setEnriching] = useState(false);
+  const [summarizing, setSummarizing] = useState(false);
   const [error, setError] = useState("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(loadChatMessages);
 
@@ -70,7 +70,7 @@ function App() {
     const query = search.trim().toLowerCase();
     if (!query) return notes;
     return notes.filter((note) =>
-      `${note.title} ${note.content} ${note.tags.join(" ")}`
+      `${note.title} ${note.content}`
         .toLowerCase()
         .includes(query),
     );
@@ -182,7 +182,7 @@ function App() {
     if (
       !selectedNote ||
       saving ||
-      enriching ||
+      summarizing ||
       !window.confirm(`Delete “${selectedNote.title}”?`)
     )
       return;
@@ -202,21 +202,21 @@ function App() {
     }
   }
 
-  async function enrichNote() {
-    if (!selectedNote || saving || enriching) return;
-    setEnriching(true);
+  async function summarizeNote() {
+    if (!selectedNote || saving || summarizing || hasUnsavedChanges) return;
+    setSummarizing(true);
     setError("");
     try {
-      const enriched = await enrichNoteRequest(selectedNote.id);
+      const summarized = await summarizeNoteRequest(selectedNote.id);
       setNotes((current) =>
-        current.map((note) => (note.id === enriched.id ? enriched : note)),
+        current.map((note) => (note.id === summarized.id ? summarized : note)),
       );
     } catch (cause) {
       setError(
-        cause instanceof Error ? cause.message : "Could not enrich note.",
+        cause instanceof Error ? cause.message : "Could not summarize note.",
       );
     } finally {
-      setEnriching(false);
+      setSummarizing(false);
     }
   }
 
@@ -337,7 +337,7 @@ function App() {
           search={search}
           loading={loading}
           saving={saving}
-          enriching={enriching}
+          summarizing={summarizing}
           error={error}
           hasUnsavedChanges={hasUnsavedChanges}
           onSearchChange={setSearch}
@@ -346,7 +346,7 @@ function App() {
           onDraftChange={setDraft}
           onSave={(event) => void saveNote(event)}
           onDelete={() => void deleteNote()}
-          onEnrich={() => void enrichNote()}
+          onSummarize={() => void summarizeNote()}
         />
       </div>
       <div className={view === "chat" ? "view" : "view is-hidden"}>
@@ -370,8 +370,8 @@ function App() {
               <a href="mailto:lorenz.moser.bw@gmail.com">lorenz.moser.bw@gmail.com</a>.
             </p>
             <p>
-              This is a public, shared demo, not private storage. Notes, summaries
-              and tags are stored on the server; anyone can read, edit or delete
+              This is a public, shared demo, not private storage. Notes and summaries
+              are stored on the server; anyone can read, edit or delete
               them. A derived search index is also stored there. Do not enter
               personal, confidential or sensitive information. Notes and their
               index entries remain until deleted or the demo is reset.
@@ -388,7 +388,7 @@ function App() {
               use analytics or advertising trackers.
             </p>
             <p>
-              When you use AI enrichment, the note title and content are sent
+              When you summarize a note, the note title and content are sent
               to GroqCloud. Chat sends your question and relevant excerpts from
               shared notes to GroqCloud to generate an answer. Embeddings and
               search run on the server using Ollama and Chroma.

@@ -22,7 +22,7 @@ Build a compact portfolio project demonstrating full-stack development, polyglot
                       |   Note events      |
                       +----> RabbitMQ -----+
 
-   MS1 --> Ollama/Groq (summaries, tags)
+   MS1 --> Ollama/Groq (manual summaries)
    MS2 --> Ollama (embeddings) + Ollama/Groq (answers)
 ```
 
@@ -36,9 +36,9 @@ host Ollama for embeddings. Deployment and verification:
 ## 1. Frontend
 
 - [x] React + TypeScript UI.
-- [x] Note management UI: list, search note title/content/tags, create, edit, and delete notes through MS1.
-- [x] Display summaries and tags already stored on a note.
-- [x] Trigger AI enrichment from the UI for a saved note.
+- [x] Note management UI: list, search note title/content, create, edit, and delete notes through MS1.
+- [x] Display the optional AI summary, hidden while editing and cleared on update.
+- [x] Manually summarize a saved note from the UI; saving never invokes AI.
 - [x] RAG chatbot UI with Notes/Chat navigation, source references, and in-session chat history (kept in `sessionStorage`).
 - [x] Calls MS1 through REST; local development uses the Vite proxy, with direct CORS access configurable.
 - [x] Calls MS2 through REST (`/api/v1/chat/query`) and supports public index actions (`/api/v1/index/reconcile`, `/api/v1/index/rebuild`).
@@ -48,18 +48,17 @@ host Ollama for embeddings. Deployment and verification:
 ## 2. MS1 — Knowledge Service
 
 - **Stack:** Java 25, Spring Boot 4, Spring Data JPA / Hibernate.
-- **Database:** PostgreSQL; source of truth for notes and tags.
+- **Database:** PostgreSQL; source of truth for notes and optional summaries.
 - **Responsibilities:**
   - [x] Note CRUD API (list, read, create, update, delete).
-  - [x] Persisted tags and note-tag associations, including tags created by enrichment; standalone tag CRUD API is not implemented.
   - [x] Input validation and centralized exception handling.
-  - [x] AI enrichment through Ollama locally or Groq in deployment: generate summaries and suggest tags; persist results. Failed or incomplete responses return explicit errors without replacing existing enrichment.
+  - [x] Manual summarization through Ollama locally or Groq in deployment: one model call via `POST /api/v1/notes/{id}/summarize`. Failed or incomplete responses return explicit errors without replacing the existing summary. Tags have been removed from the domain, API and database through Flyway V2.
   - [x] Add a persisted `source_hash` (title + content), recomputed whenever title or content changes.
   - [x] Index-metadata endpoint (`note_id`, `source_hash`) for MS2 reconciliation (`GET /api/v1/notes/index-metadata`).
   - [x] Publish versioned events when notes are created, updated, or deleted.
   - [x] Structured application logging (Spring Boot ECS JSON output in Compose; readable text for host-run development).
   - [x] OpenAPI / Swagger API documentation.
-  - [ ] Optional API pagination, server-side text search, and tag filtering (the UI currently searches its loaded notes locally).
+  - [ ] Optional API pagination and server-side text search (the UI currently searches its loaded notes locally).
 
 ## 3. MS2 — RAG Service
 
@@ -74,14 +73,14 @@ host Ollama for embeddings. Deployment and verification:
   - [x] Structured application logging.
   - [x] OpenAPI documentation through FastAPI's built-in support.
   - [x] Process events idempotently: always fetch the current note from MS1 and compare `source_hash`, so duplicate or out-of-order events are harmless.
-- [x] **Indexing scope:** Use note `title` and `content`; exclude summaries and tags initially.
+- [x] **Indexing scope:** Use note `title` and `content`; exclude generated summaries.
 - [x] **Indexing versioning:** Reindex when note `source_hash` changes or when indexing configuration changes (chunk size, overlap, splitter strategy, embedding model).
 - [x] **RAG pipeline:** Embeddings, vector search, context construction, and LLM generation.
 - [x] **API scope:** Chat and index rebuild/reconcile are public user-facing endpoints.
 
 ## 4. Communication
 
-- **UI ↔ MS1:** [x] REST note CRUD and UI-triggered enrichment. [ ] UI tag filtering.
+- **UI ↔ MS1:** [x] REST note CRUD and UI-triggered summarization.
 - **UI ↔ MS2:** [x] REST for chat requests and manual index actions.
 - **MS1 → MS2:** [x] RabbitMQ events (`NoteCreated`, `NoteUpdated`, `NoteDeleted`).
 - **MS2 → MS1:** [x] REST for initial indexing and full reindexing.
@@ -139,5 +138,5 @@ Phase numbers are retained for reference; use the order below for the remaining 
 - **Phase 12 — Transactional Outbox:** [ ] Optional reliability extension, preserved on `feature/transactional-outbox`, not included in `main`. Atomic note/event persistence, scheduled publishing with publisher confirms and retries, and idempotent MS2 consumption.
 - **Phase 13 — Outbox recovery E2E:** [ ] Only needed if phase 12 is adopted: save a note while RabbitMQ is unavailable, restore the broker, and verify eventual indexing.
 - **Phase 14 — Backup and restore:** [ ] Defer while data is disposable; revisit before relying on Mnemo for real notes. Document and verify PostgreSQL restoration, then rebuild the derived Chroma index from MS1.
-- **Phase 17 — Collection scaling and filtering:** [ ] MS1 pagination, server-side search, and tag filtering, plus UI tag filtering, when collection size or usage justifies them.
+- **Phase 17 — Collection scaling:** [ ] MS1 pagination and server-side search when collection size or usage justifies them.
 - **Optional release automation:** [ ] Publish versioned container images to GHCR through CI; not required for phase 15 or a complete portfolio release.

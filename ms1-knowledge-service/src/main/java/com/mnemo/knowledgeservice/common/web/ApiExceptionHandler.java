@@ -1,6 +1,6 @@
 package com.mnemo.knowledgeservice.common.web;
 
-import com.mnemo.knowledgeservice.knowledgehub.application.AiEnrichmentException;
+import com.mnemo.knowledgeservice.knowledgehub.application.NoteSummaryException;
 import com.mnemo.knowledgeservice.knowledgehub.domain.NoteNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -16,11 +16,11 @@ import java.util.List;
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
-    @ExceptionHandler(AiEnrichmentException.class)
-    public ProblemDetail handleAiEnrichment(AiEnrichmentException exception, HttpServletRequest request) {
+    @ExceptionHandler(NoteSummaryException.class)
+    public ProblemDetail handleNoteSummary(NoteSummaryException exception, HttpServletRequest request) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_GATEWAY, exception.getMessage());
-        problemDetail.setTitle("AI enrichment failed");
-        problemDetail.setType(URI.create("https://api.mnemo/errors/ai-enrichment"));
+        problemDetail.setTitle("Note summarization failed");
+        problemDetail.setType(URI.create("https://api.mnemo/errors/note-summary"));
         problemDetail.setInstance(URI.create(request.getRequestURI()));
         return problemDetail;
     }

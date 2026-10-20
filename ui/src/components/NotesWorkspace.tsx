@@ -13,7 +13,7 @@ type NotesWorkspaceProps = {
   search: string;
   loading: boolean;
   saving: boolean;
-  enriching: boolean;
+  summarizing: boolean;
   error: string;
   hasUnsavedChanges: boolean;
   onSearchChange: (value: string) => void;
@@ -22,7 +22,7 @@ type NotesWorkspaceProps = {
   onDraftChange: (draft: NoteDraft) => void;
   onSave: (event: FormEvent<HTMLFormElement>) => void;
   onDelete: () => void;
-  onEnrich: () => void;
+  onSummarize: () => void;
 };
 
 export function NotesWorkspace({
@@ -35,7 +35,7 @@ export function NotesWorkspace({
   search,
   loading,
   saving,
-  enriching,
+  summarizing,
   error,
   hasUnsavedChanges,
   onSearchChange,
@@ -44,7 +44,7 @@ export function NotesWorkspace({
   onDraftChange,
   onSave,
   onDelete,
-  onEnrich,
+  onSummarize,
 }: NotesWorkspaceProps) {
   return (
     <section className="workspace" aria-label="Notes">
@@ -63,13 +63,13 @@ export function NotesWorkspace({
         isNew={isNew}
         draft={draft}
         saving={saving}
-        enriching={enriching}
+        summarizing={summarizing}
         hasUnsavedChanges={hasUnsavedChanges}
         error={error}
         onDraftChange={onDraftChange}
         onSave={onSave}
         onDelete={onDelete}
-        onEnrich={onEnrich}
+        onSummarize={onSummarize}
         onCreate={onCreate}
       />
     </section>

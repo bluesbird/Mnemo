@@ -17,7 +17,7 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .info(new Info()
                         .title("Mnemo API")
-                        .description("API for managing notes and AI enrichment.")
+                        .description("API for managing notes and generating AI summaries on request.")
                         .version("v1")
                         .contact(new Contact().name("Lorenz")))
                 .servers(List.of(new Server().url("http://localhost:8080").description("Local")));

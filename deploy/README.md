@@ -15,15 +15,14 @@ to that server and those ports are reachable.
 ## Resource limits
 
 Deployment Nginx limits each client IP to 30 chat requests/minute (burst 20)
-and 10 enrichment requests/minute (burst 5). It allows at most two concurrent
+and 10 summarization requests/minute (burst 5). It allows at most two concurrent
 model-backed HTTP operations across all clients. Reconcile and rebuild are each
 limited globally to one request/minute. Requests larger than 256 KiB are rejected;
 Note titles are limited to 70 characters, note bodies to 5,000 and chat questions
 to 500 in both local and deployed apps. Chat answers are limited to 256 tokens.
-MS1 enrichment allows 2,048 generated tokens per call (summary and tags are
-separate calls). Groq reasoning is disabled for both services. Empty or
-incomplete enrichment responses return an HTTP 502 error and leave the note's
-existing summary and tags unchanged.
+MS1 summarization allows 2,048 generated tokens in one call per button press.
+Groq reasoning is disabled for both services. Empty or incomplete summaries
+return an HTTP 502 error and leave the note's existing summary unchanged.
 These deployment-only limits are disabled in the root local-development Compose
 stack. Caddy replaces the forwarded client-IP header, and Nginx trusts it only
 from Caddy's fixed address (`172.30.0.2`) on the private proxy network. Dynamic
@@ -34,17 +33,17 @@ starting again; omit `--volumes` to preserve data.
 
 ## AI providers
 
-Local development keeps Ollama for enrichment, chat and embeddings; no Groq
-key is needed. Deployment uses GroqCloud (`qwen/qwen3.8-27b`) for MS1 enrichment
+Local development keeps Ollama for summarization, chat and embeddings; no Groq
+key is needed. Deployment uses GroqCloud (`qwen/qwen3.8-27b`) for MS1 summarization
 and MS2 RAG answer generation. MS1 activates the `groq` Spring profile; MS2 sets
 `MS2_CHAT_PROVIDER=groq`. Both read the same `GROQ_API_KEY` from `deploy/.env`
 (mapped to `MS2_GROQ_API_KEY` for MS2). Keys never belong in browser assets,
 committed configuration or logs.
 
-Groq receives the title/content of notes being enriched, and questions plus
+Groq receives the title/content of notes being summarized, and questions plus
 retrieved note excerpts for RAG answers. Only use synthetic/non-sensitive data
 in this public deployment. Requests are subject to your organization's shared
-Groq quota: each enrichment uses two requests, each grounded RAG answer one.
+Groq quota: each summarization uses one request, each grounded RAG answer one.
 Failures are reported explicitly, with no automatic fallback to local inference
 or application-level retries. Check the account's Limits page for current quotas.
 
@@ -109,7 +108,7 @@ curl --fail-with-body -X POST http://127.0.0.1:8081/api/v1/admin/reset-database 
   -H "X-Mnemo-Reset-Key: $MNEMO_RESET_API_KEY"
 ```
 
-The endpoint returns `202 Accepted` after replacing notes/tags and requesting an
+The endpoint returns `202 Accepted` after replacing notes and requesting an
 MS2 full rebuild event. Event publication is best effort: if RabbitMQ/MS2 is
 currently unavailable, the reset still succeeds and an operator should run index
 rebuild/reconcile once dependencies are healthy.
@@ -119,6 +118,12 @@ Start or update the deployment from the repository root:
 ```sh
 docker compose --env-file deploy/.env -f deploy/compose.yaml up -d --build
 ```
+
+The manual summary action is `POST /api/v1/notes/{id}/summarize`; saving notes
+does not invoke AI and updating clears the previous summary. The old
+`/ai-enrich` route is removed. Deploy MS1 and UI together. Flyway V2 drops the
+old tag tables at MS1 startup without changing notes, summaries or the derived
+index. Tag data cannot be recovered without a pre-update database backup.
 
 ## Automatic deployment
 

@@ -1,10 +1,13 @@
 """Fast checks of the deterministic fake and polling, without Docker."""
 
 import json
+import http.client
+import threading
 import unittest
+from http.server import ThreadingHTTPServer
 from unittest.mock import patch
 
-from fake_ollama import respond
+from fake_ollama import Handler, respond
 from run import verify_ms1_json_logs
 from scenario import eventually
 
@@ -26,6 +29,37 @@ class HarnessTests(unittest.TestCase):
     def test_unsupported_endpoint_fails(self):
         with self.assertRaises(ValueError):
             respond("/unexpected", {})
+
+    def test_manual_summary_has_a_complete_response(self):
+        response = respond("/api/chat", {
+            "model": "test",
+            "stream": False,
+            "messages": [{"content": "Create a short summary of this note.\nTitle: Test\nContent: Details"}],
+        })
+        self.assertEqual(response["done_reason"], "stop")
+        self.assertEqual(response["message"]["content"], "This note records access details.")
+
+    def test_summary_fake_accepts_chunked_requests_from_spring(self):
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        connection = http.client.HTTPConnection(*server.server_address, timeout=5)
+        try:
+            payload = json.dumps({
+                "model": "test",
+                "stream": False,
+                "messages": [{"content": "Create a short summary of this note.\nTitle: Test"}],
+            }).encode()
+            connection.request("POST", "/api/chat", iter([payload[:20], payload[20:]]),
+                               {"Content-Type": "application/json"}, encode_chunked=True)
+            response = connection.getresponse()
+            self.assertEqual(response.status, 200)
+            self.assertEqual(json.loads(response.read())["done_reason"], "stop")
+        finally:
+            connection.close()
+            server.shutdown()
+            server.server_close()
+            thread.join()
 
     def test_poll_retries_assertion_until_success(self):
         with patch("scenario.time.sleep") as sleep:

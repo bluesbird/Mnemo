@@ -33,7 +33,7 @@ public class AdminController {
     }
 
     @PostMapping("/reset-database")
-    @Operation(summary = "Reset notes/tags to starter data and queue an MS2 full index rebuild")
+    @Operation(summary = "Reset notes to starter data and queue an MS2 full index rebuild")
     public ResponseEntity<DatabaseResetResponseDto> resetDatabase(
             @RequestHeader(value = "X-Mnemo-Reset-Key", required = false) String presentedKey
     ) {

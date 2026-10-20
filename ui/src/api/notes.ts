@@ -46,6 +46,6 @@ export function deleteNote(id: number): Promise<void> {
   return request<void>(`/${id}`, { method: "DELETE" });
 }
 
-export function enrichNote(id: number): Promise<Note> {
-  return request<Note>(`/${id}/ai-enrich`, { method: "POST" });
+export function summarizeNote(id: number): Promise<Note> {
+  return request<Note>(`/${id}/summarize`, { method: "POST" });
 }

@@ -26,15 +26,15 @@ Content-Type: application/json
 }
 
 ###
-### AI enrich note (sets summary + tags)
-POST http://localhost:8080/api/v1/notes/1/ai-enrich
+### Summarize note on request (sets summary)
+POST http://localhost:8080/api/v1/notes/1/summarize
 
 ###
 ### Get note by ID
 GET http://localhost:8080/api/v1/notes/1
 
 ###
-### Update note content/title (resets summary + tags)
+### Update note content/title (clears summary, does not call AI)
 PUT http://localhost:8080/api/v1/notes/1
 Content-Type: application/json
 
@@ -44,8 +44,8 @@ Content-Type: application/json
 }
 
 ###
-### Re-run AI enrich after update
-POST http://localhost:8080/api/v1/notes/1/ai-enrich
+### Summarize after update
+POST http://localhost:8080/api/v1/notes/1/summarize
 
 ###
 ### Delete a note

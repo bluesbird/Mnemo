@@ -1,32 +1,44 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { enrichNote } from "./notes";
+import { summarizeNote } from "./notes";
 
 afterEach(() => vi.unstubAllGlobals());
 
 describe("notes api", () => {
-  it("shows the API detail when AI enrichment fails", async () => {
+  it("calls the manual summarize endpoint", async () => {
+    const note = { id: 1, summary: "This note records access details." };
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify(note)));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(summarizeNote(1)).resolves.toEqual(note);
+    expect(fetchMock).toHaveBeenCalledWith(expect.stringMatching(/\/api\/v1\/notes\/1\/summarize$/), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+  });
+
+  it("shows the API detail when note summarization fails", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => new Response(JSON.stringify({
-        title: "AI enrichment failed",
-        detail: "AI enrichment reached its token limit before finishing. Please try again.",
+        title: "Note summarization failed",
+        detail: "Note summarization reached its token limit before finishing. Please try again.",
       }), {
         status: 502,
         headers: { "Content-Type": "application/problem+json" },
       })),
     );
 
-    await expect(enrichNote(1)).rejects.toThrow(
-      "AI enrichment reached its token limit before finishing. Please try again.",
+    await expect(summarizeNote(1)).rejects.toThrow(
+      "Note summarization reached its token limit before finishing. Please try again.",
     );
   });
 
-  it("explains when note enrichment is rate-limited", async () => {
+  it("explains when note summarization is rate-limited", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => ({ ok: false, status: 429 }) as Response),
     );
 
-    await expect(enrichNote(1)).rejects.toThrow(/wait a moment/);
+    await expect(summarizeNote(1)).rejects.toThrow(/wait a moment/);
   });
 });

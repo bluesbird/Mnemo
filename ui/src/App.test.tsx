@@ -1,16 +1,54 @@
-import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import App from "./App";
+import * as notesApi from "./api/notes";
 
 vi.mock("./api/notes", () => ({
   listNotes: vi.fn(async () => []),
   createNote: vi.fn(),
   updateNote: vi.fn(),
   deleteNote: vi.fn(),
-  enrichNote: vi.fn(),
+  summarizeNote: vi.fn(),
 }));
 
 afterEach(cleanup);
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.mocked(notesApi.listNotes).mockResolvedValue([]);
+});
+
+it("requests a summary only on demand and clears it after saving edits", async () => {
+  const note = {
+    id: 1,
+    title: "Manual summary example",
+    content: "Original content",
+    summary: null,
+    createdAt: "2026-10-20T00:00:00",
+    updatedAt: "2026-10-20T00:00:00",
+  };
+  vi.mocked(notesApi.listNotes).mockResolvedValue([note]);
+  vi.mocked(notesApi.summarizeNote).mockResolvedValue({
+    ...note, summary: "This note has an optional summary.",
+  });
+  vi.mocked(notesApi.updateNote).mockResolvedValue({ ...note, content: "Changed content" });
+  render(<App />);
+  fireEvent.click(await screen.findByText(note.title));
+  expect(notesApi.summarizeNote).not.toHaveBeenCalled();
+
+  fireEvent.click(screen.getByRole("button", { name: "Summarize note" }));
+  await screen.findByText("This note has an optional summary.");
+  expect(notesApi.summarizeNote).toHaveBeenCalledWith(1);
+
+  const content = screen.getByLabelText("Note content");
+  fireEvent.change(content, { target: { value: "Changed content" } });
+  expect(screen.queryByRole("region", { name: "AI summary" })).toBeNull();
+  fireEvent.submit(content.closest("form")!);
+  await waitFor(() => expect(notesApi.updateNote).toHaveBeenCalledWith(1, {
+    title: note.title, content: "Changed content",
+  }));
+  expect(notesApi.summarizeNote).toHaveBeenCalledTimes(1);
+  expect(screen.queryByRole("region", { name: "AI summary" })).toBeNull();
+});
 
 describe("demo privacy information", () => {
   it("shows the shared-data warning and expandable privacy notice", async () => {

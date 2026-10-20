@@ -6,21 +6,16 @@ import com.mnemo.knowledgeservice.knowledgehub.api.dto.NoteResponseDto;
 import com.mnemo.knowledgeservice.knowledgehub.api.dto.UpdateNoteRequestDto;
 import com.mnemo.knowledgeservice.knowledgehub.domain.Note;
 import com.mnemo.knowledgeservice.knowledgehub.domain.NoteNotFoundException;
-import com.mnemo.knowledgeservice.knowledgehub.domain.Tag;
 import com.mnemo.knowledgeservice.knowledgehub.messaging.NoteEventPublisher;
 import com.mnemo.knowledgeservice.knowledgehub.messaging.NoteEventType;
 import com.mnemo.knowledgeservice.knowledgehub.persistence.NoteRepository;
-import com.mnemo.knowledgeservice.knowledgehub.persistence.TagRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class NoteService {
@@ -28,19 +23,16 @@ public class NoteService {
     private static final Logger logger = LoggerFactory.getLogger(NoteService.class);
 
     private final NoteRepository noteRepository;
-    private final TagRepository tagRepository;
-    private final OllamaAiService ollamaAiService;
+    private final NoteSummaryService noteSummaryService;
     private final NoteEventPublisher noteEventPublisher;
 
     public NoteService(
             NoteRepository noteRepository,
-            TagRepository tagRepository,
-            OllamaAiService ollamaAiService,
+            NoteSummaryService noteSummaryService,
             NoteEventPublisher noteEventPublisher
     ) {
         this.noteRepository = noteRepository;
-        this.tagRepository = tagRepository;
-        this.ollamaAiService = ollamaAiService;
+        this.noteSummaryService = noteSummaryService;
         this.noteEventPublisher = noteEventPublisher;
     }
 
@@ -54,7 +46,6 @@ public class NoteService {
 
     public NoteResponseDto addNote(CreateNoteRequestDto request) {
         Note note = new Note(request.title(), request.content());
-        note.setTags(new LinkedHashSet<>());
         note.setSummary(null);
 
         Note savedNote = noteRepository.save(note);
@@ -87,7 +78,6 @@ public class NoteService {
 
         note.updateCoreContent(request.title(), request.content());
         note.setSummary(null);
-        note.setTags(new LinkedHashSet<>());
         note.setUpdatedAt(LocalDateTime.now());
 
         Note updatedNote = noteRepository.save(note);
@@ -96,20 +86,19 @@ public class NoteService {
         return toDto(updatedNote);
     }
 
-    public NoteResponseDto enrichNoteWithAi(Long id) {
+    public NoteResponseDto summarizeNote(Long id) {
         Note note = findNote(id);
 
-        OllamaAiService.AiNoteEnrichment enrichment = ollamaAiService.enrichNote(
+        String summary = noteSummaryService.summarizeNote(
                 note.getTitle(),
                 note.getContent()
         );
 
-        note.setSummary(enrichment.summary());
-        note.setTags(resolveTags(enrichment.tagNames()));
+        note.setSummary(summary);
         note.setUpdatedAt(LocalDateTime.now());
 
         Note updatedNote = noteRepository.save(note);
-        logger.info("AI-enriched note with id {}", id);
+        logger.info("Summarized note with id {}", id);
         return toDto(updatedNote);
     }
 
@@ -128,31 +117,12 @@ public class NoteService {
         );
     }
 
-    private Set<Tag> resolveTags(List<String> tagNames) {
-        if (tagNames == null || tagNames.isEmpty()) {
-            return new LinkedHashSet<>();
-        }
-
-        return tagNames.stream()
-                .map(tagName -> tagName == null ? "" : tagName.trim().toLowerCase())
-                .filter(tagName -> !tagName.isBlank())
-                .map(tagName -> tagRepository.findByName(tagName)
-                        .orElseGet(() -> tagRepository.save(new Tag(tagName))))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-    }
-
     private NoteResponseDto toDto(Note note) {
-        List<String> tagNames = note.getTags().stream()
-                .map(Tag::getName)
-                .sorted()
-                .toList();
-
         return new NoteResponseDto(
                 note.getId(),
                 note.getTitle(),
                 note.getContent(),
                 note.getSummary(),
-                tagNames,
                 note.getSourceHash(),
                 note.getCreatedAt(),
                 note.getUpdatedAt()

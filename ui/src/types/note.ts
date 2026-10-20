@@ -3,7 +3,6 @@ export type Note = {
   title: string;
   content: string;
   summary: string | null;
-  tags: string[];
   createdAt: string;
   updatedAt: string;
 };

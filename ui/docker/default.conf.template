@@ -12,7 +12,7 @@ map "${UI_RATE_LIMITS}" $global_limit_key {
 }
 
 limit_req_zone $per_ip_limit_key zone=chat_per_ip:10m rate=30r/m;
-limit_req_zone $per_ip_limit_key zone=enrich_per_ip:10m rate=10r/m;
+limit_req_zone $per_ip_limit_key zone=summarize_per_ip:10m rate=10r/m;
 limit_req_zone $global_limit_key zone=reconcile_global:1m rate=1r/m;
 limit_req_zone $global_limit_key zone=rebuild_global:1m rate=1r/m;
 limit_conn_zone $global_limit_key zone=ollama_work:1m;
@@ -35,8 +35,8 @@ server {
     location = /api {
         proxy_pass ${UI_MS1_UPSTREAM};
     }
-    location ~ ^/api/v1/notes/[0-9]+/ai-enrich$ {
-        limit_req zone=enrich_per_ip burst=5 nodelay;
+    location ~ ^/api/v1/notes/[0-9]+/summarize$ {
+        limit_req zone=summarize_per_ip burst=5 nodelay;
         limit_conn ollama_work 2;
         proxy_pass ${UI_MS1_UPSTREAM};
     }

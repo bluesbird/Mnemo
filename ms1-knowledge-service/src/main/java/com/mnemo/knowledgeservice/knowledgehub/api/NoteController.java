@@ -18,7 +18,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "api/v1/notes", produces = MediaType.APPLICATION_JSON_VALUE)
-@Tag(name = "Notes", description = "Note management and AI enrichment endpoints")
+@Tag(name = "Notes", description = "Note management and manual AI summary endpoints")
 public class NoteController {
 
     private final NoteService noteService;
@@ -68,11 +68,10 @@ public class NoteController {
         return ResponseEntity.ok(updatedNote);
     }
 
-    @PostMapping("/{id}/ai-enrich")
-    @Operation(summary = "Generate summary and tags with LLM for a note")
-    public ResponseEntity<NoteResponseDto> enrichNoteWithAi(@PathVariable Long id) {
-        NoteResponseDto enrichedNote = noteService.enrichNoteWithAi(id);
-        return ResponseEntity.ok(enrichedNote);
+    @PostMapping("/{id}/summarize")
+    @Operation(summary = "Generate an AI summary for a note on request")
+    public ResponseEntity<NoteResponseDto> summarizeNote(@PathVariable Long id) {
+        return ResponseEntity.ok(noteService.summarizeNote(id));
     }
 
     @DeleteMapping("/{id}")

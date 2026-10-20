@@ -5,9 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -17,9 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
 @Table(name = "note")
@@ -43,14 +38,6 @@ public class Note {
 
     @Column(nullable = false, length = 64, columnDefinition = "varchar(64) default ''")
     private String sourceHash;
-
-    @ManyToMany
-    @JoinTable(
-            name = "note_tags",
-            joinColumns = @JoinColumn(name = "note_id"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id")
-    )
-    private Set<Tag> tags = new HashSet<>();
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -76,10 +63,6 @@ public class Note {
 
     public void setSummary(String summary) {
         this.summary = summary;
-    }
-
-    public void setTags(Set<Tag> tags) {
-        this.tags = tags;
     }
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
