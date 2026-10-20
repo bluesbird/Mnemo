@@ -230,6 +230,14 @@ function App() {
   }
 
   function goToChat() {
+    if (view === "chat" || !confirmDiscardChanges()) return;
+    if (selectedNote) {
+      selectNote(selectedNote);
+    } else {
+      setDraft({ title: "", content: "" });
+      setIsNew(false);
+      setError("");
+    }
     window.location.hash = "#/chat";
   }
 

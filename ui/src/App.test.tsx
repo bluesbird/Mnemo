@@ -11,10 +11,50 @@ vi.mock("./api/notes", () => ({
   summarizeNote: vi.fn(),
 }));
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 beforeEach(() => {
   vi.clearAllMocks();
+  window.history.replaceState(null, "", "#/notes");
   vi.mocked(notesApi.listNotes).mockResolvedValue([]);
+});
+
+it.each([false, true])("confirms and discards changes before opening chat (new note: %s)", async (isNew) => {
+  const note = {
+    id: 1, title: "Saved note", content: "Saved content", summary: null,
+    createdAt: "2026-10-20T00:00:00", updatedAt: "2026-10-20T00:00:00",
+  };
+  vi.mocked(notesApi.listNotes).mockResolvedValue([note]);
+  const confirm = vi.fn(() => false);
+  vi.stubGlobal("confirm", confirm);
+  render(<App />);
+  await screen.findByText(note.title);
+  fireEvent.click(isNew
+    ? screen.getByRole("button", { name: "Create note" })
+    : screen.getByText(note.title));
+  fireEvent.change(screen.getByLabelText("Note title"), { target: { value: "Unsaved title" } });
+  fireEvent.change(screen.getByLabelText("Note content"), { target: { value: "Unsaved content" } });
+
+  fireEvent.click(screen.getByRole("button", { name: "Chat" }));
+  expect(confirm).toHaveBeenCalledWith("You have unsaved changes. Discard them?");
+  expect(window.location.hash).toBe("#/notes");
+  expect((screen.getByLabelText("Note content") as HTMLTextAreaElement).value).toBe("Unsaved content");
+
+  confirm.mockReturnValue(true);
+  fireEvent.click(screen.getByRole("button", { name: "Chat" }));
+  await waitFor(() => expect(screen.getByRole("button", { name: "Chat" }).className).toContain("is-active"));
+  fireEvent.click(screen.getByRole("button", { name: "Notes" }));
+  await waitFor(() => expect(screen.getByRole("button", { name: "Notes" }).className).toContain("is-active"));
+  if (isNew) {
+    expect(screen.queryByLabelText("Note content")).toBeNull();
+  } else {
+    expect((screen.getByLabelText("Note title") as HTMLInputElement).value).toBe(note.title);
+    expect((screen.getByLabelText("Note content") as HTMLTextAreaElement).value).toBe(note.content);
+  }
+  expect(notesApi.createNote).not.toHaveBeenCalled();
+  expect(notesApi.updateNote).not.toHaveBeenCalled();
 });
 
 it("requests a summary only on demand and clears it after saving edits", async () => {
