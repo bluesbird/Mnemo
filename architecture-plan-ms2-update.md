@@ -99,8 +99,9 @@ keyword/vector fusion; a dedicated BM25 engine remains deferred.
 - MS1 atomically queues note/reset events in a PostgreSQL transactional outbox.
   Confirmed, persistent RabbitMQ delivery retries automatically after broker
   outages and MS1 restarts. Duplicates are expected and handled by fetching current
-  note state. Consumer/DLQ failures and lost index data still require manual
-  reconcile/rebuild; there is no scheduled or query-time reconciliation.
+  note state. A VPS cron job reconciles nightly at 04:00 Europe/Berlin as a
+  safety net for index drift. Manual reconcile/rebuild remains available;
+  consumer/DLQ failures still need investigation. No query-time reconciliation.
 - Rebuild recreates the index from scratch.
 - Keep MS1 as the source of truth; ChromaDB contains derived data.
 

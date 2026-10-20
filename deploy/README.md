@@ -201,3 +201,41 @@ acceptance, not finished indexing. Check `ms2.note-events.dlq` and MS2 logs for
 consumer failures; after fixing the cause, use the UI's reconcile/rebuild to repair
 the derived index. The outbox does not replace PostgreSQL/RabbitMQ volume backups,
 recover a lost index automatically, or provide exactly-once delivery.
+
+## Nightly index reconciliation
+
+The VPS has a `mnemo-agent` user cron job at **04:00 in the server's timezone**
+(`Europe/Berlin`, including daylight-saving changes). It calls the existing
+reconcile endpoint through the loopback UI proxy, not the rebuild endpoint.
+Unchanged notes are skipped; missing/changed notes and stale index entries are
+repaired without regenerating the entire index.
+
+The source script is `deploy/reconcile-index.sh`. The installed copy and log
+are outside the deployment checkout so normal Git updates do not remove them:
+
+```sh
+crontab -l
+cat ~/.local/bin/mnemo-reconcile
+tail -n 50 ~/.local/state/mnemo/reconcile.log
+```
+
+The script uses `flock` to prevent overlapping runs and a ten-minute HTTP timeout.
+Failures are logged with a nonzero exit status; persistent errors still need
+operator attention. To run it manually:
+
+```sh
+~/.local/bin/mnemo-reconcile >> ~/.local/state/mnemo/reconcile.log 2>&1
+```
+
+To install on another host or update the installed script, run as the deployment
+user from the repository root (requires `curl`, `flock`, and an active cron daemon):
+
+```sh
+install -d -m 700 ~/.local/bin ~/.local/state/mnemo
+install -m 700 deploy/reconcile-index.sh ~/.local/bin/mnemo-reconcile
+(crontab -l 2>/dev/null | grep -v '# mnemo-nightly-reconcile$'; \
+  printf '0 4 * * * %s/.local/bin/mnemo-reconcile >> %s/.local/state/mnemo/reconcile.log 2>&1 # mnemo-nightly-reconcile\n' "$HOME" "$HOME") | crontab -
+```
+
+Reconciliation is a safety net for the derived index, not a replacement for the
+outbox, DLQ investigation, or backups. Its log is a small append-only daily log.

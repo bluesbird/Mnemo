@@ -158,7 +158,9 @@ Phase numbers are retained for reference; use the order below for the remaining 
 - MS2's existing durable queue, acknowledgements, retries/DLQ and current-state
   hashing handle duplicate/out-of-order events. Delivery is at-least-once, not
   exactly-once; publisher confirmation does not prove successful indexing.
-  Consumer failures or lost index data still need manual reconcile/rebuild.
+  A VPS cron job reconciles nightly at 04:00 Europe/Berlin to repair drift or
+  lost index entries. Manual reconcile/rebuild remains available for immediate
+  repair; consumer/DLQ failures still need investigation.
 - Focused tests cover transaction rollback, enqueue failure, confirms/returns/
   timeout, retries and row locking. The existing E2E runner also checks CRUD and
   reset during real broker outages, MS1 restarts, retained earlier reset events,

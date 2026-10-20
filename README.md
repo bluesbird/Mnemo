@@ -84,7 +84,9 @@ retry indefinitely with delays capped at five minutes. Delivery is at-least-once
 MS2 fetches current note state, so duplicate/out-of-order events converge.
 This does not guarantee successful indexing: consumer failures can reach MS2's
 dead-letter queue. Manual reconcile/rebuild remain available for those failures
-or lost index data. See [outbox operations](deploy/README.md#outbox-and-index-recovery).
+or lost index data. The VPS also runs reconciliation nightly at 04:00
+Europe/Berlin as a safety net. See [outbox operations](deploy/README.md#outbox-and-index-recovery)
+and [nightly reconciliation](deploy/README.md#nightly-index-reconciliation).
 
 ## Tests
 
