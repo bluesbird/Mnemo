@@ -5,7 +5,7 @@ from app.clients.chat_client import ChatClient
 from app.core.config import Settings
 from app.rag.retrieval import Candidate, fuse, keyword_score, keywords, normalize_query
 from app.schemas import ChatQueryResponse, ChatSourceReference
-from app.services.index_store import IndexStore
+from app.persistence.index_store import IndexStore
 
 logger = logging.getLogger(__name__)
 

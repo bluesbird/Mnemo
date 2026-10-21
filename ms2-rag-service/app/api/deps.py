@@ -5,7 +5,7 @@ from app.clients.ollama_client import OllamaClient
 from app.clients.groq_client import GroqClient
 from app.core.config import get_settings
 from app.rag.chunker import NoteChunker
-from app.services.index_store import IndexStore
+from app.persistence.index_store import IndexStore
 from app.services.indexing_service import IndexingService
 from app.services.query_service import QueryService
 

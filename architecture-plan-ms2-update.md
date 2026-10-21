@@ -35,6 +35,10 @@ keyword/vector fusion; a dedicated BM25 engine remains deferred.
 
 ## Responsibilities
 
+Chroma access is encapsulated in `app/persistence/index_store.py`. Application
+services orchestrate indexing/query operations; `app/rag` contains chunking and
+retrieval algorithms.
+
 - Consume `NoteCreated`, `NoteUpdated`, and `NoteDeleted` events from MS1.
 - Fetch current notes from MS1 through REST.
 - Split note titles and content into chunks.

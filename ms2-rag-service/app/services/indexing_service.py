@@ -6,7 +6,7 @@ from app.clients.ollama_client import OllamaClient
 from app.core.config import Settings
 from app.rag.chunker import NoteChunker
 from app.schemas import IndexOperationResponse, NoteSyncResult
-from app.services.index_store import IndexStore
+from app.persistence.index_store import IndexStore
 
 logger = logging.getLogger(__name__)
 

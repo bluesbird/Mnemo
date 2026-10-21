@@ -5,7 +5,7 @@ import pytest
 from app.core.config import Settings
 from app.rag.chunker import NoteChunker
 from app.schemas import IndexMetadataItem, NoteForIndex
-from app.services.index_store import IndexStore
+from app.persistence.index_store import IndexStore
 from app.services.indexing_service import IndexingService
 from app.services.query_service import QueryService
 

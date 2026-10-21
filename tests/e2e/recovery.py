@@ -17,7 +17,7 @@ def run(command, env):
         script = """
 import json, urllib.request
 from app.core.config import get_settings
-from app.services.index_store import IndexStore
+from app.persistence.index_store import IndexStore
 base = 'http://ms1:8080/api/v1'
 def request(path, method='GET', payload=None):
     data = None if payload is None else json.dumps(payload).encode()
