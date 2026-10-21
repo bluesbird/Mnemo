@@ -23,12 +23,27 @@ Monorepo with three independent project modules:
 
 ```text
 mnemo/
-├── knowledge-service/
-├── rag-service/
-├── ui/
-├── compose.yaml
+├── knowledge-service/   # Note API, PostgreSQL migrations, Java tests
+├── rag-service/         # Indexing, retrieval, grounded chat, Python tests
+├── ui/                  # React frontend and colocated tests
+├── deploy/              # Public hosting configuration and operations scripts
+├── tests/               # Deployment checks and isolated cross-service tests
+├── evaluation/          # Evaluation harness, corpus, and recorded results
+├── pom.xml              # Maven aggregator for the Java service
+├── compose.yaml         # Local development stack
 └── README.md
 ```
+
+## Documentation
+
+- [Architecture and implementation status](architecture-plan.md): overall design, completed milestones, and remaining work.
+- [RAG service design](architecture-plan-rag-service.md): indexing, retrieval, messaging, and API details.
+- [Deployment guide](deploy/README.md): hosting, configuration, upgrades, and operations.
+- [Deployment preparation and verification record](deploy/plan.md): rollout checklist and historical verification.
+- [Evaluation plan](evaluation-plan.md) and [recorded results](evaluation/results.md): procedure, scores, and limitations.
+
+The architecture documents combine implemented design with future plans; use their
+completion markers and the code to distinguish current behavior from proposed work.
 
 ## Quick start (full backend)
 

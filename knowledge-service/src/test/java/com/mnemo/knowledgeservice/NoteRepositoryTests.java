@@ -19,7 +19,7 @@ import java.util.stream.IntStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(properties = "app.events.outbox.enabled=false")
-class KnowledgeServiceApplicationTests {
+class NoteRepositoryTests {
 
     @Autowired
     private NoteRepository noteRepository;

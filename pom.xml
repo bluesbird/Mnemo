@@ -9,7 +9,7 @@
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>mnemo</name>
-    <description>Monorepo parent for Mnemo services</description>
+    <description>Maven aggregator for Mnemo's Java modules</description>
 
     <modules>
         <module>knowledge-service</module>
