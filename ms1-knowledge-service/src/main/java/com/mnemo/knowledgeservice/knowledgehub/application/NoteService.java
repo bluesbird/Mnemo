@@ -1,9 +1,5 @@
 package com.mnemo.knowledgeservice.knowledgehub.application;
 
-import com.mnemo.knowledgeservice.knowledgehub.api.dto.CreateNoteRequestDto;
-import com.mnemo.knowledgeservice.knowledgehub.api.dto.NoteIndexMetadataDto;
-import com.mnemo.knowledgeservice.knowledgehub.api.dto.NoteResponseDto;
-import com.mnemo.knowledgeservice.knowledgehub.api.dto.UpdateNoteRequestDto;
 import com.mnemo.knowledgeservice.knowledgehub.domain.Note;
 import com.mnemo.knowledgeservice.knowledgehub.domain.NoteLimitReachedException;
 import com.mnemo.knowledgeservice.knowledgehub.domain.NoteNotFoundException;
@@ -38,17 +34,15 @@ public class NoteService {
         this.noteEventPublisher = noteEventPublisher;
     }
 
-    public List<NoteResponseDto> getAllNotes() {
-        List<NoteResponseDto> notes = noteRepository.findAll().stream()
-                .map(this::toDto)
-                .toList();
+    public List<Note> getAllNotes() {
+        List<Note> notes = noteRepository.findAll();
         logger.info("Retrieved {} notes", notes.size());
         return notes;
     }
 
     @Transactional
-    public NoteResponseDto addNote(CreateNoteRequestDto request) {
-        Note note = new Note(request.title(), request.content());
+    public Note addNote(String title, String content) {
+        Note note = new Note(title, content);
         note.setSummary(null);
 
         Note savedNote = noteRepository.saveBelowLimit(note, 100).orElseThrow(() -> {
@@ -57,43 +51,39 @@ public class NoteService {
         });
         logger.info("Created note with id {}", savedNote.getId());
         noteEventPublisher.publish(NoteEventType.CREATED, savedNote.getId());
-        return toDto(savedNote);
+        return savedNote;
     }
 
-    public NoteResponseDto getNoteById(Long id) {
+    public Note getNoteById(Long id) {
         logger.info("Retrieving note with id {}", id);
-        return toDto(findNote(id));
+        return findNote(id);
     }
 
-    public List<NoteIndexMetadataDto> getAllIndexMetadata() {
+    public List<NoteIndexMetadata> getAllIndexMetadata() {
         List<Note> notes = noteRepository.findAllByOrderByIdAsc();
         backfillMissingIndexMetadata(notes);
 
-        List<NoteIndexMetadataDto> metadata = notes.stream()
-                .map(note -> new NoteIndexMetadataDto(
-                        note.getId(),
-                        note.getSourceHash()
-                ))
+        logger.info("Retrieved index metadata for {} notes", notes.size());
+        return notes.stream()
+                .map(note -> new NoteIndexMetadata(note.getId(), note.getSourceHash()))
                 .toList();
-        logger.info("Retrieved index metadata for {} notes", metadata.size());
-        return metadata;
     }
 
     @Transactional
-    public NoteResponseDto updateNote(Long id, UpdateNoteRequestDto request) {
+    public Note updateNote(Long id, String title, String content) {
         Note note = findNote(id);
 
-        note.updateCoreContent(request.title(), request.content());
+        note.updateCoreContent(title, content);
         note.setSummary(null);
         note.setUpdatedAt(LocalDateTime.now());
 
         Note updatedNote = noteRepository.save(note);
         logger.info("Updated note with id {}", id);
         noteEventPublisher.publish(NoteEventType.UPDATED, id);
-        return toDto(updatedNote);
+        return updatedNote;
     }
 
-    public NoteResponseDto summarizeNote(Long id) {
+    public Note summarizeNote(Long id) {
         Note note = findNote(id);
 
         String summary = noteSummaryService.summarizeNote(
@@ -106,7 +96,7 @@ public class NoteService {
 
         Note updatedNote = noteRepository.save(note);
         logger.info("Summarized note with id {}", id);
-        return toDto(updatedNote);
+        return updatedNote;
     }
 
     @Transactional
@@ -122,18 +112,6 @@ public class NoteService {
                     logger.warn("Note with id {} was not found", id);
                     return new NoteNotFoundException(id);
                 }
-        );
-    }
-
-    private NoteResponseDto toDto(Note note) {
-        return new NoteResponseDto(
-                note.getId(),
-                note.getTitle(),
-                note.getContent(),
-                note.getSummary(),
-                note.getSourceHash(),
-                note.getCreatedAt(),
-                note.getUpdatedAt()
         );
     }
 

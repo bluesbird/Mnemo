@@ -1,8 +1,6 @@
 package com.mnemo.knowledgeservice;
 
 import com.mnemo.knowledgeservice.common.web.ApiExceptionHandler;
-import com.mnemo.knowledgeservice.knowledgehub.api.dto.CreateNoteRequestDto;
-import com.mnemo.knowledgeservice.knowledgehub.api.dto.UpdateNoteRequestDto;
 import com.mnemo.knowledgeservice.knowledgehub.application.NoteSummaryException;
 import com.mnemo.knowledgeservice.knowledgehub.application.NoteService;
 import com.mnemo.knowledgeservice.knowledgehub.application.NoteSummaryService;
@@ -50,7 +48,7 @@ class NoteSummaryTests {
     void fullCollectionRejectsCreationWithoutPublishingAnEvent() {
         when(notes.saveBelowLimit(any(Note.class), eq(100))).thenReturn(Optional.empty());
         var error = assertThrows(NoteLimitReachedException.class,
-                () -> noteService.addNote(new CreateNoteRequestDto("Title", "Content")));
+                () -> noteService.addNote("Title", "Content"));
         var request = mock(HttpServletRequest.class);
         when(request.getRequestURI()).thenReturn("/api/v1/notes");
         var problem = new ApiExceptionHandler().handleNoteLimit(error, request);
@@ -68,11 +66,10 @@ class NoteSummaryTests {
 
         var result = noteService.summarizeNote(1L);
 
-        assertEquals("This note A short summary.", result.summary());
-        assertEquals(result.summary(), note.getSummary());
-        assertEquals("Title", result.title());
-        assertEquals("Content", result.content());
-        assertEquals(sourceHash, result.sourceHash());
+        assertEquals("This note A short summary.", result.getSummary());
+        assertEquals("Title", result.getTitle());
+        assertEquals("Content", result.getContent());
+        assertEquals(sourceHash, result.getSourceHash());
         verify(model, times(1)).call(any(Prompt.class));
         verify(notes).save(note);
         verifyNoInteractions(publisher);
@@ -83,12 +80,12 @@ class NoteSummaryTests {
         when(notes.save(any(Note.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(notes.saveBelowLimit(any(Note.class), eq(100)))
                 .thenAnswer(invocation -> Optional.of(invocation.getArgument(0)));
-        assertNull(noteService.addNote(new CreateNoteRequestDto("New", "Content")).summary());
+        assertNull(noteService.addNote("New", "Content").getSummary());
         var note = existingNote();
 
-        var updated = noteService.updateNote(1L, new UpdateNoteRequestDto("Changed", "New content"));
+        var updated = noteService.updateNote(1L, "Changed", "New content");
 
-        assertNull(updated.summary());
+        assertNull(updated.getSummary());
         assertNull(note.getSummary());
         verify(model, never()).call(any(Prompt.class));
         verify(publisher).publish(NoteEventType.UPDATED, 1L);

@@ -49,6 +49,11 @@ host Ollama for embeddings. Deployment and verification:
 
 - **Stack:** Java 25, Spring Boot 4, Spring Data JPA / Hibernate.
 - **Database:** PostgreSQL; source of truth for notes and optional summaries.
+- **Layering:** controllers validate HTTP request DTOs and map notes to response
+  DTOs. Application services accept plain inputs and return domain notes or
+  application-level index metadata without
+  depending on API DTOs. Business rules, transactions and event enqueueing stay
+  in the application layer; JPA entities/repositories remain inside MS1.
 - **Responsibilities:**
   - [x] Note CRUD API (list, read, create, update, delete).
   - [x] Input validation and centralized exception handling.

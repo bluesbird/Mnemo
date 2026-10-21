@@ -1,7 +1,5 @@
 package com.mnemo.knowledgeservice;
 
-import com.mnemo.knowledgeservice.knowledgehub.api.dto.CreateNoteRequestDto;
-import com.mnemo.knowledgeservice.knowledgehub.api.dto.UpdateNoteRequestDto;
 import com.mnemo.knowledgeservice.knowledgehub.application.DatabaseResetService;
 import com.mnemo.knowledgeservice.knowledgehub.application.NoteService;
 import com.mnemo.knowledgeservice.knowledgehub.messaging.*;
@@ -45,9 +43,9 @@ class NoteOutboxTests {
 
     @Test
     void commitsLifecycleAndResetEventsWithNotes() {
-        var note = notes.addNote(new CreateNoteRequestDto("Title", "Content"));
-        notes.updateNote(note.id(), new UpdateNoteRequestDto("Updated", "Changed"));
-        notes.deleteNote(note.id());
+        var note = notes.addNote("Title", "Content");
+        notes.updateNote(note.getId(), "Updated", "Changed");
+        notes.deleteNote(note.getId());
         assertEquals(0, repository.count());
         assertEquals(List.of("NoteCreated", "NoteDeleted", "NoteUpdated"),
                 jdbc.queryForList("SELECT event_type FROM note_outbox ORDER BY event_type", String.class));
@@ -62,23 +60,23 @@ class NoteOutboxTests {
     void rollsBackNoteAndEventTogetherForCreateUpdateDeleteAndReset() {
         var transaction = new TransactionTemplate(manager);
         transaction.executeWithoutResult(status -> {
-            notes.addNote(new CreateNoteRequestDto("Rolled back", "Content"));
+            notes.addNote("Rolled back", "Content");
             status.setRollbackOnly();
         });
         assertEquals(0, repository.count());
         assertEquals(0, pendingCount());
-        var note = notes.addNote(new CreateNoteRequestDto("Original", "Content"));
+        var note = notes.addNote("Original", "Content");
         transaction.executeWithoutResult(status -> {
-            notes.updateNote(note.id(), new UpdateNoteRequestDto("Changed", "Changed"));
-            notes.deleteNote(note.id());
+            notes.updateNote(note.getId(), "Changed", "Changed");
+            notes.deleteNote(note.getId());
             reset.reset();
             status.setRollbackOnly();
         });
-        assertEquals("Original", notes.getNoteById(note.id()).title());
+        assertEquals("Original", notes.getNoteById(note.getId()).getTitle());
         assertEquals(1, repository.count());
         assertEquals(1, pendingCount());
         assertThrows(IllegalTransactionStateException.class,
-                () -> publisher.publish(NoteEventType.CREATED, note.id()));
+                () -> publisher.publish(NoteEventType.CREATED, note.getId()));
     }
 
     @Test
@@ -86,7 +84,7 @@ class NoteOutboxTests {
         jdbc.execute("ALTER TABLE note_outbox ADD CONSTRAINT reject_test_event CHECK (event_type <> 'NoteCreated')");
         try {
             assertThrows(org.springframework.dao.DataIntegrityViolationException.class,
-                    () -> notes.addNote(new CreateNoteRequestDto("Must roll back", "Content")));
+                    () -> notes.addNote("Must roll back", "Content"));
             assertEquals(0, repository.count());
             assertEquals(0, pendingCount());
         } finally {
@@ -96,7 +94,7 @@ class NoteOutboxTests {
 
     @Test
     void failedDeliveryBacksOffThenRetriesTheSameEventAndDeletesOnlyOnSuccess() throws Exception {
-        notes.addNote(new CreateNoteRequestDto("Title", "Content"));
+        notes.addNote("Title", "Content");
         var sender = mock(ConfirmedNoteSender.class);
         var dispatcher = new NoteOutboxDispatcher(store, sender, manager);
         doThrow(new AmqpException("Broker unavailable")).doNothing().when(sender).send(any());
@@ -117,7 +115,7 @@ class NoteOutboxTests {
 
     @Test
     void rollbackAfterBrokerAcceptanceLeavesEventEligibleForRedelivery() {
-        notes.addNote(new CreateNoteRequestDto("Title", "Content"));
+        notes.addNote("Title", "Content");
         var transaction = new TransactionTemplate(manager);
         var event = transaction.execute(status -> {
             var pending = store.nextForUpdate().orElseThrow();
@@ -136,7 +134,7 @@ class NoteOutboxTests {
         var transaction = new TransactionTemplate(manager);
         var locked = new CountDownLatch(1);
         var release = new CountDownLatch(1);
-        notes.addNote(new CreateNoteRequestDto("Title", "Content"));
+        notes.addNote("Title", "Content");
         try (var executor = Executors.newSingleThreadExecutor()) {
             var worker = executor.submit(() -> transaction.executeWithoutResult(status -> {
                 assertTrue(store.nextForUpdate().isPresent());
