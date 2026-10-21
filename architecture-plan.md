@@ -11,10 +11,10 @@ Build a compact portfolio project demonstrating full-stack development, polyglot
                        |             |
                       REST          REST
                        v             v
-              +----------------+  +----------------+
-              | MS1: Knowledge |  | MS2: RAG       |
-              | Java / Spring  |  | Python / FastAPI|
-              +-------+--------+  +--------+-------+
+              +-------------------+  +------------------+
+              | Knowledge service |  | RAG service      |
+              | Java / Spring     |  | Python / FastAPI |
+              +-------+-----------+  +-----+------------+
                       |                    |
                       v                    v
                  PostgreSQL             ChromaDB
@@ -22,11 +22,11 @@ Build a compact portfolio project demonstrating full-stack development, polyglot
                       |   Note events      |
                       +----> RabbitMQ -----+
 
-   MS1 --> Ollama/Groq (manual summaries)
-   MS2 --> Ollama (embeddings) + Ollama/Groq (answers)
+   Knowledge service --> Ollama/Groq (manual summaries)
+   RAG service --> Ollama (embeddings) + Ollama/Groq (answers)
 ```
 
-Detailed MS2 design: [architecture-plan-ms2-update.md](architecture-plan-ms2-update.md).
+Detailed RAG service design: [architecture-plan-rag-service.md](architecture-plan-rag-service.md).
 
 Local development uses Ollama for all model calls. The
 [public demo](https://mnemo-hub.duckdns.org) uses Groq for text generation and
@@ -36,16 +36,16 @@ host Ollama for embeddings. Deployment and verification:
 ## 1. Frontend
 
 - [x] React + TypeScript UI.
-- [x] Note management UI: list, search note title/content, create, edit, and delete notes through MS1.
+- [x] Note management UI: list, search note title/content, create, edit, and delete notes through Knowledge service.
 - [x] Display the optional AI summary, hidden while editing and cleared on update.
 - [x] Manually summarize a saved note from the UI; saving never invokes AI.
 - [x] RAG chatbot UI with Notes/Chat navigation, source references, and in-session chat history (kept in `sessionStorage`).
-- [x] Calls MS1 through REST; local development uses the Vite proxy, with direct CORS access configurable.
-- [x] Calls MS2 through REST (`/api/v1/chat/query`) and supports public index actions (`/api/v1/index/reconcile`, `/api/v1/index/rebuild`).
-- [x] Multi-stage UI image: Node builds static assets; nginx serves them and proxies same-origin `/api` to MS1 and `/rag-api` to MS2 (prefix stripped). Hash routing and the Vite development workflow are unchanged.
+- [x] Calls Knowledge service through REST; local development uses the Vite proxy, with direct CORS access configurable.
+- [x] Calls RAG service through REST (`/api/v1/chat/query`) and supports public index actions (`/api/v1/index/reconcile`, `/api/v1/index/rebuild`).
+- [x] Multi-stage UI image: Node builds static assets; nginx serves them and proxies same-origin `/api` to Knowledge service and `/rag-api` to RAG service (prefix stripped). Hash routing and the Vite development workflow are unchanged.
 - [x] Validated runtime upstream origins; the UI proxy discards browser-supplied API-key headers.
 
-## 2. MS1 — Knowledge Service
+## 2. Knowledge service
 
 - **Stack:** Java 25, Spring Boot 4, Spring Data JPA / Hibernate.
 - **Database:** PostgreSQL; source of truth for notes and optional summaries.
@@ -53,32 +53,32 @@ host Ollama for embeddings. Deployment and verification:
   DTOs. Application services accept plain inputs and return domain notes or
   application-level index metadata without
   depending on API DTOs. Business rules, transactions and event enqueueing stay
-  in the application layer; JPA entities/repositories remain inside MS1.
+  in the application layer; JPA entities/repositories remain inside Knowledge service.
 - **Responsibilities:**
   - [x] Note CRUD API (list, read, create, update, delete).
   - [x] Input validation and centralized exception handling.
   - [x] Manual summarization through Ollama locally or Groq in deployment: one model call via `POST /api/v1/notes/{id}/summarize`. Failed or incomplete responses return explicit errors without replacing the existing summary. Tags have been removed from the domain, API and database through Flyway V2.
   - [x] Add a persisted `source_hash` (title + content), recomputed whenever title or content changes.
-  - [x] Index-metadata endpoint (`note_id`, `source_hash`) for MS2 reconciliation (`GET /api/v1/notes/index-metadata`).
+  - [x] Index-metadata endpoint (`note_id`, `source_hash`) for RAG service reconciliation (`GET /api/v1/notes/index-metadata`).
   - [x] Publish versioned events when notes are created, updated, or deleted.
   - [x] Structured application logging (Spring Boot ECS JSON output in Compose; readable text for host-run development).
   - [x] OpenAPI / Swagger API documentation.
   - The UI searches the loaded notes locally. With a 100-note collection limit,
     backend pagination and server-side search are not planned.
 
-## 3. MS2 — RAG Service
+## 3. RAG service
 
 - **Status:** Implemented (indexing, RabbitMQ events, reconcile/rebuild, chat query); containerized in Compose; UI integration completed.
 - **Stack:** Python, FastAPI, Ollama (`qwen3-embedding:0.6b` embeddings, local `qwen3:4b` answers), Groq for deployed answers, Qwen3-Embedding tokenizer (`tokenizers`) for chunking.
 - **Database:** ChromaDB for embeddings and vector-index data.
 - **Responsibilities:**
   - [x] Consume note events and update the vector index.
-  - [x] Fetch notes from MS1 through REST for initial indexing and full reindexing.
+  - [x] Fetch notes from Knowledge service through REST for initial indexing and full reindexing.
   - [x] Run retrieval and answer generation for the chatbot.
   - [x] Return answers with references to source notes.
   - [x] Structured application logging.
   - [x] OpenAPI documentation through FastAPI's built-in support.
-  - [x] Process events idempotently: always fetch the current note from MS1 and compare `source_hash`, so duplicate or out-of-order events are harmless.
+  - [x] Process events idempotently: always fetch the current note from Knowledge service and compare `source_hash`, so duplicate or out-of-order events are harmless.
 - [x] **Indexing scope:** Use note `title` and `content`; exclude generated summaries.
 - [x] **Indexing versioning:** Reindex when note `source_hash` changes or when indexing configuration changes (chunk size, overlap, splitter strategy, embedding model).
 - [x] **RAG pipeline:** Embeddings, vector search, context construction, and LLM generation.
@@ -86,25 +86,25 @@ host Ollama for embeddings. Deployment and verification:
 
 ## 4. Communication
 
-- **UI ↔ MS1:** [x] REST note CRUD and UI-triggered summarization.
-- **UI ↔ MS2:** [x] REST for chat requests and manual index actions.
-- **MS1 → MS2:** [x] RabbitMQ events (`NoteCreated`, `NoteUpdated`, `NoteDeleted`).
-- **MS2 → MS1:** [x] REST for initial indexing and full reindexing.
-- **MS2 → Ollama/Groq:** [x] REST for Ollama embeddings and provider-selected answer generation.
-- **Event contract:** Define a versioned payload with `event_id`, `event_type`, `occurred_at`, and `note_id`. The event is only a change trigger; MS2 fetches the current note state from MS1.
-- The vector index is derived data; MS1 remains the source of truth.
+- **UI ↔ Knowledge service:** [x] REST note CRUD and UI-triggered summarization.
+- **UI ↔ RAG service:** [x] REST for chat requests and manual index actions.
+- **Knowledge service → RAG service:** [x] RabbitMQ events (`NoteCreated`, `NoteUpdated`, `NoteDeleted`).
+- **RAG service → Knowledge service:** [x] REST for initial indexing and full reindexing.
+- **RAG service → Ollama/Groq:** [x] REST for Ollama embeddings and provider-selected answer generation.
+- **Event contract:** Define a versioned payload with `event_id`, `event_type`, `occurred_at`, and `note_id`. The event is only a change trigger; RAG service fetches the current note state from Knowledge service.
+- The vector index is derived data; Knowledge service remains the source of truth.
 - Index updates are eventually consistent with PostgreSQL.
 
 ## 5. Infrastructure and Quality
 
-- [x] Docker Compose for local development with PostgreSQL, RabbitMQ, MS1, MS2 and UI (`http://localhost:5173`, UI bound to loopback).
-- [x] Separate multi-stage Docker images for MS1, MS2 and UI, built by Compose.
-- [x] GitHub Actions CI for builds and tests (`.github/workflows/ci.yml`: MS1, MS2, and UI jobs on push to `main` and on PRs).
-- [x] MS1 persistence integration tests, MS2 unit/API tests (pytest), and isolated cross-service integration tests (`tests/e2e`, also run in CI).
+- [x] Docker Compose for local development with PostgreSQL, RabbitMQ, Knowledge service, RAG service and UI (`http://localhost:5173`, UI bound to loopback).
+- [x] Separate multi-stage Docker images for Knowledge service, RAG service and UI, built by Compose.
+- [x] GitHub Actions CI for builds and tests (`.github/workflows/ci.yml`: Knowledge service, RAG service, and UI jobs on push to `main` and on PRs).
+- [x] Knowledge service persistence integration tests, RAG service unit/API tests (pytest), and isolated cross-service integration tests (`tests/e2e`, also run in CI).
 - [x] UI container build and nginx smoke checks in that isolated E2E stack: static assets, real service proxy lifecycle, wire-level path/method/body/status/header checks and unsafe runtime configuration rejection; no real model downloads.
 - [x] OpenAPI / Swagger documentation for API exploration.
-- [x] Structured logs for debugging and operations (MS1 ECS JSON and MS2 JSON enabled in Compose; no centralized collection or cross-service tracing).
-- [x] Retry and dead-letter handling for RabbitMQ consumers in MS2.
+- [x] Structured logs for debugging and operations (Knowledge service ECS JSON and RAG service JSON enabled in Compose; no centralized collection or cross-service tracing).
+- [x] Retry and dead-letter handling for RabbitMQ consumers in RAG service.
 - [x] PostgreSQL persistent volume in Docker Compose; backup procedure is not set up.
 - [x] Public HTTPS deployment with Caddy, server-side secrets, private backend ports and request limits; anonymous shared-demo APIs, authenticated operator-only reset.
 - [x] GitHub Actions CD: deploy pushes to `main` after all four CI jobs pass, with SSH host verification and local/public health checks.
@@ -120,17 +120,17 @@ host Ollama for embeddings. Deployment and verification:
 
 ## Phases of Implementation
 
-1. [x] MS1 — Knowledge Service (core done)
+1. [x] Knowledge service (core done)
 2. [x] UI for note management
-3. [x] MS1 prerequisites for MS2 (`source_hash`, index-metadata endpoint)
-4. [x] MS2 — RAG Service (manual/scheduled reconcile + query first)
-5. [x] MS1 ↔ MS2 integration via RabbitMQ incremental events
+3. [x] Knowledge service prerequisites for RAG service (`source_hash`, index-metadata endpoint)
+4. [x] RAG service (manual/scheduled reconcile + query first)
+5. [x] Knowledge service ↔ RAG service integration via RabbitMQ incremental events
 6. [x] UI for RAG chatbot
 7. [x] CI setup (GitHub Actions builds and tests all three services)
-8. [x] Cross-service integration tests (MS1 → RabbitMQ → MS2 → chat), run in CI
-9. [x] MS1 structured (JSON) logging
+8. [x] Cross-service integration tests (Knowledge service → RabbitMQ → RAG service → chat), run in CI
+9. [x] Knowledge service structured (JSON) logging
 10. [x] UI containerization and same-origin nginx proxy in Compose, validated in isolated CI E2E
-11. [x] Versioned MS1 database migrations (Flyway), replacing Hibernate `ddl-auto=update` with a safe migration path for existing data
+11. [x] Versioned Knowledge service database migrations (Flyway), replacing Hibernate `ddl-auto=update` with a safe migration path for existing data
 
 ### Remaining priorities
 
@@ -138,7 +138,7 @@ Phase numbers are retained for reference; use the order below for the remaining 
 
 - **Phase 16 — RAG evaluation:** [x] Small real-model sanity check completed: 10 fixed notes and 10 questions, with documented scoring and limitations in [evaluation/results.md](evaluation/results.md). Scores are assistant-reviewed, not independently human-validated. Scope and procedure: [evaluation-plan.md](evaluation-plan.md).
 - **Phase 18 — Public deployment:** [x] Public demo deployed and verified for the agreed scope: HTTPS, server-side secrets, restricted backend exposure, request limits, index recovery and reset authentication. Note/chat/index actions intentionally remain anonymous; no account management. Automatic deployment after CI is working. Verification details and intentionally omitted destructive/reset/restart checks: [deploy/plan.md](deploy/plan.md).
-- **Phases 12/13 — Transactional outbox and recovery verification:** [x] Implemented and verified locally in the isolated E2E stack: committed CRUD/reset events survive broker outages and MS1 restarts, then update the index without manual reconciliation. Public deployment of this change is pending.
+- **Phases 12/13 — Transactional outbox and recovery verification:** [x] Implemented and verified locally in the isolated E2E stack: committed CRUD/reset events survive broker outages and Knowledge service restarts, then update the index without manual reconciliation. Public deployment of this change is pending.
 - **Phase 15 — Release polish:** [ ] Keep startup instructions and model prerequisites accurate throughout development; finalize screenshots, architecture/limitations documentation, and a clean-start walkthrough after evaluation and any intended deployment safeguards are finished. Public hosting is not required for a repository-only release.
 
 ### Transactional outbox
@@ -160,7 +160,7 @@ Phase numbers are retained for reference; use the order below for the remaining 
   releases it; acceptance before database commit can cause duplicate delivery.
   Transport correlations are unique per attempt; payload event IDs stay stable.
   This briefly occupies one database connection but avoids claim tokens/leases.
-- MS2's existing durable queue, acknowledgements, retries/DLQ and current-state
+- RAG service's existing durable queue, acknowledgements, retries/DLQ and current-state
   hashing handle duplicate/out-of-order events. Delivery is at-least-once, not
   exactly-once; publisher confirmation does not prove successful indexing.
   A VPS cron job reconciles nightly at 04:00 Europe/Berlin to repair drift or
@@ -168,7 +168,7 @@ Phase numbers are retained for reference; use the order below for the remaining 
   repair; consumer/DLQ failures still need investigation.
 - Focused tests cover transaction rollback, enqueue failure, confirms/returns/
   timeout, retries and row locking. The existing E2E runner also checks CRUD and
-  reset during real broker outages, MS1 restarts, retained earlier reset events,
+  reset during real broker outages, Knowledge service restarts, retained earlier reset events,
   drained queues and matching index metadata without repair calls.
 - No new dependency, infrastructure service, API, UI or event archive.
   Pending-count/oldest-event queries and log/DLQ inspection are documented in
@@ -176,5 +176,5 @@ Phase numbers are retained for reference; use the order below for the remaining 
 
 ### Optional / deferred work
 
-- **Phase 14 — Backup and restore:** [ ] Defer while data is disposable; revisit before relying on Mnemo for real notes. Document and verify PostgreSQL restoration, then rebuild the derived Chroma index from MS1.
+- **Phase 14 — Backup and restore:** [ ] Defer while data is disposable; revisit before relying on Mnemo for real notes. Document and verify PostgreSQL restoration, then rebuild the derived Chroma index from Knowledge service.
 - **Optional release automation:** [ ] Publish versioned container images to GHCR through CI; not required for phase 15 or a complete portfolio release.

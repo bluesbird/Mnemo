@@ -4,7 +4,7 @@ This Compose project is separate from the local-development stack in the
 repository root. It keeps PostgreSQL, RabbitMQ and both application services
 off host-published ports. Caddy listens on ports 80 and 443, obtains and renews
 certificates for `mnemo-hub.duckdns.org`, and forwards HTTPS traffic to the UI's
-nginx server. Nginx serves the frontend and proxies API requests to MS1 and MS2.
+nginx server. Nginx serves the frontend and proxies API requests to Knowledge service and RAG service.
 The UI is also available on `127.0.0.1:8081` for local diagnostics.
 
 Before starting the stack, point the domain's DNS A record to the VPS public IPv4
@@ -23,7 +23,7 @@ model-backed HTTP operations across all clients. Reconcile and rebuild are each
 limited globally to one request/minute. Requests larger than 256 KiB are rejected;
 Note titles are limited to 70 characters, note bodies to 5,000 and chat questions
 to 500 in both local and deployed apps. Chat answers are limited to 256 tokens.
-MS1 summarization allows 2,048 generated tokens in one call per button press.
+Knowledge service summarization allows 2,048 generated tokens in one call per button press.
 Groq reasoning is disabled for both services. Empty or incomplete summaries
 return an HTTP 502 error and leave the note's existing summary unchanged.
 These deployment-only limits are disabled in the root local-development Compose
@@ -37,10 +37,10 @@ starting again; omit `--volumes` to preserve data.
 ## AI providers
 
 Local development keeps Ollama for summarization, chat and embeddings; no Groq
-key is needed. Deployment uses GroqCloud (`qwen/qwen3.8-27b`) for MS1 summarization
-and MS2 RAG answer generation. MS1 activates the `groq` Spring profile; MS2 sets
-`MS2_CHAT_PROVIDER=groq`. Both read the same `GROQ_API_KEY` from `deploy/.env`
-(mapped to `MS2_GROQ_API_KEY` for MS2). Keys never belong in browser assets,
+key is needed. Deployment uses GroqCloud (`qwen/qwen3.8-27b`) for Knowledge service summarization
+and RAG service answer generation. Knowledge service activates the `groq` Spring profile; RAG service sets
+`RAG_CHAT_PROVIDER=groq`. Both read the same `GROQ_API_KEY` from `deploy/.env`
+(mapped to `RAG_GROQ_API_KEY` for RAG service). Keys never belong in browser assets,
 committed configuration or logs.
 
 Groq receives the title/content of notes being summarized, and questions plus
@@ -56,7 +56,7 @@ generation providers needs no rebuild or data migration.
 
 Ollama runs on the VPS host and is not managed by this Compose project. An
 administrator must install Ollama using its official Linux installation
-instructions before starting the application. MS2 connects through Docker's host
+instructions before starting the application. RAG service connects through Docker's host
 gateway, so a loopback-only Ollama listener is not sufficient.
 Find the host's private Docker bridge address:
 
@@ -112,23 +112,58 @@ curl --fail-with-body -X POST http://127.0.0.1:8081/api/v1/admin/reset-database 
 ```
 
 The endpoint returns `202 Accepted` after committing the replacement notes and
-an outbox event requesting an MS2 full rebuild. Broker outages do not block reset;
+an outbox event requesting a RAG service full rebuild. Broker outages do not block reset;
 the event remains in PostgreSQL for automatic delivery. Rebuilding is asynchronous.
 
 Start or update the deployment from the repository root:
 
 ```sh
-docker compose --env-file deploy/.env -f deploy/compose.yaml up -d --build
+docker compose --env-file deploy/.env -f deploy/compose.yaml up -d --build --remove-orphans
 ```
 
 The manual summary action is `POST /api/v1/notes/{id}/summarize`; saving notes
 does not invoke AI and updating clears the previous summary. The old
-`/ai-enrich` route is removed. Deploy MS1 and UI together. Flyway V2 drops the
-old tag tables at MS1 startup without changing notes, summaries or the derived
+`/ai-enrich` route is removed. Deploy Knowledge service and UI together. Flyway V2 drops the
+old tag tables at Knowledge service startup without changing notes, summaries or the derived
 index. Tag data cannot be recovered without a pre-update database backup.
 Flyway V3 adds the transactional event outbox; existing migrations stay unchanged.
 
 ## Automatic deployment
+
+### Service-name migration
+
+The application directories and Compose services are now `knowledge-service`
+and `rag-service`, without numbered prefixes.
+Keep the existing Compose project name and `deploy/.env`. The update commands
+use `--remove-orphans` so the old application containers do not keep consuming
+events after the renamed containers start. Do not run `down --volumes`.
+
+Settings now use `RAG_*`, `KNOWLEDGE_BASE_URL`, `UI_KNOWLEDGE_UPSTREAM`,
+`UI_RAG_UPSTREAM`, and `VITE_RAG_API_BASE_URL`. Update custom environment
+overrides to these names. Index operation responses use `total_knowledge_notes`.
+The internal notes client is `KnowledgeClient`.
+
+Before the first manual update of an existing host, run from the repository root:
+
+```sh
+python3 deploy/migrate-service-names.py
+```
+
+CD runs this automatically before updating containers. It finds the old RAG
+container in the same Compose project and records its actual volume and queue
+identities in private `deploy/.env` overrides (`RAG_DATA_VOLUME`,
+`RAG_CACHE_VOLUME`, `RAG_EVENTS_QUEUE`, `RAG_EVENTS_DEAD_LETTER_QUEUE`). This
+retains existing index data, cache, pending messages and dead letters without
+copying or deleting them. Keep these overrides on subsequent deployments.
+Legacy physical Docker/RabbitMQ names may remain; fresh installations use the
+new names. The migration refuses conflicting overrides or unexpected mounts.
+Do not remove old containers before running it.
+
+Historical evaluation responses retain the service identities of their recorded run.
+
+The repository rename does not migrate a running host until it is deployed.
+
+### CI/CD
 
 The GitHub Actions `CI` workflow deploys pushes to `main` only after all four
 test jobs pass. Pull requests never deploy. Repository secrets required:
@@ -145,20 +180,20 @@ update fails rather than discarding server changes.
 
 Images build before containers are updated. Normal updates preserve volumes,
 but container recreation can briefly interrupt requests. The job checks the UI,
-notes API and MS2 health locally and over public HTTPS without invoking AI.
+notes API and RAG service health locally and over public HTTPS without invoking AI.
 There is no automatic rollback: a failed deployment/check is visible in Actions;
 inspect container status/logs on the VPS before retrying. CI failures leave the
 running deployment untouched. View deployment output in the workflow's
 `Deploy to VPS` job.
 
 The Compose project creates named volumes for PostgreSQL, RabbitMQ, ChromaDB,
-the MS2 tokenizer cache, and Caddy's TLS certificates and state. Normal
+the RAG service tokenizer cache, and Caddy's TLS certificates and state. Normal
 stop/start and image updates preserve them. Do not use `down --volumes` unless
 deleting all stored application/index data and TLS state is intended. Keep
 `deploy/.env` private and out of version control.
 
 On first startup, the `starter-data` job reads the same canonical note catalog
-used by reset and creates the ten fictional notes only if MS1's note list is
+used by reset and creates the ten fictional notes only if Knowledge service's note list is
 empty. Existing notes are left untouched. The UI waits for this one-shot job to
 complete before accepting public requests;
 inspect its result with:
@@ -181,7 +216,7 @@ The dispatcher polls every second, holds one pending row lock while sending, and
 deletes only after a positive RabbitMQ confirmation with no mandatory return.
 Persistent messages and unique per-attempt correlations preserve at-least-once
 delivery; duplicates can occur after broker acceptance and before database commit.
-MS2 handles them by fetching the current note state. Failed sends retry indefinitely,
+RAG service handles them by fetching the current note state. Failed sends retry indefinitely,
 with exponential delays from two seconds up to five minutes. No extra service is needed.
 
 Inspect pending work without changing it:
@@ -189,15 +224,15 @@ Inspect pending work without changing it:
 ```sh
 docker compose --env-file deploy/.env -f deploy/compose.yaml exec -T db \
   sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT count(*) AS pending, min(occurred_at) AS oldest_event, max(attempts) AS max_attempts FROM note_outbox;"'
-docker compose --env-file deploy/.env -f deploy/compose.yaml logs --tail 100 ms1-knowledge-service ms2-rag-service
+docker compose --env-file deploy/.env -f deploy/compose.yaml logs --tail 100 knowledge-service rag-service
 docker compose --env-file deploy/.env -f deploy/compose.yaml exec -T rabbitmq \
   rabbitmqctl list_queues name messages_ready messages_unacknowledged consumers
 ```
 
-Pending rows survive MS1/broker restarts and reset never clears them. Check broker
-connectivity and the MS2 queue/bindings if rows keep retrying. Do not delete pending
+Pending rows survive Knowledge service/broker restarts and reset never clears them. Check broker
+connectivity and the RAG service queue/bindings if rows keep retrying. Do not delete pending
 rows to clear an error. Once delivery succeeds, an empty outbox means broker
-acceptance, not finished indexing. Check `ms2.note-events.dlq` and MS2 logs for
+acceptance, not finished indexing. Check `rag.note-events.dlq` and RAG service logs for
 consumer failures; after fixing the cause, use the UI's reconcile/rebuild to repair
 the derived index. The outbox does not replace PostgreSQL/RabbitMQ volume backups,
 recover a lost index automatically, or provide exactly-once delivery.

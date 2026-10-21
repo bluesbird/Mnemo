@@ -8,7 +8,7 @@ from http.server import ThreadingHTTPServer
 from unittest.mock import patch
 
 from fake_ollama import Handler, respond
-from run import verify_ms1_json_logs
+from run import verify_knowledge_json_logs
 from scenario import eventually
 
 
@@ -67,24 +67,24 @@ class HarnessTests(unittest.TestCase):
             eventually("test", unittest.mock.Mock(side_effect=AssertionError("missing source")),
                        timeout=0)
 
-    def test_ms1_structured_log_fields(self):
-        verify_ms1_json_logs(json.dumps(self.ms1_startup_record()))
+    def test_knowledge_structured_log_fields(self):
+        verify_knowledge_json_logs(json.dumps(self.knowledge_startup_record()))
 
-    def test_ms1_plain_text_logs_fail_verification(self):
-        with self.assertRaisesRegex(AssertionError, "Missing MS1 structured startup log"):
-            verify_ms1_json_logs("INFO Started KnowledgeServiceApplication")
+    def test_knowledge_plain_text_logs_fail_verification(self):
+        with self.assertRaisesRegex(AssertionError, "Missing Knowledge service structured startup log"):
+            verify_knowledge_json_logs("INFO Started KnowledgeServiceApplication")
 
-    def test_ms1_incomplete_or_wrong_service_logs_fail_verification(self):
+    def test_knowledge_incomplete_or_wrong_service_logs_fail_verification(self):
         for change in ({"message": ""}, {"log": {}}, {"service": {"name": "another-service"}}):
             with self.subTest(change=change), self.assertRaises(AssertionError):
-                verify_ms1_json_logs(json.dumps(self.ms1_startup_record() | change))
+                verify_knowledge_json_logs(json.dumps(self.knowledge_startup_record() | change))
 
-    def test_ms1_malformed_json_fails_verification(self):
-        with self.assertRaisesRegex(AssertionError, "Invalid MS1 JSON log"):
-            verify_ms1_json_logs("{invalid")
+    def test_knowledge_malformed_json_fails_verification(self):
+        with self.assertRaisesRegex(AssertionError, "Invalid Knowledge service JSON log"):
+            verify_knowledge_json_logs("{invalid")
 
     @staticmethod
-    def ms1_startup_record():
+    def knowledge_startup_record():
         return {
             "@timestamp": "2026-10-17T00:00:00Z",
             "log": {
@@ -92,7 +92,7 @@ class HarnessTests(unittest.TestCase):
                 "logger": "com.mnemo.knowledgeservice.KnowledgeServiceApplication",
             },
             "message": "Started KnowledgeServiceApplication in 5 seconds",
-            "service": {"name": "ms1-knowledge-service"},
+            "service": {"name": "knowledge-service"},
         }
 
 

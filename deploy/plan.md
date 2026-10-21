@@ -24,8 +24,8 @@ No login, users, read-only mode or deployment-specific backend mode.
    an empty database only. Normal deployment must not overwrite existing notes.
    One note is "Attention Is All You Need"; the rest are humorous fictional notes.
 6. [x] **Authenticated reset:** add an admin endpoint that clears notes,
-   restores the same ten starter notes, and durably queues an MS2 full
-   rebuild event in the transactional outbox. If MS2/RabbitMQ is unavailable,
+   restores the same ten starter notes, and durably queues a RAG service full
+   rebuild event in the transactional outbox. If RAG service/RabbitMQ is unavailable,
    data reset succeeds and delivery retries automatically.
 7. [x] **Deploy and verify:** confirm server permissions and effective public port
    exposure, deploy, then check HTTPS, user actions, limits and index recovery.
@@ -45,7 +45,7 @@ Completed:
 - DNS, public HTTPS and application/API routing work.
 - Server-side deployment credentials were configured without committing them.
 - Note create/update/delete and real-model enrichment/chat work.
-- Note lifecycle events and matching MS2 index updates were verified.
+- Note lifecycle events and matching RAG service index updates were verified.
 - Input-length validation was checked through the public APIs.
 - Existing data survived application container recreation during updates.
 - Start, update, reset and troubleshooting commands are in `deploy/README.md`.
@@ -78,7 +78,7 @@ the historical results below are not a live verification of the renamed route.
   all 13 notes. Immediate follow-up GETs to each operation returned HTTP 429,
   verifying their global request limits without executing a second operation.
 - Source notes were identical before and after index verification. Final public
-  UI, notes API and MS2 health checks all returned HTTP 200.
+  UI, notes API and RAG service health checks all returned HTTP 200.
 
 Step 7 is complete for the agreed demo scope. Full-stack restart persistence
 and a successful authenticated live reset were intentionally not exercised;

@@ -26,7 +26,7 @@ def check_static():
     for asset in assets:
         status, _, data = fetch("http://ui" + asset.decode())
         assert status == 200 and data, (asset, status)
-        assert b"MS2_ADMIN_API_KEY" not in data, asset
+        assert b"RAG_ADMIN_API_KEY" not in data, asset
     # Hash routes remain browser-side; nginx only sees "/".
     assert fetch("http://ui/#/chat")[0] == 200
     for path in ("/.env", "/docker/default.conf.template", "/missing.js"):
@@ -130,7 +130,7 @@ def check_real_backends(request, eventually):
     assert request(notes) == []
     assert request(rag + "/health")["status"] == "ok"
     # Public index actions work directly and through nginx without credentials.
-    request("http://ms2:8000/api/v1/admin/index/reconcile", "POST", expected=404)
+    request("http://rag-service:8000/api/v1/admin/index/reconcile", "POST", expected=404)
     note = request(notes, "POST", {"title": "UI proxy", "content": "Proxy access is indigo-2718."},
                    expected=201)
     note_url = notes + "/" + str(note["id"])
@@ -161,7 +161,7 @@ def check_real_backends(request, eventually):
     for action in ("reconcile", "rebuild"):
         result = request(rag + "/index/" + action, "POST")
         assert isinstance(result, dict), result
-    print("PASS: real MS1/MS2 via UI and public index actions", flush=True)
+    print("PASS: real Knowledge service/RAG service via UI and public index actions", flush=True)
 
 
 def run(request, eventually):

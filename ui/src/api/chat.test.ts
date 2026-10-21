@@ -59,7 +59,7 @@ describe("chat api", () => {
         indexed_note_ids: [],
         deleted_note_ids: [],
         skipped_note_ids: [],
-        total_ms1_notes: 0,
+        total_knowledge_notes: 0,
       }),
     });
 

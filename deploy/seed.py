@@ -9,7 +9,7 @@ STARTER_NOTES_PATH = Path(
     os.environ.get(
         "STARTER_NOTES_FILE",
         Path(__file__).resolve().parent.parent
-        / "ms1-knowledge-service"
+        / "knowledge-service"
         / "src"
         / "main"
         / "resources"
@@ -31,18 +31,18 @@ def request_json(url, method="GET", payload=None):
     except HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="replace")
         raise RuntimeError(
-            f"MS1 {method} {url} failed with HTTP {exc.code}: {detail}"
+            f"Knowledge service {method} {url} failed with HTTP {exc.code}: {detail}"
         ) from exc
 
 
-def wait_for_ms1(base_url):
+def wait_for_knowledge(base_url):
     deadline = time.monotonic() + 120
     while True:
         try:
             return request_json(f"{base_url}/api/v1/notes")
         except (URLError, TimeoutError):
             if time.monotonic() >= deadline:
-                raise RuntimeError("Timed out waiting for MS1 to accept requests.")
+                raise RuntimeError("Timed out waiting for Knowledge service to accept requests.")
             time.sleep(2)
 
 
@@ -50,7 +50,7 @@ def seed_notes(base_url, get_json=request_json, post_json=request_json):
     notes_url = f"{base_url.rstrip('/')}/api/v1/notes"
     existing_notes = get_json(notes_url)
     if not isinstance(existing_notes, list):
-        raise RuntimeError("MS1 returned an invalid note list during starter-data check.")
+        raise RuntimeError("Knowledge service returned an invalid note list during starter-data check.")
     if existing_notes:
         print(f"Starter data skipped: database already contains {len(existing_notes)} notes.")
         return False
@@ -62,8 +62,8 @@ def seed_notes(base_url, get_json=request_json, post_json=request_json):
 
 
 def main():
-    base_url = os.environ.get("MS1_BASE_URL", "http://ms1-knowledge-service:8080")
-    wait_for_ms1(base_url)
+    base_url = os.environ.get("KNOWLEDGE_BASE_URL", "http://knowledge-service:8080")
+    wait_for_knowledge(base_url)
     seed_notes(base_url)
 
 

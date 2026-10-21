@@ -1,4 +1,4 @@
-"""Real REST -> PostgreSQL -> RabbitMQ -> MS2/Chroma -> chat lifecycle."""
+"""Real REST -> PostgreSQL -> RabbitMQ -> RAG_API/Chroma -> chat lifecycle."""
 
 import base64
 import json
@@ -6,9 +6,9 @@ import time
 import urllib.error
 import urllib.request
 
-MS1 = "http://ms1:8080/api/v1/notes"
-ADMIN_RESET = "http://ms1:8080/api/v1/admin/reset-database"
-MS2 = "http://ms2:8000/api/v1"
+KNOWLEDGE_API = "http://knowledge-service:8080/api/v1/notes"
+ADMIN_RESET = "http://knowledge-service:8080/api/v1/admin/reset-database"
+RAG_API = "http://rag-service:8000/api/v1"
 BROKER = "http://rabbitmq:15672/api/queues/%2F/"
 AUTH = "Basic " + base64.b64encode(b"e2e:e2e-only").decode()
 RESET_KEY = "e2e-reset-key-that-is-long-enough-for-test"
@@ -51,7 +51,7 @@ def eventually(label, probe, timeout=60):
         time.sleep(min(0.5, remaining))
 
 
-def queue(name="ms2.note-events"):
+def queue(name="rag.note-events"):
     return request(BROKER + name, headers={"Authorization": AUTH})
 
 
@@ -62,7 +62,7 @@ def consumer_ready():
 
 
 def broker_drained():
-    state, dead = queue(), queue("ms2.note-events.dlq")
+    state, dead = queue(), queue("rag.note-events.dlq")
     assert state.get("consumers") == 1, state
     assert state.get("messages") == 0, state
     assert dead.get("messages") == 0, dead
@@ -70,7 +70,7 @@ def broker_drained():
 
 
 def chat():
-    return request(MS2 + "/chat/query", "POST",
+    return request(RAG_API + "/chat/query", "POST",
                    {"question": "What is the observatory access code?", "top_k": 4})
 
 
@@ -95,8 +95,8 @@ def assert_removed():
 
 
 def main():
-    eventually("MS1/PostgreSQL ready", lambda: request(MS1) == [], timeout=120)
-    eventually("MS2 HTTP ready", lambda: request(MS2 + "/health")["status"] == "ok",
+    eventually("KNOWLEDGE_API/PostgreSQL ready", lambda: request(KNOWLEDGE_API) == [], timeout=120)
+    eventually("RAG_API HTTP ready", lambda: request(RAG_API + "/health")["status"] == "ok",
                timeout=120)
     # HTTP health alone does not prove queue/binding declaration. Do not race creation.
     eventually("RabbitMQ consumer and binding ready", consumer_ready)
@@ -105,8 +105,8 @@ def main():
     original = {"title": "Observatory access", "content": "The observatory access code is amber-1729."}
     changed = {"title": "Observatory access revised",
                "content": "The observatory access code is violet-3141."}
-    created = request(MS1, "POST", original, expected=201)
-    note_url = MS1 + "/" + str(created["id"])
+    created = request(KNOWLEDGE_API, "POST", original, expected=201)
+    note_url = KNOWLEDGE_API + "/" + str(created["id"])
     persisted = request(note_url)
     # PostgreSQL rounds timestamp precision; compare the persisted indexing contract.
     for field in ("id", "title", "content", "sourceHash"):
@@ -128,7 +128,7 @@ def main():
 
     request(note_url, "DELETE", expected=204)
     request(note_url, expected=404)
-    assert request(MS1 + "/index-metadata") == []
+    assert request(KNOWLEDGE_API + "/index-metadata") == []
     eventually("delete removes index and stale chat sources", assert_removed)
     eventually("delete event acknowledged, no dead letters", broker_drained)
     # Check again after the consumer has acknowledged deletion.
@@ -153,7 +153,7 @@ def main():
     }, reset
 
     def starter_data_restored():
-        restored = request(MS1)
+        restored = request(KNOWLEDGE_API)
         assert len(restored) == 10, restored
         assert any(note["title"] == "Attention Is All You Need" for note in restored), restored
         return True

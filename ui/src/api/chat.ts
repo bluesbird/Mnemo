@@ -5,7 +5,7 @@ import type {
 } from "../types/chat";
 
 const CHAT_API_BASE_URL = (
-  import.meta.env.VITE_MS2_API_BASE_URL ?? "/rag-api"
+  import.meta.env.VITE_RAG_API_BASE_URL ?? "/rag-api"
 ).replace(/\/$/, "");
 
 function describeFailure(status: number, action: string): string {

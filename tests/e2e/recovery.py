@@ -18,7 +18,7 @@ def run(command, env):
 import json, urllib.request
 from app.core.config import get_settings
 from app.persistence.index_store import IndexStore
-base = 'http://ms1:8080/api/v1'
+base = 'http://knowledge-service:8080/api/v1'
 def request(path, method='GET', payload=None):
     data = None if payload is None else json.dumps(payload).encode()
     req = urllib.request.Request(base + path, data=data, method=method, headers={
@@ -29,7 +29,7 @@ def request(path, method='GET', payload=None):
         body = response.read()
         return json.loads(body) if body else None
 """ + code
-        return compose("exec", "-T", "ms2", "python", "-c", script)
+        return compose("exec", "-T", "rag-service", "python", "-c", script)
 
     def eventually(label, probe, timeout=180):
         deadline = time.monotonic() + timeout
@@ -64,19 +64,19 @@ assert all(item['source_hash'] == expected[item['note_id']]
         api("""
 import base64
 auth = 'Basic ' + base64.b64encode(b'e2e:e2e-only').decode()
-for name in ('ms2.note-events', 'ms2.note-events.dlq'):
+for name in ('rag.note-events', 'rag.note-events.dlq'):
     req = urllib.request.Request('http://rabbitmq:15672/api/queues/%2F/' + name,
                                  headers={'Authorization': auth})
     with urllib.request.urlopen(req, timeout=5) as response:
         queue = json.load(response)
     assert queue['messages'] == 0, queue
-    if name == 'ms2.note-events':
+    if name == 'rag.note-events':
         assert queue['consumers'] == 1, queue
 """)
 
     def recovered(label):
         eventually(label + ": outbox drained", pending_empty)
-        eventually(label + ": index matches MS1 (no reconcile/rebuild)", index_matches)
+        eventually(label + ": index matches Knowledge service (no reconcile/rebuild)", index_matches)
         eventually(label + ": consumer acknowledged, no dead letters", broker_drained)
 
     def ready():
@@ -99,11 +99,11 @@ request('/notes', 'POST', {{'title': 'Recovery create', 'content': 'Created whil
     assert len(pending.splitlines()) == 3, pending
     assert sql("SELECT string_agg(event_type, ',' ORDER BY event_type) FROM note_outbox") == (
         "NoteCreated,NoteDeleted,NoteUpdated")
-    compose("restart", "ms1")
-    eventually("MS1 restarts while broker unavailable", ready)
+    compose("restart", "knowledge-service")
+    eventually("Knowledge service restarts while broker unavailable", ready)
     assert sql("SELECT event_id FROM note_outbox ORDER BY event_id") == pending
     compose("start", "rabbitmq")
-    recovered("create/update/delete after broker outage and MS1 restart")
+    recovered("create/update/delete after broker outage and Knowledge service restart")
 
     # Check a reset with an older event still pending; reset must not clear the outbox.
     compose("stop", "rabbitmq")
@@ -118,9 +118,9 @@ assert len(request('/notes')) == 10
     assert pending in sql("SELECT event_id FROM note_outbox")
     assert sql("SELECT count(*) FROM note_outbox WHERE note_id IS NULL "
                "AND event_type='IndexRebuildRequested'") == "1"
-    compose("restart", "ms1")
-    eventually("reset survives MS1 restart with broker down", ready)
+    compose("restart", "knowledge-service")
+    eventually("reset survives Knowledge service restart with broker down", ready)
     assert sql("SELECT count(*) FROM note_outbox") == "2"
     compose("start", "rabbitmq")
-    recovered("reset after broker outage and MS1 restart")
+    recovered("reset after broker outage and Knowledge service restart")
     print("PASS: durable outbox recovery, including reset and retained earlier events", flush=True)

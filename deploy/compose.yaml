@@ -28,10 +28,10 @@ services:
       timeout: 10s
       retries: 10
 
-  ms1-knowledge-service:
+  knowledge-service:
     build:
-      context: ../ms1-knowledge-service
-    image: mnemo-ms1:deployment
+      context: ../knowledge-service
+    image: mnemo-knowledge-service:deployment
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-mnemo}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:?Set POSTGRES_USER in deploy/.env}
@@ -54,31 +54,33 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  ms2-rag-service:
+  rag-service:
     build:
-      context: ../ms2-rag-service
-    image: mnemo-ms2:deployment
+      context: ../rag-service
+    image: mnemo-rag-service:deployment
     environment:
-      MS2_APP_ENV: production
-      MS2_MS1_BASE_URL: http://ms1-knowledge-service:8080
-      MS2_OLLAMA_BASE_URL: http://host.docker.internal:11434
-      MS2_CHAT_PROVIDER: groq
-      MS2_GROQ_API_KEY: ${GROQ_API_KEY:?Set GROQ_API_KEY in deploy/.env}
-      MS2_GROQ_MODEL: qwen/qwen3.8-27b
-      MS2_CHAT_NUM_PREDICT: 256
-      MS2_RABBITMQ_HOST: rabbitmq
-      MS2_RABBITMQ_USERNAME: ${RABBITMQ_USER:?Set RABBITMQ_USER in deploy/.env}
-      MS2_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:?Set RABBITMQ_PASSWORD in deploy/.env}
-      MS2_LOG_FORMAT: json
+      RAG_APP_ENV: production
+      RAG_KNOWLEDGE_BASE_URL: http://knowledge-service:8080
+      RAG_OLLAMA_BASE_URL: http://host.docker.internal:11434
+      RAG_CHAT_PROVIDER: groq
+      RAG_GROQ_API_KEY: ${GROQ_API_KEY:?Set GROQ_API_KEY in deploy/.env}
+      RAG_GROQ_MODEL: qwen/qwen3.8-27b
+      RAG_CHAT_NUM_PREDICT: 256
+      RAG_RABBITMQ_HOST: rabbitmq
+      RAG_RABBITMQ_USERNAME: ${RABBITMQ_USER:?Set RABBITMQ_USER in deploy/.env}
+      RAG_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:?Set RABBITMQ_PASSWORD in deploy/.env}
+      RAG_LOG_FORMAT: json
+      RAG_EVENTS_QUEUE: ${RAG_EVENTS_QUEUE:-rag.note-events}
+      RAG_EVENTS_DEAD_LETTER_QUEUE: ${RAG_EVENTS_DEAD_LETTER_QUEUE:-rag.note-events.dlq}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
-      - ms2_data:/app/data
-      - ms2_hf_cache:/app/.cache
+      - rag_data:/app/data
+      - rag_hf_cache:/app/.cache
     depends_on:
       rabbitmq:
         condition: service_healthy
-      ms1-knowledge-service:
+      knowledge-service:
         condition: service_started
     restart: unless-stopped
 
@@ -87,15 +89,15 @@ services:
     command: ["python", "/opt/mnemo/seed.py"]
     restart: "no"
     environment:
-      MS1_BASE_URL: http://ms1-knowledge-service:8080
+      KNOWLEDGE_BASE_URL: http://knowledge-service:8080
       STARTER_NOTES_FILE: /opt/mnemo/starter-notes.json
     volumes:
       - ./seed.py:/opt/mnemo/seed.py:ro
-      - ../ms1-knowledge-service/src/main/resources/starter-notes.json:/opt/mnemo/starter-notes.json:ro
+      - ../knowledge-service/src/main/resources/starter-notes.json:/opt/mnemo/starter-notes.json:ro
     depends_on:
-      ms1-knowledge-service:
+      knowledge-service:
         condition: service_started
-      ms2-rag-service:
+      rag-service:
         condition: service_healthy
 
   ui:
@@ -105,8 +107,8 @@ services:
     ports:
       - "127.0.0.1:8081:80"
     environment:
-      UI_MS1_UPSTREAM: http://ms1-knowledge-service:8080
-      UI_MS2_UPSTREAM: http://ms2-rag-service:8000
+      UI_KNOWLEDGE_UPSTREAM: http://knowledge-service:8080
+      UI_RAG_UPSTREAM: http://rag-service:8000
       UI_RATE_LIMITS: "on"
     networks:
       default:
@@ -114,7 +116,7 @@ services:
         aliases:
           - ui
     depends_on:
-      ms2-rag-service:
+      rag-service:
         condition: service_started
       starter-data:
         condition: service_completed_successfully
@@ -148,7 +150,9 @@ networks:
 volumes:
   postgres_data:
   rabbitmq_data:
-  ms2_data:
-  ms2_hf_cache:
+  rag_data:
+    name: ${RAG_DATA_VOLUME:-${COMPOSE_PROJECT_NAME}_rag_data}
+  rag_hf_cache:
+    name: ${RAG_CACHE_VOLUME:-${COMPOSE_PROJECT_NAME}_rag_hf_cache}
   caddy_data:
   caddy_config:

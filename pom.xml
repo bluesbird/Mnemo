@@ -12,6 +12,6 @@
     <description>Monorepo parent for Mnemo services</description>
 
     <modules>
-        <module>ms1-knowledge-service</module>
+        <module>knowledge-service</module>
     </modules>
 </project>

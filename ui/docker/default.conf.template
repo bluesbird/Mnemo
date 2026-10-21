@@ -33,44 +33,44 @@ server {
     limit_conn_status 429;
 
     location = /api {
-        proxy_pass ${UI_MS1_UPSTREAM};
+        proxy_pass ${UI_KNOWLEDGE_UPSTREAM};
     }
     location ~ ^/api/v1/notes/[0-9]+/summarize$ {
         limit_req zone=summarize_per_ip burst=5 nodelay;
         limit_conn ollama_work 2;
-        proxy_pass ${UI_MS1_UPSTREAM};
+        proxy_pass ${UI_KNOWLEDGE_UPSTREAM};
     }
     location /api/ {
-        proxy_pass ${UI_MS1_UPSTREAM};
+        proxy_pass ${UI_KNOWLEDGE_UPSTREAM};
     }
     location = /rag-api {
-        proxy_pass ${UI_MS2_UPSTREAM}/;
+        proxy_pass ${UI_RAG_UPSTREAM}/;
         proxy_set_header X-API-Key "";
         proxy_set_header Connection "";
     }
     location = /rag-api/api/v1/chat/query {
         limit_req zone=chat_per_ip burst=20 nodelay;
         limit_conn ollama_work 2;
-        proxy_pass ${UI_MS2_UPSTREAM}/api/v1/chat/query;
+        proxy_pass ${UI_RAG_UPSTREAM}/api/v1/chat/query;
         proxy_set_header X-API-Key "";
         proxy_set_header Connection "";
     }
     location = /rag-api/api/v1/index/reconcile {
         limit_req zone=reconcile_global;
         limit_conn ollama_work 2;
-        proxy_pass ${UI_MS2_UPSTREAM}/api/v1/index/reconcile;
+        proxy_pass ${UI_RAG_UPSTREAM}/api/v1/index/reconcile;
         proxy_set_header X-API-Key "";
         proxy_set_header Connection "";
     }
     location = /rag-api/api/v1/index/rebuild {
         limit_req zone=rebuild_global;
         limit_conn ollama_work 2;
-        proxy_pass ${UI_MS2_UPSTREAM}/api/v1/index/rebuild;
+        proxy_pass ${UI_RAG_UPSTREAM}/api/v1/index/rebuild;
         proxy_set_header X-API-Key "";
         proxy_set_header Connection "";
     }
     location /rag-api/ {
-        proxy_pass ${UI_MS2_UPSTREAM}/;
+        proxy_pass ${UI_RAG_UPSTREAM}/;
         proxy_set_header X-API-Key "";
         proxy_set_header Connection "";
     }

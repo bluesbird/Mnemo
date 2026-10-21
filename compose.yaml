@@ -36,10 +36,10 @@ services:
       timeout: 10s
       retries: 10
 
-  ms1-knowledge-service:
+  knowledge-service:
     build:
-      context: ./ms1-knowledge-service
-    image: ms1-knowledge-service:0.0.1-SNAPSHOT
+      context: ./knowledge-service
+    image: knowledge-service:0.0.1-SNAPSHOT
     ports:
       - "8080:8080"
     environment:
@@ -64,26 +64,28 @@ services:
       - services
     restart: unless-stopped
 
-  ms2-rag-service:
+  rag-service:
     build:
-      context: ./ms2-rag-service
-    image: ms2-rag-service:0.1.0
+      context: ./rag-service
+    image: rag-service:0.1.0
     ports:
       - "8000:8000"
     environment:
-      MS2_MS1_BASE_URL: http://ms1-knowledge-service:8080
-      MS2_OLLAMA_BASE_URL: http://host.docker.internal:11434
-      MS2_RABBITMQ_HOST: rabbitmq
-      MS2_LOG_FORMAT: json
+      RAG_KNOWLEDGE_BASE_URL: http://knowledge-service:8080
+      RAG_OLLAMA_BASE_URL: http://host.docker.internal:11434
+      RAG_RABBITMQ_HOST: rabbitmq
+      RAG_LOG_FORMAT: json
+      RAG_EVENTS_QUEUE: ${RAG_EVENTS_QUEUE:-rag.note-events}
+      RAG_EVENTS_DEAD_LETTER_QUEUE: ${RAG_EVENTS_DEAD_LETTER_QUEUE:-rag.note-events.dlq}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
-      - ms2-data:/app/data
-      - ms2-hf-cache:/app/.cache
+      - rag-data:/app/data
+      - rag-hf-cache:/app/.cache
     depends_on:
       rabbitmq:
         condition: service_healthy
-      ms1-knowledge-service:
+      knowledge-service:
         condition: service_started
     networks:
       - messaging
@@ -95,15 +97,15 @@ services:
     command: ["python", "/opt/mnemo/seed.py"]
     restart: "no"
     environment:
-      MS1_BASE_URL: http://ms1-knowledge-service:8080
+      KNOWLEDGE_BASE_URL: http://knowledge-service:8080
       STARTER_NOTES_FILE: /opt/mnemo/starter-notes.json
     volumes:
       - ./deploy/seed.py:/opt/mnemo/seed.py:ro
-      - ./ms1-knowledge-service/src/main/resources/starter-notes.json:/opt/mnemo/starter-notes.json:ro
+      - ./knowledge-service/src/main/resources/starter-notes.json:/opt/mnemo/starter-notes.json:ro
     depends_on:
-      ms1-knowledge-service:
+      knowledge-service:
         condition: service_started
-      ms2-rag-service:
+      rag-service:
         condition: service_healthy
     networks:
       - services
@@ -115,13 +117,13 @@ services:
     ports:
       - "127.0.0.1:5173:80"
     environment:
-      UI_MS1_UPSTREAM: http://ms1-knowledge-service:8080
-      UI_MS2_UPSTREAM: http://ms2-rag-service:8000
+      UI_KNOWLEDGE_UPSTREAM: http://knowledge-service:8080
+      UI_RAG_UPSTREAM: http://rag-service:8000
       UI_RATE_LIMITS: "off"
     depends_on:
-      ms1-knowledge-service:
+      knowledge-service:
         condition: service_started
-      ms2-rag-service:
+      rag-service:
         condition: service_started
       starter-data:
         condition: service_completed_successfully
@@ -139,5 +141,7 @@ networks:
 
 volumes:
   db:
-  ms2-data:
-  ms2-hf-cache:
+  rag-data:
+    name: ${RAG_DATA_VOLUME:-${COMPOSE_PROJECT_NAME}_rag-data}
+  rag-hf-cache:
+    name: ${RAG_CACHE_VOLUME:-${COMPOSE_PROJECT_NAME}_rag-hf-cache}

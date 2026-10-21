@@ -69,10 +69,10 @@ after seeing the response.
 
 ## Isolation, limitations and reproduction
 
-The runner reused the existing E2E Compose topology and built current MS1/MS2
+The runner reused the existing E2E Compose topology and built current Knowledge service/RAG service
 images. Only a unique project/network, fresh PostgreSQL and fresh Chroma were
 used; no host ports, development mounts or personal notes. Events were disabled
-in MS2 so the explicit reconcile deterministically indexed all ten notes
+in RAG service so the explicit reconcile deterministically indexed all ten notes
 (`indexed=10, skipped=0, deleted=0`). This does not evaluate event ingestion.
 The host Ollama was the only shared runtime.
 

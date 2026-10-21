@@ -11,7 +11,7 @@ import uuid
 HERE = Path(__file__).resolve().parent
 
 
-def verify_ms1_json_logs(output):
+def verify_knowledge_json_logs(output):
     records = []
     for line in output.splitlines():
         if not line.startswith("{"):
@@ -19,7 +19,7 @@ def verify_ms1_json_logs(output):
         try:
             record = json.loads(line)
         except json.JSONDecodeError as exc:
-            raise AssertionError(f"Invalid MS1 JSON log: {line}") from exc
+            raise AssertionError(f"Invalid Knowledge service JSON log: {line}") from exc
         for field in ("@timestamp", "message"):
             assert isinstance(record.get(field), str) and record[field], (field, record)
         log = record.get("log")
@@ -28,13 +28,13 @@ def verify_ms1_json_logs(output):
             assert isinstance(log.get(field), str) and log[field], (field, record)
         service = record.get("service")
         assert isinstance(service, dict), record
-        assert service.get("name") == "ms1-knowledge-service", record
+        assert service.get("name") == "knowledge-service", record
         records.append(record)
     assert any("Started KnowledgeServiceApplication" in record["message"]
-               for record in records), "Missing MS1 structured startup log"
+               for record in records), "Missing Knowledge service structured startup log"
 
 
-def verify_ms1_migrations(command, env):
+def verify_knowledge_migrations(command, env):
     deadline = time.monotonic() + 120
     last_observation = "migration history not queried"
     while time.monotonic() < deadline:
@@ -55,8 +55,8 @@ def verify_ms1_migrations(command, env):
     else:
         raise AssertionError("Timed out waiting for Flyway V1/V2/V3; last observation: "
                              + last_observation)
-    subprocess.run(command + ["restart", "ms1"], env=env, check=True, timeout=60)
-    print("PASS: fresh Flyway V1/V2/V3 applied and MS1 restarted with validated schema", flush=True)
+    subprocess.run(command + ["restart", "knowledge-service"], env=env, check=True, timeout=60)
+    print("PASS: fresh Flyway V1/V2/V3 applied and Knowledge service restarted with validated schema", flush=True)
 
 
 def verify_ui_configuration(command, env):
@@ -64,9 +64,9 @@ def verify_ui_configuration(command, env):
         subprocess.run(command + ["exec", "-T", service, "nginx", "-t"],
                        env=env, check=True, timeout=30)
     for setting in (
-        "UI_MS1_UPSTREAM=http://ms1:8080;include /etc/passwd",
-        "UI_MS1_UPSTREAM=http://ms1:8080/api",
-        "UI_MS2_UPSTREAM=http://ms2:8000\nhttp://ms2:8000",
+        "UI_KNOWLEDGE_UPSTREAM=http://knowledge-service:8080;include /etc/passwd",
+        "UI_KNOWLEDGE_UPSTREAM=http://knowledge-service:8080/api",
+        "UI_RAG_UPSTREAM=http://rag-service:8000\nhttp://rag-service:8000",
         "UI_RATE_LIMITS=enabled",
     ):
         result = subprocess.run(
@@ -95,19 +95,19 @@ def main():
                        stdout=subprocess.DEVNULL, timeout=30)
         subprocess.run(command + ["up", "--detach", "--build"], env=env,
                        check=True, timeout=900)
-        verify_ms1_migrations(command, env)
+        verify_knowledge_migrations(command, env)
         verify_ui_configuration(command, env)
         with scenario_log.open("w", encoding="utf-8") as log:
             subprocess.run(command + ["run", "--rm", "-T", "tests"], env=env,
                            stdout=log, stderr=subprocess.STDOUT, check=True, timeout=420)
         from recovery import run as verify_recovery
         verify_recovery(command, env)
-        logs = subprocess.run(command + ["logs", "--no-color", "--no-log-prefix", "ms1"],
+        logs = subprocess.run(command + ["logs", "--no-color", "--no-log-prefix", "knowledge-service"],
                               env=env, capture_output=True, text=True, errors="replace",
                               check=True, timeout=30)
-        (artifacts / "ms1-json.log").write_text(logs.stdout, encoding="utf-8")
-        verify_ms1_json_logs(logs.stdout)
-        print("PASS: MS1 ECS JSON logs include timestamp, level, logger, message and service",
+        (artifacts / "knowledge-json.log").write_text(logs.stdout, encoding="utf-8")
+        verify_knowledge_json_logs(logs.stdout)
+        print("PASS: Knowledge service ECS JSON logs include timestamp, level, logger, message and service",
               flush=True)
         status = 0
     except (subprocess.SubprocessError, OSError, AssertionError) as exc:

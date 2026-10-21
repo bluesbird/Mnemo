@@ -1,0 +1,69 @@
+# Requires: Knowledge service on :8080, Ollama on :11434 (qwen3-embedding:0.6b, qwen3:4b), RAG service on :8000
+# Start RAG service (from rag-service):
+#   python -m venv .venv ; .\.venv\Scripts\python.exe -m pip install .
+#   .\.venv\Scripts\python.exe -m uvicorn app.main:app --port 8000
+
+### Health check
+GET http://localhost:8000/api/v1/health
+
+###
+### Reconcile index with Knowledge service (index missing/changed notes, remove deleted ones)
+POST http://localhost:8000/api/v1/index/reconcile
+
+###
+### Rebuild the whole index from scratch
+POST http://localhost:8000/api/v1/index/rebuild
+
+###
+### Obsolete admin path -> 404
+POST http://localhost:8000/api/v1/admin/index/reconcile
+
+###
+### Ask a question
+POST http://localhost:8000/api/v1/chat/query
+Content-Type: application/json
+
+{
+  "question": "What is the transformer architecture?"
+}
+
+###
+### Ask a question with custom top_k
+POST http://localhost:8000/api/v1/chat/query
+Content-Type: application/json
+
+{
+  "question": "What is Spring Boot?",
+  "top_k": 2
+}
+
+###
+### Invalid request (empty question) -> 422
+POST http://localhost:8000/api/v1/chat/query
+Content-Type: application/json
+
+{
+  "question": ""
+}
+
+###
+### OpenAPI spec (Swagger UI: http://localhost:8000/docs)
+GET http://localhost:8000/openapi.json
+
+###
+### Ask a question
+POST http://localhost:8000/api/v1/chat/query
+Content-Type: application/json
+
+{
+  "question": "What does xd mean?"
+}
+
+###
+### Ask a question
+POST http://localhost:8000/api/v1/chat/query
+Content-Type: application/json
+
+{
+  "question": "What number is light gray? why?"
+}

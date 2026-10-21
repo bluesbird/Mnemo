@@ -15,7 +15,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 OUTPUT = HERE / "responses.json"
 
-# HTTP runs inside MS2: no host ports, host dependencies, or development APIs.
+# HTTP runs inside RAG service: no host ports, host dependencies, or development APIs.
 HTTP = """
 import json, sys, urllib.request, urllib.error
 data = json.load(sys.stdin)
@@ -87,12 +87,12 @@ def main():
             "chown rabbitmq:rabbitmq /var/lib/rabbitmq/.erlang.cookie; "
             "chmod 600 /var/lib/rabbitmq/.erlang.cookie; "
             "exec docker-entrypoint.sh rabbitmq-server"]},
-        "ms1": {"environment": {
+        "knowledge-service": {"environment": {
             "SPRING_AI_OLLAMA_BASE_URL": "http://host.docker.internal:11434"},
             "extra_hosts": ["host.docker.internal:host-gateway"]},
-        "ms2": {"environment": {
-            "MS2_OLLAMA_BASE_URL": "http://host.docker.internal:11434",
-            "MS2_RABBITMQ_ENABLED": "false", "HF_HUB_OFFLINE": "0"},
+        "rag-service": {"environment": {
+            "RAG_OLLAMA_BASE_URL": "http://host.docker.internal:11434",
+            "RAG_RABBITMQ_ENABLED": "false", "HF_HUB_OFFLINE": "0"},
             "extra_hosts": ["host.docker.internal:host-gateway"]}
     }}), encoding="utf-8")
     compose = ["docker", "compose", "--project-name", project, "--env-file",
@@ -149,13 +149,13 @@ def main():
         with (scratch / "startup.log").open("w", encoding="utf-8") as log:
             command(compose + ["up", "-d", "--wait", "db", "rabbitmq"],
                     stdout=log, stderr=subprocess.STDOUT, timeout=180)
-            command(compose + ["up", "-d", "--build", "--no-deps", "ms1", "ms2"],
+            command(compose + ["up", "-d", "--build", "--no-deps", "knowledge-service", "rag-service"],
                     stdout=log, stderr=subprocess.STDOUT, timeout=900)
-        container = command(compose + ["ps", "-q", "ms2"], capture_output=True).stdout.strip()
+        container = command(compose + ["ps", "-q", "rag-service"], capture_output=True).stdout.strip()
         last = None
         for _ in range(90):
             try:
-                assert success(request("http://ms1:8080/api/v1/notes")) == []
+                assert success(request("http://knowledge-service:8080/api/v1/notes")) == []
                 assert success(request("http://localhost:8000/api/v1/health"))["status"] == "ok"
                 break
             except (subprocess.SubprocessError, AssertionError, ValueError, RuntimeError) as exc:
@@ -166,7 +166,7 @@ def main():
         result["containers"] = [json.loads(line) for line in command(
             compose + ["ps", "--format", "json"], capture_output=True).stdout.splitlines()]
         for note in fixture["notes"]:
-            created = success(request("http://ms1:8080/api/v1/notes",
+            created = success(request("http://knowledge-service:8080/api/v1/notes",
                                       {"title": note["title"], "content": note["content"]}))
             result["notes"].append({"key": note["key"], "note_id": created["id"],
                                     "source_hash": created["sourceHash"]})
@@ -182,7 +182,7 @@ def main():
             assert mapping["chunk_count"] > 0, mapping
             if note["length"] == "long":
                 assert mapping["chunk_count"] > 1, mapping
-        assert result["reconcile"]["body"]["total_ms1_notes"] == 10
+        assert result["reconcile"]["body"]["total_knowledge_notes"] == 10
         save(result)
         # One warmup, not a scored question and not drawn from the answer key.
         result["warmup"] = ollama("/api/chat", {

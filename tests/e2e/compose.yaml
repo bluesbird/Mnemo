@@ -31,9 +31,9 @@ services:
       - ./fake_ollama.py:/tests/fake_ollama.py:ro
     command: ["python", "fake_ollama.py"]
 
-  ms1:
+  knowledge-service:
     build:
-      context: ../../ms1-knowledge-service
+      context: ../../knowledge-service
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/mnemo_e2e
       SPRING_DATASOURCE_USERNAME: e2e
@@ -51,17 +51,17 @@ services:
       rabbitmq:
         condition: service_healthy
 
-  ms2:
+  rag-service:
     build:
-      context: ../../ms2-rag-service
+      context: ../../rag-service
     environment:
-      MS2_APP_ENV: e2e
-      MS2_MS1_BASE_URL: http://ms1:8080
-      MS2_OLLAMA_BASE_URL: http://ollama:11434
-      MS2_RABBITMQ_HOST: rabbitmq
-      MS2_RABBITMQ_USERNAME: e2e
-      MS2_RABBITMQ_PASSWORD: e2e-only
-      MS2_LOG_FORMAT: json
+      RAG_APP_ENV: e2e
+      RAG_KNOWLEDGE_BASE_URL: http://knowledge-service:8080
+      RAG_OLLAMA_BASE_URL: http://ollama:11434
+      RAG_RABBITMQ_HOST: rabbitmq
+      RAG_RABBITMQ_USERNAME: e2e
+      RAG_RABBITMQ_PASSWORD: e2e-only
+      RAG_LOG_FORMAT: json
       # Exercise the existing offline word-count fallback, without model/tokenizer downloads.
       HF_HUB_OFFLINE: "1"
       ANONYMIZED_TELEMETRY: "False"
@@ -70,7 +70,7 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-      ms1:
+      knowledge-service:
         condition: service_started
       ollama:
         condition: service_started
@@ -79,12 +79,12 @@ services:
     build:
       context: ../../ui
     environment:
-      UI_MS1_UPSTREAM: http://ms1:8080
-      UI_MS2_UPSTREAM: http://ms2:8000
+      UI_KNOWLEDGE_UPSTREAM: http://knowledge-service:8080
+      UI_RAG_UPSTREAM: http://rag-service:8000
     depends_on:
-      ms1:
+      knowledge-service:
         condition: service_started
-      ms2:
+      rag-service:
         condition: service_started
 
   proxy-probe:
@@ -98,8 +98,8 @@ services:
     extends:
       service: ui
     environment:
-      UI_MS1_UPSTREAM: http://proxy-probe:8080
-      UI_MS2_UPSTREAM: http://proxy-probe:8080
+      UI_KNOWLEDGE_UPSTREAM: http://proxy-probe:8080
+      UI_RAG_UPSTREAM: http://proxy-probe:8080
       UI_RATE_LIMITS: "on"
     depends_on:
       proxy-probe:

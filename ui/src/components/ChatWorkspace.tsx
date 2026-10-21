@@ -16,7 +16,7 @@ function summarizeIndexResult(
   operation: "reconcile" | "rebuild",
   result: IndexOperationResponse,
 ): string {
-  return `${operation === "reconcile" ? "Reconcile" : "Rebuild"} complete · indexed ${result.indexed_note_ids.length}, deleted ${result.deleted_note_ids.length}, skipped ${result.skipped_note_ids.length}, total notes ${result.total_ms1_notes}.`;
+  return `${operation === "reconcile" ? "Reconcile" : "Rebuild"} complete · indexed ${result.indexed_note_ids.length}, deleted ${result.deleted_note_ids.length}, skipped ${result.skipped_note_ids.length}, total notes ${result.total_knowledge_notes}.`;
 }
 
 export function ChatWorkspace({

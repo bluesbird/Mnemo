@@ -21,7 +21,7 @@ export type IndexOperationResponse = {
   indexed_note_ids: number[];
   deleted_note_ids: number[];
   skipped_note_ids: number[];
-  total_ms1_notes: number;
+  total_knowledge_notes: number;
 };
 
 export type ChatMessage = {
