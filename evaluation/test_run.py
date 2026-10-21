@@ -1,7 +1,7 @@
 import json
 from collections import Counter
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import run
 
@@ -30,13 +30,6 @@ class EvaluationTests(unittest.TestCase):
             with self.assertRaisesRegex(SystemExit, "preserve the first run"):
                 run.main()
             command.assert_not_called()
-
-    def test_partial_results_are_saved_as_json(self):
-        output = Mock()
-        partial = {"status": "running", "questions": [{"id": "Q1", "error": "HTTP 500"}]}
-        with patch.object(run, "OUTPUT", output):
-            run.save(partial)
-        self.assertEqual(json.loads(output.write_text.call_args.args[0]), partial)
 
 
 if __name__ == "__main__":

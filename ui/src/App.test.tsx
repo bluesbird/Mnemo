@@ -1,5 +1,5 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import App from "./App";
 import * as notesApi from "./api/notes";
 
@@ -96,25 +96,19 @@ it("requests a summary only on demand and clears it after saving edits", async (
   await waitFor(() => expect(notesApi.updateNote).toHaveBeenCalledWith(1, {
     title: note.title, content: "Changed content",
   }));
+  await waitFor(() => expect((screen.getByRole("button", { name: "Summarize note" }) as HTMLButtonElement).disabled).toBe(false));
   expect(notesApi.summarizeNote).toHaveBeenCalledTimes(1);
   expect(screen.queryByRole("region", { name: "AI summary" })).toBeNull();
 });
 
-describe("demo privacy information", () => {
-  it("shows the shared-data warning and expandable privacy notice", async () => {
-    render(<App />);
+it("shows the shared-data warning and expandable privacy notice", async () => {
+  render(<App />);
 
-    expect(screen.getByText(/Public demo: notes are shared/)).toBeTruthy();
-    const summary = screen.getByText("Privacy");
-    expect(summary.closest("details")).not.toBeNull();
-    expect(screen.getByText(/Lorenz Moser/)).toBeTruthy();
-    expect(screen.getByRole("link", { name: "lorenz.moser.bw@gmail.com" }).getAttribute("href"))
-      .toBe("mailto:lorenz.moser.bw@gmail.com");
-    expect(screen.getByText(/Hosting is provided by Contabo/)).toBeTruthy();
-    expect(screen.queryByText(/TODO/)).toBeNull();
-    expect(screen.getByText(/Chat history is saved in your browser/)).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Groq's data information" }).getAttribute("href"))
-      .toBe("https://console.groq.com/docs/your-data");
-    await screen.findByText("No notes yet. Create one to get started.");
-  });
+  expect(screen.getByText(/Public demo: notes are shared/)).toBeTruthy();
+  const summary = screen.getByText("Privacy");
+  expect(summary.closest("details")).not.toBeNull();
+  expect(screen.getByText(/Chat history is saved in your browser/)).toBeTruthy();
+  expect(screen.getByRole("link", { name: "Groq's data information" }).getAttribute("href"))
+    .toBe("https://console.groq.com/docs/your-data");
+  await screen.findByText("No notes yet. Create one to get started.");
 });

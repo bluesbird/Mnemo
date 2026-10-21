@@ -51,7 +51,7 @@ describe("chat api", () => {
     );
   });
 
-  it("posts public index operations without credentials", async () => {
+  it("posts public index operations", async () => {
     const fetchMock = mockFetch({
       ok: true,
       status: 200,

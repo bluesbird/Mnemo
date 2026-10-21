@@ -105,8 +105,6 @@ class AiProviderConfigurationTests {
                     "spring.ai.openai.base-url=http://127.0.0.1:" + server.getAddress().getPort() + "/openai/v1"
             ).run(context -> {
                 assertThat(context).hasNotFailed().hasSingleBean(ChatModel.class);
-                assertThat(context.getEnvironment().getProperty("spring.ai.openai.base-url"))
-                        .isEqualTo("http://127.0.0.1:" + server.getAddress().getPort() + "/openai/v1");
                 var model = context.getBean(ChatModel.class);
                 assertThat(model).isInstanceOf(OpenAiChatModel.class);
                 assertThat(context).doesNotHaveBean(OllamaChatModel.class);

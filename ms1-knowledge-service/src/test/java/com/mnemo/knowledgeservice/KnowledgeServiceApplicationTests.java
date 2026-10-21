@@ -28,10 +28,6 @@ class KnowledgeServiceApplicationTests {
     private EntityManager entityManager;
 
     @Test
-    void contextLoads() {
-    }
-
-    @Test
     void noteLimitSerializesConcurrentCreatesAndDeletionFreesSpace() throws Exception {
         var fixtures = noteRepository.saveAll(IntStream.range(0, 99)
                 .mapToObj(i -> new Note("Limit " + i, "Content")).toList());

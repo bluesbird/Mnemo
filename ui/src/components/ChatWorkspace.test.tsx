@@ -1,9 +1,8 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ChatWorkspace } from "./ChatWorkspace";
 import * as chatApi from "../api/chat";
 
-// jsdom does not implement scrollIntoView or crypto.randomUUID consistently.
 Element.prototype.scrollIntoView = vi.fn();
 
 afterEach(cleanup);
@@ -37,13 +36,16 @@ describe("ChatWorkspace input", () => {
     const spy = vi
       .spyOn(chatApi, "queryChat")
       .mockResolvedValue({ answer: "ok", sources: [] });
-    const { box } = renderChat();
+    const { box, onMessagesChange } = renderChat();
 
     fireEvent.change(box, { target: { value: "what is black?" } });
     fireEvent.keyDown(box, { key: "Enter" });
 
     expect(spy).toHaveBeenCalledWith({ question: "what is black?" });
-    await screen.findByLabelText("Question for the chatbot");
+    await waitFor(() => expect(onMessagesChange).toHaveBeenLastCalledWith([
+      expect.objectContaining({ role: "user", text: "what is black?" }),
+      expect.objectContaining({ role: "assistant", text: "ok", sources: [] }),
+    ]));
   });
 
   it("does not send on Shift+Enter", () => {

@@ -2,6 +2,8 @@ import json
 from types import SimpleNamespace
 from unittest.mock import Mock
 
+import pytest
+
 from app.core.config import Settings
 from app.messaging.consumer import NoteEventConsumer
 
@@ -26,31 +28,25 @@ def rebuild_event(note_id=None) -> bytes:
     }).encode()
 
 
-def test_note_event_invokes_note_handler_and_acknowledges():
+@pytest.mark.parametrize(
+    ("body", "delivery_tag", "expected_handler", "expected_args"),
+    [
+        (note_event(42), 7, "note", (42,)),
+        (rebuild_event(), 8, "rebuild", ()),
+    ],
+)
+def test_supported_events_invoke_handler_and_acknowledge(body, delivery_tag, expected_handler, expected_args):
     note_handler = Mock()
     rebuild_handler = Mock()
     consumer = NoteEventConsumer(Settings(), note_handler, rebuild_handler)
     channel = Mock()
+    consumer._on_message(channel, SimpleNamespace(delivery_tag=delivery_tag), None, body)
 
-    consumer._on_message(channel, SimpleNamespace(delivery_tag=7), None, note_event(42))
-
-    note_handler.assert_called_once_with(42)
-    rebuild_handler.assert_not_called()
-    channel.basic_ack.assert_called_once_with(delivery_tag=7)
-    channel.basic_reject.assert_not_called()
-
-
-def test_rebuild_event_invokes_rebuild_handler_and_acknowledges():
-    note_handler = Mock()
-    rebuild_handler = Mock()
-    consumer = NoteEventConsumer(Settings(), note_handler, rebuild_handler)
-    channel = Mock()
-
-    consumer._on_message(channel, SimpleNamespace(delivery_tag=8), None, rebuild_event())
-
-    note_handler.assert_not_called()
-    rebuild_handler.assert_called_once_with()
-    channel.basic_ack.assert_called_once_with(delivery_tag=8)
+    expected = note_handler if expected_handler == "note" else rebuild_handler
+    unexpected = rebuild_handler if expected_handler == "note" else note_handler
+    expected.assert_called_once_with(*expected_args)
+    unexpected.assert_not_called()
+    channel.basic_ack.assert_called_once_with(delivery_tag=delivery_tag)
     channel.basic_reject.assert_not_called()
 
 
