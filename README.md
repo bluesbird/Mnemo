@@ -93,6 +93,15 @@ and [nightly reconciliation](deploy/README.md#nightly-index-reconciliation).
 - MS1: `cd ms1-knowledge-service; .\mvnw.cmd test`
 - MS2: `cd ms2-rag-service; .\.venv\Scripts\python.exe -m pytest`
 
+From the repository root:
+
+- Deployment configuration and seeding: `python -m pytest tests/test_deploy_seed.py tests/test_deploy_network.py -q`
+  (requires pytest and Docker Compose; does not start containers).
+- Evaluation harness: `python -m unittest discover -s evaluation -p test_run.py`
+  (standard library only; no model calls).
+
+Both run in the existing E2E CI job before the isolated stack starts.
+
 ### Real-model RAG sanity check
 
 The separate [evaluation results](evaluation/results.md) contain a fixed synthetic
