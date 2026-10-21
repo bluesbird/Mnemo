@@ -59,6 +59,9 @@ a note to make room when the limit is reached.
 Use **Summarize note** on a saved note to generate a summary with one model call
 (`POST /api/v1/notes/{id}/summarize`). Saving never invokes AI. Updating a note
 clears its summary; a failed summarization preserves the previous summary.
+MS1's provider-neutral `app.summary.enabled` setting defaults to `true`.
+Set `APP_SUMMARY_ENABLED=false` to disable summarization with either Ollama or
+Groq; this replaces the old `ai.ollama.enabled` / `AI_OLLAMA_ENABLED` setting.
 
 MS2 options (env vars, prefix `MS2_`): `RABBITMQ_ENABLED=false` runs without the broker, `LOG_FORMAT=json` enables JSON logs, `RETRIEVAL_MIN_SCORE` sets the relevance cut-off.
 

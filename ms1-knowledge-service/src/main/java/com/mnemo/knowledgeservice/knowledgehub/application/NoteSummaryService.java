@@ -19,7 +19,7 @@ public class NoteSummaryService {
 
     public NoteSummaryService(
             ChatClient.Builder chatClientBuilder,
-            @Value("${ai.ollama.enabled:true}") boolean enabled
+            @Value("${app.summary.enabled:true}") boolean enabled
     ) {
         this.chatClient = chatClientBuilder.build();
         this.enabled = enabled;

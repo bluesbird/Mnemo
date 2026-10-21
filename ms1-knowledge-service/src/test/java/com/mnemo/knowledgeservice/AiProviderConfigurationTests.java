@@ -56,6 +56,22 @@ class AiProviderConfigurationTests {
     }
 
     @Test
+    void summaryCanBeDisabledWithProviderNeutralProperty() {
+        var model = org.mockito.Mockito.mock(ChatModel.class);
+        new ApplicationContextRunner()
+                .withBean(ChatClient.Builder.class, () -> ChatClient.builder(model))
+                .withBean(NoteSummaryService.class)
+                .withPropertyValues("app.summary.enabled=false")
+                .run(context -> {
+                    var error = assertThrows(NoteSummaryException.class,
+                            () -> context.getBean(NoteSummaryService.class).summarizeNote("Title", "Content"));
+                    assertThat(error.getMessage()).isEqualTo("Note summarization is disabled.");
+                    org.mockito.Mockito.verify(model, org.mockito.Mockito.never())
+                            .call(org.mockito.ArgumentMatchers.any(org.springframework.ai.chat.prompt.Prompt.class));
+                });
+    }
+
+    @Test
     void localDefaultsSelectOllamaWithoutAGroqKey() {
         context(false).run(context -> {
             assertThat(context).hasNotFailed().hasSingleBean(ChatModel.class);
