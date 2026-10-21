@@ -159,6 +159,10 @@ jobs:
               --retry 30 --retry-delay 2 --retry-all-errors --max-time 10 \
               "http://127.0.0.1:8081$path"
           done
+          sh -n deploy/reconcile-index.sh
+          install -d -m 700 "$HOME/.local/bin" "$HOME/.local/state/mnemo"
+          install -m 700 deploy/reconcile-index.sh "$HOME/.local/bin/.mnemo-reconcile.new"
+          mv -f "$HOME/.local/bin/.mnemo-reconcile.new" "$HOME/.local/bin/mnemo-reconcile"
           echo "Deployed $1."
           REMOTE
       - name: Verify public HTTPS

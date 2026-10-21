@@ -219,6 +219,11 @@ cat ~/.local/bin/mnemo-reconcile
 tail -n 50 ~/.local/state/mnemo/reconcile.log
 ```
 
+Automatic deployment refreshes the installed script from the tested checkout
+after local application health checks pass. The replacement is atomic, so cron
+cannot read a partially copied script. The existing schedule, log and lock are
+preserved; cron installation is still a one-time host setup.
+
 The script uses `flock` to prevent overlapping runs and a ten-minute HTTP timeout.
 Failures are logged with a nonzero exit status; persistent errors still need
 operator attention. To run it manually:
@@ -227,12 +232,14 @@ operator attention. To run it manually:
 ~/.local/bin/mnemo-reconcile >> ~/.local/state/mnemo/reconcile.log 2>&1
 ```
 
-To install on another host or update the installed script, run as the deployment
+To install on another host or update the script after a manual deployment, run as the deployment
 user from the repository root (requires `curl`, `flock`, and an active cron daemon):
 
 ```sh
 install -d -m 700 ~/.local/bin ~/.local/state/mnemo
-install -m 700 deploy/reconcile-index.sh ~/.local/bin/mnemo-reconcile
+sh -n deploy/reconcile-index.sh
+install -m 700 deploy/reconcile-index.sh ~/.local/bin/.mnemo-reconcile.new
+mv -f ~/.local/bin/.mnemo-reconcile.new ~/.local/bin/mnemo-reconcile
 (crontab -l 2>/dev/null | grep -v '# mnemo-nightly-reconcile$'; \
   printf '0 4 * * * %s/.local/bin/mnemo-reconcile >> %s/.local/state/mnemo/reconcile.log 2>&1 # mnemo-nightly-reconcile\n' "$HOME" "$HOME") | crontab -
 ```

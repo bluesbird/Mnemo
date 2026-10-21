@@ -198,6 +198,11 @@ After a forcibly terminated local run, use the project name printed by Compose:
 
 ## Run everything in Docker
 
+Local containers use Compose project-scoped names. Use `docker compose exec db`
+and `docker compose exec rabbitmq` rather than hard-coded container names.
+Existing data volumes are unchanged. Running multiple stacks on one host still
+requires distinct published ports.
+
 Ollama must run on the host (reached via `host.docker.internal`), with the models
 listed above already pulled. Docker Compose is the only other runtime prerequisite;
 host Java, Node and Python are not needed.
