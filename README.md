@@ -2,31 +2,33 @@
 
 **A self-hosted knowledge hub for notes, on-demand summaries, and grounded AI answers.**
 
-Mnemo is a full-stack portfolio project built as three independently deployable
-services. Ask questions in natural language and get answers grounded in your
-notes, with links back to the source material.
+Mnemo is a polyglot microservice app: the Knowledge service manages source
+data, the RAG service builds a derived vector index, and the UI provides note
+management and source-backed chat.
 
-**[Open the live demo](https://mnemo-hub.duckdns.org)** · Shared and anonymous:
-anyone can change or delete notes. Use fictional data only; AI requests send
-note content to Groq, and generated answers may be wrong.
-
-## See it in action
-
-<p align="center">
-  <img src="deploy/screenshots/notes_wide.png" width="49%" alt="Mnemo notes view with a selected note and its AI summary">
-  <img src="deploy/screenshots/chat_2_wide.png" width="49%" alt="Mnemo chat showing grounded answers and linked source notes">
-</p>
+**Open the live demo**: https://mnemo-hub.duckdns.org
 
 ## System architecture
 
-![Mnemo production deployment architecture](mnemo_architecture_diagram.png)
+![Mnemo production deployment architecture](docs/assets/mnemo_architecture_diagram.png)
 
-The React UI connects to the Java Knowledge service and Python RAG service
-through a same-origin HTTPS proxy. Knowledge service is the source of truth for
-notes and summaries in PostgreSQL. It publishes note-change events through
-RabbitMQ; RAG service keeps a derived ChromaDB index current, retrieves relevant
-note chunks, and generates answers with source references. Ollama creates
-embeddings; Groq generates summaries and answers in the public deployment.
+Mnemo is deployed on a self-hosted VPS with a same-origin web gateway. Caddy
+handles HTTPS termination, while Nginx serves the UI and proxies API requests
+to the Knowledge and RAG services over the private network.
+
+The Knowledge Service is the source of truth for notes and summaries in PostgreSQL.
+The RAG Service handles retrieval and answer generation: it builds a derived ChromaDB
+index from note title/content chunks, retrieves relevant context, and returns
+answers with source-note references.
+
+Data flows both synchronously and asynchronously. User actions (CRUD, summarization,
+chat, and manual reconciliation or rebuild) use HTTP through the UI proxy. 
+The Knowledge Service also publishes note-change and index-rebuild events to 
+RabbitMQ, allowing the RAG Service to keep the index synchronized incrementally 
+or rebuild it when requested.
+
+In this deployment, Ollama generates embeddings, while Groq handles text generation 
+for summaries and RAG answers.
 
 ## What this project demonstrates
 
@@ -64,6 +66,15 @@ embeddings; Groq generates summaries and answers in the public deployment.
 | Data and messaging | PostgreSQL, RabbitMQ |
 | AI | Ollama embeddings and local models; Groq generation in the public demo |
 | Delivery | Docker Compose, Nginx, Caddy, GitHub Actions |
+
+## See it in action
+
+<p align="center">
+  <img src="docs/assets/notes_wide.png" width="100%" alt="Mnemo notes view with a selected note and its AI summary">
+</p>
+<p align="center">
+  <img src="docs/assets/chat_2_wide.png" width="100%" alt="Mnemo chat showing grounded answers and linked source notes">
+</p>
 
 ## Production scope
 
