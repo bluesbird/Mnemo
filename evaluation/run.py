@@ -50,7 +50,7 @@ for doc, meta in zip(page["documents"], page["metadatas"]):
                    "tokens": chunker._count_tokens(doc), "text": doc,
                    "source_hash": meta["source_hash"],
                    "indexing_version": meta["indexing_version"]})
-settings_data = settings.model_dump()
+settings_data = settings.model_dump(mode="json")
 for key in ("rabbitmq_password",):
     settings_data[key] = "[redacted]"
 print(json.dumps({"settings": settings_data, "indexing_version": settings.indexing_version,

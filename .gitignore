@@ -45,3 +45,6 @@ tests/e2e/artifacts/
 .env
 .env.*
 !.env.example
+
+# Local architecture planning artifacts (not part of final project docs)
+target_architecture_files/

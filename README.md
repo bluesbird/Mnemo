@@ -104,5 +104,6 @@ integration scenario locally with Docker Compose and Python 3.12+:
 python tests/e2e/run.py
 ```
 
-See the [RAG sanity-check results](evaluation/results.md) for the small,
-real-model evaluation and its limitations.
+See the [evaluation snapshot](evaluation/README.md) and
+[RAG sanity-check results](evaluation/results.md) for reproducibility details
+and limitations.
