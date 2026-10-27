@@ -122,26 +122,20 @@ docker compose --env-file deploy/.env -f deploy/compose.yaml up -d --build --rem
 ```
 
 The manual summary action is `POST /api/v1/notes/{id}/summarize`; saving notes
-does not invoke AI and updating clears the previous summary. The old
-`/ai-enrich` route is removed. Deploy Knowledge service and UI together. Flyway V2 drops the
-old tag tables at Knowledge service startup without changing notes, summaries or the derived
-index. Tag data cannot be recovered without a pre-update database backup.
-Flyway V3 adds the transactional event outbox; existing migrations stay unchanged.
+does not invoke AI and updating clears the previous summary. Deploy Knowledge
+service and UI together so frontend/backend API contracts stay aligned.
 
 ## Automatic deployment
 
 ### Service-name migration
 
-The application directories and Compose services are now `knowledge-service`
-and `rag-service`, without numbered prefixes.
-Keep the existing Compose project name and `deploy/.env`. The update commands
-use `--remove-orphans` so the old application containers do not keep consuming
-events after the renamed containers start. Do not run `down --volumes`.
+Use this only for older hosts that still run the pre-rename
+`ms2-rag-service` container. Fresh deployments can skip this section.
 
-Settings now use `RAG_*`, `KNOWLEDGE_BASE_URL`, `UI_KNOWLEDGE_UPSTREAM`,
-`UI_RAG_UPSTREAM`, and `VITE_RAG_API_BASE_URL`. Update custom environment
-overrides to these names. Index operation responses use `total_knowledge_notes`.
-The internal notes client is `KnowledgeClient`.
+Current deployment configuration uses `RAG_*` variables (including
+`RAG_KNOWLEDGE_BASE_URL`) plus `UI_KNOWLEDGE_UPSTREAM` and
+`UI_RAG_UPSTREAM`. `KNOWLEDGE_BASE_URL` is only used by the one-shot
+`starter-data` job.
 
 Before the first manual update of an existing host, run from the repository root:
 
@@ -154,14 +148,8 @@ container in the same Compose project and records its actual volume and queue
 identities in private `deploy/.env` overrides (`RAG_DATA_VOLUME`,
 `RAG_CACHE_VOLUME`, `RAG_EVENTS_QUEUE`, `RAG_EVENTS_DEAD_LETTER_QUEUE`). This
 retains existing index data, cache, pending messages and dead letters without
-copying or deleting them. Keep these overrides on subsequent deployments.
-Legacy physical Docker/RabbitMQ names may remain; fresh installations use the
-new names. The migration refuses conflicting overrides or unexpected mounts.
-Do not remove old containers before running it.
-
-Historical evaluation responses retain the service identities of their recorded run.
-
-The repository rename does not migrate a running host until it is deployed.
+copying or deleting them. Keep these overrides on subsequent deployments. The
+migration refuses conflicting overrides or unexpected mounts.
 
 ### CI/CD
 

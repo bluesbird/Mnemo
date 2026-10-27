@@ -65,6 +65,20 @@ embeddings; Groq generates summaries and answers in the public deployment.
 | AI | Ollama embeddings and local models; Groq generation in the public demo |
 | Delivery | Docker Compose, Nginx, Caddy, GitHub Actions |
 
+## Production scope
+
+- Public demo APIs are intentionally anonymous and shared.
+- Database reset is the only authenticated operation.
+- Notes + summaries are primary data; the vector index is derived and rebuildable.
+- The demo is optimized for clarity and reliability, not multi-user tenancy.
+
+## Service documentation
+
+- [Knowledge service](knowledge-service/README.md)
+- [RAG service](rag-service/README.md)
+- [UI](ui/README.md)
+- [Deployment and operations](deploy/README.md)
+
 ## Run locally
 
 Prerequisites: Docker Compose and [Ollama](https://ollama.com). Pull the local
