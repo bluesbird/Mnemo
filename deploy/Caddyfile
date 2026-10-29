@@ -1,6 +1,34 @@
+# TODO: Consider moving this into a shared infra repo
+
+# ==================================================
+# Mnemo — Personal Knowledge Hub
+# ==================================================
 mnemo-hub.duckdns.org {
 	encode zstd gzip
 	reverse_proxy ui:80 {
 		header_up X-Real-IP {http.request.remote.host}
+	}
+}
+
+# ==================================================
+# Pixle — Daily Portrait Guessing Game
+# Separate application, deployed on the same VPS.
+# ==================================================
+pixle.duckdns.org {
+	encode zstd gzip
+
+	@api path /api/*
+	handle @api {
+		reverse_proxy host.docker.internal:18000
+	}
+
+	@puzzles path /puzzles/*
+	handle @puzzles {
+		root * /srv/pixle/puzzles/public
+		file_server
+	}
+
+	handle {
+		reverse_proxy host.docker.internal:18080
 	}
 }
