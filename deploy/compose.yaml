@@ -122,33 +122,10 @@ services:
         condition: service_completed_successfully
     restart: unless-stopped
 
-  caddy:
-    image: caddy:2
-    ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - /srv/pixle/puzzles/public:/srv/pixle/puzzles/public:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    depends_on:
-      ui:
-        condition: service_started
-    networks:
-      proxy:
-        ipv4_address: 172.30.0.2
-    restart: unless-stopped
-
 networks:
   proxy:
-    ipam:
-      config:
-        - subnet: 172.30.0.0/24
-          ip_range: 172.30.0.128/25
+    external: true
+    name: deploy_proxy
 
 volumes:
   postgres_data:
@@ -157,5 +134,3 @@ volumes:
     name: ${RAG_DATA_VOLUME:-${COMPOSE_PROJECT_NAME}_rag_data}
   rag_hf_cache:
     name: ${RAG_CACHE_VOLUME:-${COMPOSE_PROJECT_NAME}_rag_hf_cache}
-  caddy_data:
-  caddy_config:

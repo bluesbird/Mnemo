@@ -12,7 +12,8 @@ management and source-backed chat.
 
 ![Mnemo production deployment architecture](docs/assets/mnemo_architecture_diagram.png)
 
-Mnemo is deployed on a self-hosted VPS with a same-origin web gateway. Caddy
+Mnemo is deployed on a self-hosted VPS with a same-origin web gateway. A separate
+`vps-infra` stack runs Caddy independently of the application deployments. Caddy
 handles HTTPS termination, while Nginx serves the UI and proxies API requests
 to the Knowledge and RAG services over the private network.
 

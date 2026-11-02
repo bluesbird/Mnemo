@@ -2,12 +2,16 @@
 
 This Compose project is separate from the local-development stack in the
 repository root. It keeps PostgreSQL, RabbitMQ and both application services
-off host-published ports. Caddy listens on ports 80 and 443, obtains and renews
-certificates for `mnemo-hub.duckdns.org`, and forwards HTTPS traffic to the UI's
-nginx server. Nginx serves the frontend and proxies API requests to Knowledge service and RAG service.
+off host-published ports. The separate `vps-infra` stack runs Caddy on ports
+80 and 443 and forwards HTTPS traffic to the UI's nginx server over the external
+`deploy_proxy` network. Nginx serves the frontend and proxies API requests to Knowledge service and RAG service.
 The UI is also available on `127.0.0.1:8081` for local diagnostics.
 
-Before starting the stack, point the domain's DNS A record to the VPS public IPv4
+Set up `vps-infra` before starting this stack; its deploy script creates the
+shared network. Mnemo neither starts Caddy nor manages its certificates or
+Pixle's files. Updating Mnemo does not redeploy either Caddy or Pixle.
+
+Point the domain's DNS A record to the VPS public IPv4
 address and allow inbound TCP ports 80/443 through the host firewall and any
 provider firewall. Caddy cannot issue certificates until the domain resolves
 to that server and those ports are reachable.
@@ -30,9 +34,8 @@ These deployment-only limits are disabled in the root local-development Compose
 stack. Caddy replaces the forwarded client-IP header, and Nginx trusts it only
 from Caddy's fixed address (`172.30.0.2`) on the private proxy network. Dynamic
 addresses, including the UI's, are allocated from `172.30.0.128/25` so they cannot
-claim Caddy's address. Existing deployments must recreate the proxy network
-with `docker compose --env-file deploy/.env -f deploy/compose.yaml down` before
-starting again; omit `--volumes` to preserve data.
+claim Caddy's address. The network is external to this stack and is validated
+by `vps-infra`. Do not remove it when updating Mnemo.
 
 ## AI providers
 
@@ -175,9 +178,10 @@ running deployment untouched. View deployment output in the workflow's
 `Deploy to VPS` job.
 
 The Compose project creates named volumes for PostgreSQL, RabbitMQ, ChromaDB,
-the RAG service tokenizer cache, and Caddy's TLS certificates and state. Normal
+and the RAG service tokenizer cache. Caddy's TLS certificates and state belong
+to `vps-infra`. Normal
 stop/start and image updates preserve them. Do not use `down --volumes` unless
-deleting all stored application/index data and TLS state is intended. Keep
+deleting all stored Mnemo application/index data is intended. Keep
 `deploy/.env` private and out of version control.
 
 On first startup, the `starter-data` job reads the same canonical note catalog
