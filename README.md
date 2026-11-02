@@ -25,7 +25,9 @@ Data flows both synchronously and asynchronously. User actions (CRUD, summarizat
 chat, and manual reconciliation or rebuild) use HTTP through the UI proxy. 
 The Knowledge Service also publishes note-change and index-rebuild events to 
 RabbitMQ, allowing the RAG Service to keep the index synchronized incrementally 
-or rebuild it when requested.
+or rebuild it when requested. Note events trigger a read of the note's current
+state, so duplicate or out-of-order deliveries are safe. The PostgreSQL outbox
+retries failed publishes; reconcile and rebuild operations repair index drift.
 
 In this deployment, Ollama generates embeddings, while Groq handles text generation 
 for summaries and RAG answers.
@@ -41,20 +43,6 @@ for summaries and RAG answers.
   linked to their source notes.
 - **Production-minded delivery:** containerized services, automated CI/CD, and
   a live HTTPS deployment with private backend services and bounded requests.
-
-## Key design decisions
-
-- **One source of truth:** PostgreSQL owns notes and summaries; ChromaDB is
-  derived, rebuildable index data. RAG detects stale content using note hashes
-  and indexing-configuration versions.
-- **Events trigger current-state reads:** RabbitMQ messages identify changed
-  notes; RAG fetches their latest state from Knowledge service. Duplicate and
-  out-of-order events therefore converge safely.
-- **Durability without a separate platform:** note changes and outbox events
-  commit together. Failed delivery retries, while reconciliation provides a
-  recovery path for index drift.
-- **Separate embeddings and generation:** embeddings stay on Ollama while
-  answer-generation providers can change without reindexing.
 
 ## Technology stack
 
