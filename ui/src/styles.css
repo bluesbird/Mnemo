@@ -155,6 +155,33 @@ button {
   background: #edf3ee;
   color: #2f644e;
 }
+.topbar-theme-button {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid #dfe6e0;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--ink);
+  cursor: pointer;
+}
+.topbar-theme-button:hover {
+  background: var(--pale-green);
+  border-color: #c8d7cd;
+}
+.topbar-theme-button svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 .topbar-repo-link {
   display: inline-flex;
   align-items: center;
@@ -175,6 +202,13 @@ button {
 .topbar-repo-link:focus-visible {
   outline: 2px solid var(--green);
   outline-offset: 2px;
+}
+.theme-storage-error {
+  width: 100%;
+  max-width: 1240px;
+  margin: 6px auto 0;
+  color: #88453e;
+  font-size: 11px;
 }
 
 .workspace {
@@ -865,6 +899,11 @@ kbd {
     padding: 9px 11px;
     font-size: 12px;
   }
+  .topbar-theme-button {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+  }
   .topbar-label {
     font-size: 9px;
   }
@@ -932,4 +971,236 @@ kbd {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  color: #e7e9ed;
+  background: #191b20;
+  --ink: #e7e9ed;
+  --muted: #aeb4bf;
+  --line: #3b3e45;
+  --green: #a8b7cb;
+  --pale-green: #363d48;
+}
+:root[data-theme="dark"] body {
+  background: #191b20;
+}
+:root[data-theme="dark"] .topbar {
+  border-color: #3b3e45;
+}
+:root[data-theme="dark"] .brand-subtitle,
+:root[data-theme="dark"] .editor-meta,
+:root[data-theme="dark"] .note-row-preview,
+:root[data-theme="dark"] .note-row-date,
+:root[data-theme="dark"] .sidebar-footer,
+:root[data-theme="dark"] .page-footer,
+:root[data-theme="dark"] .chat-empty,
+:root[data-theme="dark"] .chat-sources-label {
+  color: #aeb4bf;
+}
+:root[data-theme="dark"] .topbar-nav-button,
+:root[data-theme="dark"] .topbar-theme-button {
+  border-color: #4a4e57;
+  background: #25282e;
+  color: #e7e9ed;
+}
+:root[data-theme="dark"] .topbar-nav-button:hover,
+:root[data-theme="dark"] .topbar-theme-button:hover {
+  border-color: #5e6570;
+  background: #343840;
+}
+:root[data-theme="dark"] .topbar-nav-button.is-active,
+:root[data-theme="dark"] .topbar-nav-button.is-active:hover {
+  border-color: #8292a7;
+  background: #39434f;
+  color: #f0f2f6;
+}
+:root[data-theme="dark"] .topbar-repo-link {
+  color: #e7e9ed;
+}
+:root[data-theme="dark"] .topbar-repo-link:hover {
+  background: #363d48;
+}
+:root[data-theme="dark"] .theme-storage-error {
+  color: #f0aaa0;
+}
+:root[data-theme="dark"] .workspace,
+:root[data-theme="dark"] .chat-workspace {
+  border-color: #3b4049;
+  background: #22252b;
+  box-shadow: 0 12px 36px #00000030;
+}
+:root[data-theme="dark"] .chat-header,
+:root[data-theme="dark"] .chat-form,
+:root[data-theme="dark"] .editor-toolbar,
+:root[data-theme="dark"] .sidebar-footer,
+:root[data-theme="dark"] .note-summary,
+:root[data-theme="dark"] .chat-sources {
+  border-color: #3b3e45;
+}
+:root[data-theme="dark"] .chat-header h1,
+:root[data-theme="dark"] .chat-empty h2,
+:root[data-theme="dark"] .title-input,
+:root[data-theme="dark"] .note-row-title {
+  color: #e7e9ed;
+}
+:root[data-theme="dark"] .outline-button,
+:root[data-theme="dark"] .chat-suggestion {
+  border-color: #4a4e57;
+  background: #25282e;
+  color: #c0cbda;
+}
+:root[data-theme="dark"] .outline-button:not(:disabled):hover,
+:root[data-theme="dark"] .index-menu[open] > summary,
+:root[data-theme="dark"] .chat-suggestion:not(:disabled):hover {
+  border-color: #657487;
+  background: #363d48;
+}
+:root[data-theme="dark"] .outline-button.danger-button {
+  border-color: #79564f;
+  color: #e6a394;
+}
+:root[data-theme="dark"] .outline-button.danger-button:not(:disabled):hover {
+  border-color: #a36c62;
+  background: #3b2927;
+}
+:root[data-theme="dark"] .chat-empty-icon,
+:root[data-theme="dark"] .empty-mark {
+  background: #30343b;
+  color: #aebbd0;
+}
+:root[data-theme="dark"] .index-menu-items,
+:root[data-theme="dark"] .search-box,
+:root[data-theme="dark"] kbd {
+  border-color: #484e58;
+  background: #25282e;
+  color: #d4d7de;
+}
+:root[data-theme="dark"] .search-box input {
+  color: #e7e9ed;
+}
+:root[data-theme="dark"] .search-box input::placeholder,
+:root[data-theme="dark"] .title-input::placeholder,
+:root[data-theme="dark"] .note-form textarea::placeholder,
+:root[data-theme="dark"] .chat-form textarea::placeholder {
+  color: #9aa2af;
+}
+:root[data-theme="dark"] .chat-index-feedback,
+:root[data-theme="dark"] .list-message {
+  color: #aeb4bf;
+}
+:root[data-theme="dark"] .chat-thread {
+  background: #191b20;
+}
+:root[data-theme="dark"] .chat-message {
+  border-color: #3b4049;
+  border-left-color: #8292a7;
+  background: #22252b;
+  box-shadow: 0 2px 8px #00000020;
+}
+:root[data-theme="dark"] .chat-message p {
+  color: #d8dbe2;
+}
+:root[data-theme="dark"] .chat-message-label {
+  color: #b4c2cf !important;
+}
+:root[data-theme="dark"] .chat-message-user {
+  border: 0;
+  background: #46566b;
+}
+:root[data-theme="dark"] .chat-message-user p,
+:root[data-theme="dark"] .chat-message-user .chat-message-label {
+  color: #fff !important;
+}
+:root[data-theme="dark"] .chat-message-error {
+  border-color: #79564f;
+  border-left-color: #cc766c;
+  background: #3b2927;
+}
+:root[data-theme="dark"] .chat-sources li {
+  background: #30343b;
+}
+:root[data-theme="dark"] .chat-source-count {
+  background: #3a3e45;
+  color: #d5d9e1;
+}
+:root[data-theme="dark"] .chat-source-excerpt,
+:root[data-theme="dark"] .text-button {
+  color: #b4bdcb !important;
+}
+:root[data-theme="dark"] .chat-form textarea,
+:root[data-theme="dark"] .search-box input {
+  border-color: #4a4e57;
+}
+:root[data-theme="dark"] .chat-form textarea {
+  background: #23262c;
+  color: #e7e9ed;
+}
+:root[data-theme="dark"] .chat-form textarea:focus {
+  border-color: #91a5c1;
+  box-shadow: 0 0 0 3px #91a5c130;
+}
+:root[data-theme="dark"] .note-sidebar {
+  background: #202329;
+  border-color: #3b3e45;
+}
+:root[data-theme="dark"] .note-row:hover {
+  background: #292d34;
+}
+:root[data-theme="dark"] .note-row.is-selected {
+  background: #363d48;
+}
+:root[data-theme="dark"] .editor-toolbar {
+  color: #aeb4bf;
+}
+:root[data-theme="dark"] .note-form textarea,
+:root[data-theme="dark"] .note-content-highlight-overlay {
+  color: #d8dbe2;
+}
+:root[data-theme="dark"] .note-form textarea {
+  background: #22252b;
+}
+:root[data-theme="dark"] .note-content-editor.has-source-highlight textarea {
+  background: transparent;
+}
+:root[data-theme="dark"] .source-chunk-highlight {
+  background: #665421;
+  box-shadow: 0 0 0 1px #8e742e;
+  color: #fff0bd;
+}
+:root[data-theme="dark"] .source-match-notice,
+:root[data-theme="dark"] .limit-hint,
+:root[data-theme="dark"] .save-status.is-unsaved {
+  color: #e6c27f;
+}
+:root[data-theme="dark"] .note-summary {
+  color: #aeb4bf;
+}
+:root[data-theme="dark"] .error-banner {
+  border-left-color: #ce766c;
+  background: #352624;
+  color: #f0b0a7;
+}
+:root[data-theme="dark"] .empty-editor p {
+  color: #aeb4bf;
+}
+:root[data-theme="dark"] .new-button,
+:root[data-theme="dark"] .save-button {
+  background: #46566b;
+  color: #fff;
+}
+:root[data-theme="dark"] .new-button:hover,
+:root[data-theme="dark"] .save-button:not(:disabled):hover {
+  background: #53667c;
+}
+:root[data-theme="dark"] .privacy-notice summary,
+:root[data-theme="dark"] .privacy-content a {
+  color: #a8b7cb;
+}
+:root[data-theme="dark"] .privacy-content {
+  color: #d8dbe2;
+}
+:root[data-theme="dark"] :focus-visible {
+  outline-color: #91abd0;
 }

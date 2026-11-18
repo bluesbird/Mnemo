@@ -14,6 +14,18 @@ import type { Note, NoteDraft } from "./types/note";
 type AppView = "notes" | "chat";
 
 const CHAT_STORAGE_KEY = "pkh.chat";
+const THEME_STORAGE_KEY = "mnemo.theme.v1";
+
+type ThemeOverride = "light" | "dark" | null;
+
+function loadThemeOverride(): ThemeOverride {
+  try {
+    const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+    return savedTheme === "light" || savedTheme === "dark" ? savedTheme : null;
+  } catch {
+    return null;
+  }
+}
 
 function loadChatMessages(): ChatMessage[] {
   try {
@@ -40,12 +52,19 @@ function App() {
   const [summarizing, setSummarizing] = useState(false);
   const [error, setError] = useState("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(loadChatMessages);
+  const [themeOverride, setThemeOverride] = useState<ThemeOverride>(loadThemeOverride);
+  const [systemDarkMode, setSystemDarkMode] = useState(() =>
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+  );
+  const [themeError, setThemeError] = useState("");
   const [sourceHighlight, setSourceHighlight] = useState<{
     noteId: number;
     passages: string[];
   } | null>(null);
 
   const [suggestionSeed, setSuggestionSeed] = useState(0);
+  const darkMode = themeOverride === null ? systemDarkMode : themeOverride === "dark";
   const chatIsEmpty = chatMessages.length === 0;
   const chatSuggestions = useMemo(() => {
     const byRecent = [...notes].sort((a, b) =>
@@ -114,6 +133,18 @@ function App() {
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
   }, []);
+
+  useEffect(() => {
+    if (typeof window.matchMedia !== "function") return;
+    const preference = window.matchMedia("(prefers-color-scheme: dark)");
+    const updateSystemTheme = () => setSystemDarkMode(preference.matches);
+    preference.addEventListener("change", updateSystemTheme);
+    return () => preference.removeEventListener("change", updateSystemTheme);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = darkMode ? "dark" : "light";
+  }, [darkMode]);
 
   useEffect(() => {
     if (!window.location.hash) {
@@ -251,6 +282,17 @@ function App() {
     window.location.hash = "#/chat";
   }
 
+  function toggleTheme() {
+    const nextTheme = darkMode ? "light" : "dark";
+    setThemeOverride(nextTheme);
+    setThemeError("");
+    try {
+      window.localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+    } catch {
+      setThemeError("Your theme preference could not be saved in browser storage.");
+    }
+  }
+
   async function openNoteFromChat(noteId: number, passages: string[]) {
     if (selectedId !== noteId && !confirmDiscardChanges()) return;
 
@@ -319,6 +361,24 @@ function App() {
           >
             Chat
           </button>
+          <button
+            type="button"
+            className="topbar-theme-button"
+            onClick={toggleTheme}
+            aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+            aria-pressed={darkMode}
+          >
+            {darkMode ? (
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M20.5 15.1A8.8 8.8 0 0 1 8.9 3.5a8.8 8.8 0 1 0 11.6 11.6Z" />
+              </svg>
+            )}
+          </button>
           <a
             className="topbar-repo-link"
             href="https://github.com/bluesbird/Mnemo"
@@ -345,6 +405,11 @@ function App() {
         Public demo: notes are shared and anyone can change or delete them.
         Use fictional data only. AI requests send note content to Groq; answers may be wrong.
       </p>
+      {themeError && (
+        <p className="theme-storage-error" role="status">
+          {themeError}
+        </p>
+      )}
 
       <div className={view === "notes" ? "view" : "view is-hidden"}>
         <NotesWorkspace

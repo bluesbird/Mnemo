@@ -18,8 +18,30 @@ afterEach(() => {
 beforeEach(() => {
   vi.clearAllMocks();
   sessionStorage.clear();
+  localStorage.removeItem("mnemo.theme.v1");
+  document.documentElement.dataset.theme = "light";
   window.history.replaceState(null, "", "#/notes");
   vi.mocked(notesApi.listNotes).mockResolvedValue([]);
+});
+
+it("toggles and persists the theme preference", async () => {
+  render(<App />);
+
+  fireEvent.click(screen.getByRole("button", { name: "Switch to dark mode" }));
+  await waitFor(() => expect(document.documentElement.dataset.theme).toBe("dark"));
+  expect(localStorage.getItem("mnemo.theme.v1")).toBe("dark");
+
+  fireEvent.click(screen.getByRole("button", { name: "Switch to light mode" }));
+  await waitFor(() => expect(document.documentElement.dataset.theme).toBe("light"));
+  expect(localStorage.getItem("mnemo.theme.v1")).toBe("light");
+});
+
+it("restores a saved dark theme", async () => {
+  localStorage.setItem("mnemo.theme.v1", "dark");
+  render(<App />);
+
+  await waitFor(() => expect(document.documentElement.dataset.theme).toBe("dark"));
+  expect(screen.getByRole("button", { name: "Switch to light mode" })).toBeTruthy();
 });
 
 it("explains the collection limit and disables creation at 100 notes", async () => {
