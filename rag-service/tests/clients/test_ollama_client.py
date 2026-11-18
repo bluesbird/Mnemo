@@ -80,6 +80,61 @@ def test_chat_answer_parses_structured_answer():
     assert _client_returning('{"answer":"Plain answer."}').chat_answer("q", "ctx") == "Plain answer."
 
 
+def test_completion_sends_supplied_messages_and_parses_answer():
+    requests = []
+
+    def respond(request):
+        requests.append(request)
+        return httpx.Response(
+            200,
+            json={"message": {"content": '{"answer":"We discussed bluebirds and a song."}'}},
+        )
+
+    messages = [
+        {"role": "system", "content": "Summarize the transcript."},
+        {"role": "user", "content": "We discussed bluebirds and a song."},
+    ]
+    client = OllamaClient(Settings())
+    client._client = httpx.Client(transport=httpx.MockTransport(respond))
+
+    assert client.complete(messages) == "We discussed bluebirds and a song."
+    payload = json.loads(requests[0].content)
+    assert payload["messages"] == messages
+
+
+def test_incomplete_completion_is_not_a_successful_summary():
+    client = OllamaClient(Settings())
+    client._client.close()
+    client._client = httpx.Client(transport=httpx.MockTransport(
+        lambda _: httpx.Response(200, json={
+            "done_reason": "length", "message": {"content": '{"answer":"Incomplete"}'},
+        }),
+    ))
+    with pytest.raises(httpx.DecodingError, match="incomplete answer"):
+        client.complete([{"role": "user", "content": "Summarize the chat"}])
+
+
+def test_routing_constrains_choices_without_changing_later_answers():
+    requests = []
+
+    def respond(request):
+        requests.append(json.loads(request.content))
+        return httpx.Response(200, json={"message": {"content": '{"answer":"notes"}'}})
+
+    client = OllamaClient(Settings())
+    client._client.close()
+    client._client = httpx.Client(transport=httpx.MockTransport(respond))
+    messages = [{"role": "user", "content": "Where is the bird?"}]
+    assert client.complete(messages, choices=["notes", "conversation"]) == "notes"
+    client.chat_answer("question", "retrieved text")
+
+    assert requests[0]["format"]["properties"]["answer"]["enum"] == ["notes", "conversation"]
+    assert requests[0]["options"]["temperature"] == 0
+    assert requests[0]["options"]["num_predict"] == 32
+    assert "enum" not in requests[1]["format"]["properties"]["answer"]
+    assert requests[1]["options"]["num_predict"] == 256
+
+
 @pytest.mark.parametrize("invalid_content", [
     "not json",
     "{}",

@@ -396,16 +396,19 @@ function App() {
             </p>
             <p>
               Chat history is saved in your browser&apos;s session storage.
-              Recent chat exchanges are sent with each question to provide
-              conversational context. Clearing the chat removes it from that
-              storage. The app does not use analytics or advertising trackers.
+              Up to 500 messages are sent to the chat service with each request.
+              Note answers use the 10 latest messages, while chat summaries use
+              all submitted messages. Clearing the chat
+              removes it from that storage. The app does not use analytics or
+              advertising trackers.
             </p>
             <p>
               When you summarize a note, the note title and content are sent
-              to GroqCloud. Chat sends your question, recent chat exchanges and
-              relevant excerpts from shared notes to GroqCloud to generate an
-              answer. Embeddings and search run on the server using Ollama and
-              Chroma.
+              to GroqCloud. Chat sends your question to GroqCloud to identify
+              whether you want a conversation summary.
+              Note answers send recent messages and relevant note excerpts;
+              summaries send the submitted conversation without retrieving
+              notes. Embeddings and search run on the server using Ollama and Chroma.
             </p>
             <p>
               Groq states that inference inputs and outputs are not retained by

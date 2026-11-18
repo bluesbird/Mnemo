@@ -49,6 +49,7 @@ server {
         proxy_set_header Connection "";
     }
     location = /rag-api/api/v1/chat/query {
+        client_max_body_size 8m;
         limit_req zone=chat_per_ip burst=20 nodelay;
         limit_conn ollama_work 2;
         proxy_pass ${UI_RAG_UPSTREAM}/api/v1/chat/query;

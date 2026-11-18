@@ -49,21 +49,34 @@ class OllamaClient:
         if context.strip() == "":
             return "I don't know based on the provided notes."
 
+        return self.complete(chat_messages(question, context, history))
+
+    def complete(
+        self, messages: list[dict[str, str]], *, choices: list[str] | None = None,
+    ) -> str:
+        response_format = CHAT_RESPONSE_FORMAT
+        if choices:
+            response_format = {
+                **CHAT_RESPONSE_FORMAT,
+                "properties": {"answer": {"type": "string", "enum": choices}},
+            }
         payload = {
             "model": self._settings.chat_model,
             "stream": False,
             "think": self._settings.chat_think,
-            "format": CHAT_RESPONSE_FORMAT,
-            "messages": chat_messages(question, context, history),
+            "format": response_format,
+            "messages": messages,
             "options": {
-                "temperature": self._settings.chat_temperature,
+                "temperature": 0 if choices else self._settings.chat_temperature,
                 "num_ctx": self._settings.chat_num_ctx,
-                "num_predict": self._settings.chat_num_predict,
+                "num_predict": 32 if choices else self._settings.chat_num_predict,
             },
         }
         response = self._client.post(f"{self._base_url}/api/chat", json=payload)
         response.raise_for_status()
         data = response.json()
+        if data.get("done_reason") == "length":
+            raise httpx.DecodingError("Ollama returned an incomplete answer.", request=response.request)
         content = data.get("message", {}).get("content")
         if isinstance(content, str) and "</think>" in content:
             # Some Qwen3 builds ignore think=false and emit reasoning before a closing tag.

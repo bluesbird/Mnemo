@@ -49,7 +49,7 @@ class ChatHistoryMessage(BaseModel):
 class ChatQueryRequest(BaseModel):
     question: str = Field(min_length=1, max_length=500)
     top_k: int | None = Field(default=None, ge=1, le=20)
-    history: list[ChatHistoryMessage] = Field(default_factory=list, max_length=10)
+    history: list[ChatHistoryMessage] = Field(default_factory=list, max_length=500)
 
 
 class ChatSourceReference(BaseModel):

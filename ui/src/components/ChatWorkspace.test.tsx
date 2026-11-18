@@ -92,6 +92,56 @@ describe("ChatWorkspace input", () => {
     });
   });
 
+  it.each([
+    "summarize the chat",
+    "Summarize what we discussed",
+    "Pull together the main threads of our exchange",
+    "Where do quokkas live?",
+  ])("sends retained history without classifying '%s' in the UI", async (question) => {
+    const spy = vi
+      .spyOn(chatApi, "queryChat")
+      .mockResolvedValue({ answer: "Summary.", sources: [] });
+    const messages: ChatMessage[] = Array.from({ length: 12 }, (_, index) => ({
+      id: String(index),
+      role: index % 2 === 0 ? "user" : "assistant",
+      text: `message ${index}`,
+      sources: [],
+    }));
+    const { box } = renderChat(vi.fn(), messages);
+
+    fireEvent.change(box, { target: { value: question } });
+    fireEvent.keyDown(box, { key: "Enter" });
+
+    expect(spy).toHaveBeenCalledWith({
+      question,
+      history: messages.map(({ role, text }) => ({ role, content: text })),
+    });
+  });
+
+  it("caps history after excluding errors and shows the summary limit", async () => {
+    const spy = vi
+      .spyOn(chatApi, "queryChat")
+      .mockResolvedValue({ answer: "Summary.", sources: [] });
+    const messages: ChatMessage[] = Array.from({ length: 503 }, (_, index) => ({
+      id: String(index),
+      role: index % 2 === 0 ? "user" : "assistant",
+      text: `message ${index}`,
+      sources: [],
+      isError: index === 501,
+    }));
+    const { box } = renderChat(vi.fn(), messages);
+
+    expect(screen.getByText(/Only the latest 500 messages/)).toBeTruthy();
+    fireEvent.change(box, { target: { value: "What have we covered so far?" } });
+    fireEvent.keyDown(box, { key: "Enter" });
+
+    expect(spy).toHaveBeenCalledWith({
+      question: "What have we covered so far?",
+      history: messages.filter((message) => !message.isError).slice(-500)
+        .map(({ role, text }) => ({ role, content: text })),
+    });
+  });
+
   it("does not send on Shift+Enter", () => {
     const spy = vi.spyOn(chatApi, "queryChat");
     const { box } = renderChat();

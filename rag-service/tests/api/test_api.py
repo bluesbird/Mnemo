@@ -110,8 +110,8 @@ def test_chat_history_is_bounded_and_validated():
     from pydantic import ValidationError
     from app.schemas import ChatQueryRequest
 
-    history = [{"role": "user", "content": "Earlier question"}] * 10
-    assert len(ChatQueryRequest(question="Follow-up", history=history).history) == 10
+    history = [{"role": "user", "content": "Earlier question"}] * 500
+    assert len(ChatQueryRequest(question="Follow-up", history=history).history) == 500
     with pytest.raises(ValidationError):
         ChatQueryRequest(question="Follow-up", history=history + history[:1])
     with pytest.raises(ValidationError):

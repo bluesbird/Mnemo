@@ -17,6 +17,10 @@ class ChatClient(Protocol):
         history: list[ChatHistoryMessage] | None = None,
     ) -> str: ...
 
+    def complete(
+        self, messages: list[dict[str, str]], *, choices: list[str] | None = None,
+    ) -> str: ...
+
 
 def chat_messages(
     question: str,

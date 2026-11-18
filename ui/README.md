@@ -12,9 +12,13 @@ React/TypeScript frontend for Mnemo note management and grounded chat.
 ## Main flows
 
 - Notes: create, update, delete, summarize, search.
-- Chat: ask grounded questions, inspect cited source notes, trigger index reconcile/rebuild.
-- In-session chat history is stored in `sessionStorage`; up to 10 recent messages
-  are sent with each question to provide conversational context.
+- Chat: ask grounded questions, summarize the conversation, inspect source notes, trigger index reconcile/rebuild.
+- In-session chat history is stored in `sessionStorage`. Each request sends up
+  to 500 prior non-error messages to the backend, which identifies the intent
+  using the configured model rather than a list of trigger phrases.
+  Note answers use only the latest 10 messages as conversational context;
+  summaries process all submitted history without retrieving notes.
+  Longer sessions show a notice that earlier messages are outside this window.
 
 ## Configuration
 

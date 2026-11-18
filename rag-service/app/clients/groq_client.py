@@ -25,15 +25,30 @@ class GroqClient:
         if not context.strip():
             return "I don't know based on the provided notes."
 
+        return self.complete(chat_messages(question, context, history))
+
+    def complete(
+        self, messages: list[dict[str, str]], *, choices: list[str] | None = None,
+    ) -> str:
+        if choices:
+            messages = [
+                *messages,
+                {
+                    "role": "system",
+                    "content": 'Return a JSON object with an "answer" string, one of: '
+                    + json.dumps(choices),
+                },
+            ]
         response = self._client.post(
             "chat/completions",
             json={
                 "model": self._settings.groq_model,
-                "messages": chat_messages(question, context, history),
-                "temperature": self._settings.chat_temperature,
-                "max_completion_tokens": self._settings.chat_num_predict,
+                "messages": messages,
+                "temperature": 0 if choices else self._settings.chat_temperature,
+                "max_completion_tokens": 32 if choices else self._settings.chat_num_predict,
                 "reasoning_effort": "none",
                 "stream": False,
+                **({"response_format": {"type": "json_object"}} if choices else {}),
             },
         )
         response.raise_for_status()
@@ -41,12 +56,20 @@ class GroqClient:
             data = response.json()
         except json.JSONDecodeError as exc:
             raise httpx.DecodingError("Groq returned invalid JSON.", request=response.request) from exc
-        choices = data.get("choices") if isinstance(data, dict) else None
-        choice = choices[0] if isinstance(choices, list) and choices else None
+        returned_choices = data.get("choices") if isinstance(data, dict) else None
+        choice = returned_choices[0] if isinstance(returned_choices, list) and returned_choices else None
         if not isinstance(choice, dict) or choice.get("finish_reason") != "stop":
             raise httpx.DecodingError("Groq returned an incomplete answer.", request=response.request)
         message = choice.get("message")
         content = message.get("content") if isinstance(message, dict) else None
         if not isinstance(content, str) or not content.strip():
             raise httpx.DecodingError("Groq returned an empty answer.", request=response.request)
+        if choices:
+            try:
+                result = json.loads(content)
+            except json.JSONDecodeError as exc:
+                raise httpx.DecodingError("Groq returned invalid JSON.", request=response.request) from exc
+            content = result.get("answer") if isinstance(result, dict) else None
+            if not isinstance(content, str) or content not in choices:
+                raise httpx.DecodingError("Groq returned an invalid choice.", request=response.request)
         return content.strip()

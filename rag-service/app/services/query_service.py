@@ -7,6 +7,7 @@ from app.core.config import Settings
 from app.rag.retrieval import Candidate, fuse, keyword_score, keywords, normalize_query
 from app.schemas import ChatHistoryMessage, ChatQueryResponse, ChatSourceReference
 from app.persistence.index_store import IndexStore
+from app.services.chat_summary import is_chat_summary_request, summarize_chat
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +18,7 @@ _FOLLOW_UP_REFERENCE = re.compile(
     r"tell me more|elaborate|the note|that note|this note|the song|that song)\b",
     re.IGNORECASE,
 )
+RECENT_CHAT_MESSAGES = 10
 
 
 def _retrieval_query(
@@ -81,8 +83,16 @@ class QueryService:
         top_k: int,
         history: list[ChatHistoryMessage] | None = None,
     ) -> ChatQueryResponse:
+        history = history or []
+        if is_chat_summary_request(self._chat_client, question):
+            return ChatQueryResponse(
+                answer=summarize_chat(self._chat_client, self._settings, question, history),
+                sources=[],
+            )
+
         collection = self._store.collection()
-        query = normalize_query(_retrieval_query(question, history)) or question.strip()
+        recent_history = history[-RECENT_CHAT_MESSAGES:]
+        query = normalize_query(_retrieval_query(question, recent_history)) or question.strip()
         query_embedding = self._ollama_client.embed_query(query)
 
         dense = collection.query(
@@ -141,7 +151,7 @@ class QueryService:
             )
 
         answer = self._chat_client.chat_answer(
-            question, "\n\n".join(context_parts), history or []
+            question, "\n\n".join(context_parts), recent_history
         )
         if answer.lower().startswith("i don't know"):
             return ChatQueryResponse(answer=answer, sources=[])

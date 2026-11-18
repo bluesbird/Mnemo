@@ -55,6 +55,55 @@ def test_groq_request_and_answer():
     assert "think" not in payload
 
 
+def test_completion_sends_supplied_messages_without_note_context():
+    requests = []
+
+    def handler(request):
+        requests.append(request)
+        return httpx.Response(200, json={
+            "choices": [{"finish_reason": "stop", "message": {"content": "Summary."}}],
+        })
+
+    messages = [
+        {"role": "system", "content": "Summarize the transcript."},
+        {"role": "user", "content": "Earlier question"},
+    ]
+    assert mock_client(handler).complete(messages) == "Summary."
+
+    payload = json.loads(requests[0].content)
+    assert payload["messages"] == messages
+
+
+def test_routing_uses_json_mode_and_validates_choice_without_mutating_messages():
+    requests = []
+
+    def handler(request):
+        requests.append(json.loads(request.content))
+        return httpx.Response(200, json={
+            "choices": [{"finish_reason": "stop", "message": {"content": '{"answer":"conversation"}'}}],
+        })
+
+    messages = [{"role": "user", "content": "Recap the chat"}]
+    result = mock_client(handler).complete(messages, choices=["notes", "conversation"])
+
+    assert result == "conversation"
+    assert len(messages) == 1
+    assert requests[0]["response_format"] == {"type": "json_object"}
+    assert requests[0]["max_completion_tokens"] == 32
+    assert requests[0]["temperature"] == 0
+
+
+@pytest.mark.parametrize("content", [
+    "not json", "[]", "{}", '{"answer":"maybe"}', '{"answer":null}',
+])
+def test_invalid_routing_output_is_an_upstream_error(content):
+    client = mock_client(lambda _: httpx.Response(200, json={
+        "choices": [{"finish_reason": "stop", "message": {"content": content}}],
+    }))
+    with pytest.raises(httpx.DecodingError):
+        client.complete([{"role": "user", "content": "Recap"}], choices=["notes", "conversation"])
+
+
 @pytest.mark.parametrize("choices", [
     [],
     [{"finish_reason": "length", "message": {"content": "Partial answer"}}],

@@ -29,9 +29,12 @@ class FakeOllama:
     def __init__(self) -> None:
         self.embed_calls = 0
         self.chat_calls = 0
+        self.completions = []
+        self.completion_results = iter(["notes"])
         self.query_vector = [1.0, 0.0]
         self.last_query = ""
         self.last_context = ""
+        self.last_chat_history = []
 
     def embed_documents(self, texts):
         self.embed_calls += 1
@@ -44,7 +47,12 @@ class FakeOllama:
     def chat_answer(self, question, context, history=None):
         self.chat_calls += 1
         self.last_context = context
+        self.last_chat_history = history or []
         return "fake answer"
+
+    def complete(self, messages, *, choices=None):
+        self.completions.append(messages)
+        return next(self.completion_results)
 
 
 @pytest.fixture

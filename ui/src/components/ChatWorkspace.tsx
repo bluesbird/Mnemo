@@ -87,7 +87,7 @@ export function ChatWorkspace({
     try {
       const history = historyMessages
         .filter((message) => !message.isError)
-        .slice(-10)
+        .slice(-500)
         .map(({ role, text }) => ({ role, content: text }));
       const response = await queryChat({ question: trimmed, history });
       const assistantMessage: ChatMessage = {
@@ -219,6 +219,12 @@ export function ChatWorkspace({
         )}
       </header>
 
+      {messages.filter((message) => !message.isError).length > 500 && (
+        <p role="status" className="chat-index-feedback">
+          Only the latest 500 messages are available for chat summaries.
+        </p>
+      )}
+
       <div className="chat-thread" aria-live="polite">
         {messages.length === 0 && (
           <div className="chat-empty">
@@ -300,7 +306,7 @@ export function ChatWorkspace({
           aria-label="Question for the chatbot"
           maxLength={500}
           aria-describedby={question.length >= 500 ? "question-limit" : undefined}
-          placeholder="Ask about your notes…"
+          placeholder="Ask about your notes or summarize our chat…"
           value={question}
           onChange={(event) => setQuestion(event.target.value)}
           onKeyDown={onQuestionKeyDown}
