@@ -27,12 +27,40 @@ def respond(path, payload):
                 "prompt_eval_count": 10,
                 "eval_count": 6,
             }
+        choices = (
+            payload.get("format", {})
+            .get("properties", {})
+            .get("answer", {})
+            .get("enum", [])
+        )
+        if choices:
+            answer = "notes" if "notes" in choices else choices[0]
+            return {
+                "model": payload["model"],
+                "message": {
+                    "role": "assistant",
+                    "content": json.dumps({"answer": answer}),
+                },
+                "done": True,
+                "done_reason": "stop",
+                "prompt_eval_count": 10,
+                "eval_count": 1,
+            }
+        if "NOTES:\n" not in message or "\n\nQUESTION:" not in message:
+            raise ValueError("Expected a notes-and-question chat prompt")
         context = message.split("NOTES:\n", 1)[1].rsplit("\n\nQUESTION:", 1)[0]
         if not context.strip():
             raise ValueError("Missing context")
         # Echo only retrieved context, never the question or canned lifecycle answers.
         # A stale chunk therefore cannot be hidden behind an abstaining model answer.
-        return {"message": {"role": "assistant", "content": context}, "done": True}
+        return {
+            "message": {
+                "role": "assistant",
+                "content": json.dumps({"answer": context}),
+            },
+            "done": True,
+            "done_reason": "stop",
+        }
     raise ValueError(f"Unsupported Ollama endpoint: {path}")
 
 

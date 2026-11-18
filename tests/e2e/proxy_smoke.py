@@ -86,7 +86,7 @@ def check_rate_limits():
     oversized = fetch(
         chat,
         "POST",
-        b"x" * (256 * 1024 + 1),
+        b"x" * (8 * 1024 * 1024 + 1),
         {"Content-Type": "application/json"},
     )[0]
     assert oversized == 413, oversized

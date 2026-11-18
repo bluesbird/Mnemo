@@ -23,7 +23,29 @@ class HarnessTests(unittest.TestCase):
             "stream": False,
             "messages": [{"content": "NOTES:\nold indexed fact\n\nQUESTION: new unindexed fact"}],
         })
-        self.assertEqual(response["message"]["content"], "old indexed fact")
+        self.assertEqual(
+            json.loads(response["message"]["content"]),
+            {"answer": "old indexed fact"},
+        )
+
+    def test_chat_route_choice_returns_structured_notes_intent(self):
+        response = respond("/api/chat", {
+            "model": "test",
+            "stream": False,
+            "format": {
+                "properties": {
+                    "answer": {"enum": ["notes", "conversation"]},
+                },
+            },
+            "messages": [
+                {"role": "system", "content": "Choose a source."},
+                {"role": "user", "content": "What is in my notes?"},
+            ],
+        })
+        self.assertEqual(
+            json.loads(response["message"]["content"]),
+            {"answer": "notes"},
+        )
 
     def test_unsupported_endpoint_fails(self):
         with self.assertRaises(ValueError):
