@@ -7,6 +7,7 @@ from pydantic import ValidationError
 from app.clients.groq_client import GroqClient
 from app.clients.ollama_client import OllamaClient
 from app.core.config import Settings
+from app.schemas import ChatHistoryMessage
 
 
 def settings():
@@ -34,14 +35,22 @@ def test_groq_request_and_answer():
         })
 
     client = mock_client(handler)
-    assert client.chat_answer("question", "retrieved text") == "Answer."
+    history = [ChatHistoryMessage(role="user", content="Earlier question")]
+    assert client.chat_answer("question", "retrieved text", history) == "Answer."
     assert str(requests[0].url) == "https://api.groq.com/openai/v1/chat/completions"
     assert requests[0].headers["Authorization"] == "Bearer test-key-not-a-real-secret"
     payload = json.loads(requests[0].content)
     assert payload["model"] == "qwen/qwen3.8-27b"
     assert payload["max_completion_tokens"] == 256
     assert payload["reasoning_effort"] == "none"
-    assert payload["messages"][1]["content"] == "NOTES:\nretrieved text\n\nQUESTION: question"
+    assert payload["messages"][1] == {
+        "role": "user",
+        "content": "Earlier question",
+    }
+    assert payload["messages"][2] == {
+        "role": "user",
+        "content": "NOTES:\nretrieved text\n\nQUESTION: question",
+    }
     assert "options" not in payload
     assert "think" not in payload
 

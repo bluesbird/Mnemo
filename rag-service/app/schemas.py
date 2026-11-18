@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -39,9 +41,15 @@ class IndexOperationResponse(BaseModel):
     total_knowledge_notes: int
 
 
+class ChatHistoryMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(min_length=1, max_length=2000)
+
+
 class ChatQueryRequest(BaseModel):
     question: str = Field(min_length=1, max_length=500)
     top_k: int | None = Field(default=None, ge=1, le=20)
+    history: list[ChatHistoryMessage] = Field(default_factory=list, max_length=10)
 
 
 class ChatSourceReference(BaseModel):

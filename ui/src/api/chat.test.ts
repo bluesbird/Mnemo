@@ -20,14 +20,20 @@ describe("chat api", () => {
       json: async () => ({ answer: "Hi", sources: [] }),
     });
 
-    const result = await queryChat({ question: "hello" });
+    const result = await queryChat({
+      question: "hello",
+      history: [{ role: "user", content: "Earlier question" }],
+    });
 
     expect(result.answer).toBe("Hi");
     expect(fetchMock).toHaveBeenCalledWith(
       "/rag-api/api/v1/chat/query",
       expect.objectContaining({
         method: "POST",
-        body: JSON.stringify({ question: "hello" }),
+        body: JSON.stringify({
+          question: "hello",
+          history: [{ role: "user", content: "Earlier question" }],
+        }),
       }),
     );
   });

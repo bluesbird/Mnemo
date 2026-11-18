@@ -1,11 +1,20 @@
+import json
 import logging
 
 import httpx
 
 from app.clients.chat_client import chat_messages
 from app.core.config import Settings
+from app.schemas import ChatHistoryMessage
 
 logger = logging.getLogger(__name__)
+
+CHAT_RESPONSE_FORMAT = {
+    "type": "object",
+    "properties": {"answer": {"type": "string"}},
+    "required": ["answer"],
+    "additionalProperties": False,
+}
 
 
 class OllamaClient:
@@ -31,7 +40,12 @@ class OllamaClient:
         embeddings = self.embed_documents([prompt])
         return embeddings[0]
 
-    def chat_answer(self, question: str, context: str) -> str:
+    def chat_answer(
+        self,
+        question: str,
+        context: str,
+        history: list[ChatHistoryMessage] | None = None,
+    ) -> str:
         if context.strip() == "":
             return "I don't know based on the provided notes."
 
@@ -39,7 +53,8 @@ class OllamaClient:
             "model": self._settings.chat_model,
             "stream": False,
             "think": self._settings.chat_think,
-            "messages": chat_messages(question, context),
+            "format": CHAT_RESPONSE_FORMAT,
+            "messages": chat_messages(question, context, history),
             "options": {
                 "temperature": self._settings.chat_temperature,
                 "num_ctx": self._settings.chat_num_ctx,
@@ -55,4 +70,13 @@ class OllamaClient:
             content = content.rsplit("</think>", 1)[1]
         if not isinstance(content, str) or content.strip() == "":
             raise RuntimeError("Invalid chat response from Ollama.")
-        return content.strip()
+        try:
+            structured = json.loads(content)
+        except json.JSONDecodeError as exc:
+            raise RuntimeError("Invalid structured chat response from Ollama.") from exc
+        if not isinstance(structured, dict):
+            raise RuntimeError("Invalid structured chat response from Ollama.")
+        answer = structured.get("answer")
+        if not isinstance(answer, str) or not answer.strip():
+            raise RuntimeError("Invalid structured chat response from Ollama.")
+        return answer.strip()

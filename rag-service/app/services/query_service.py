@@ -1,15 +1,68 @@
 import logging
+import re
 
 from app.clients.ollama_client import OllamaClient
 from app.clients.chat_client import ChatClient
 from app.core.config import Settings
 from app.rag.retrieval import Candidate, fuse, keyword_score, keywords, normalize_query
-from app.schemas import ChatQueryResponse, ChatSourceReference
+from app.schemas import ChatHistoryMessage, ChatQueryResponse, ChatSourceReference
 from app.persistence.index_store import IndexStore
 
 logger = logging.getLogger(__name__)
 
 NO_ANSWER = "I don't know based on the provided notes."
+_FOLLOW_UP_REFERENCE = re.compile(
+    r"\b(?:it|this|that|these|those|they|them|there|"
+    r"what do you mean|what did you mean|can you clarify|explain that|"
+    r"tell me more|elaborate|the note|that note|this note|the song|that song)\b",
+    re.IGNORECASE,
+)
+
+
+def _retrieval_query(
+    question: str, history: list[ChatHistoryMessage] | None
+) -> str:
+    if not history or not _FOLLOW_UP_REFERENCE.search(question):
+        return question
+
+    previous_question = next(
+        (message.content for message in reversed(history) if message.role == "user"),
+        None,
+    )
+    return f"{previous_question}\n{question}" if previous_question else question
+
+
+def _named_note_ids(query: str, candidates: list[Candidate]) -> set[str]:
+    normalized_query = " ".join(re.findall(r"\w+", query.lower()))
+    if not normalized_query:
+        return set()
+    padded_query = f" {normalized_query} "
+    return {
+        str(candidate.metadata["note_id"])
+        for candidate in candidates
+        if candidate.metadata.get("note_id") is not None
+        and (title := " ".join(
+            re.findall(r"\w+", str(candidate.metadata.get("note_title", "")).lower())
+        ))
+        and f" {title} " in padded_query
+    }
+
+
+def _focus_candidates(
+    query: str,
+    candidates: list[Candidate],
+    min_dense_score: float,
+) -> list[Candidate]:
+    named_note_ids = _named_note_ids(query, candidates)
+    if not named_note_ids:
+        return candidates
+
+    return [
+        candidate
+        for candidate in candidates
+        if str(candidate.metadata.get("note_id")) in named_note_ids
+        or candidate.dense_score >= min_dense_score
+    ]
 
 
 class QueryService:
@@ -22,9 +75,14 @@ class QueryService:
         self._chat_client = chat_client if chat_client is not None else ollama_client
         self._store = store
 
-    def answer_query(self, question: str, top_k: int) -> ChatQueryResponse:
+    def answer_query(
+        self,
+        question: str,
+        top_k: int,
+        history: list[ChatHistoryMessage] | None = None,
+    ) -> ChatQueryResponse:
         collection = self._store.collection()
-        query = normalize_query(question) or question.strip()
+        query = normalize_query(_retrieval_query(question, history)) or question.strip()
         query_embedding = self._ollama_client.embed_query(query)
 
         dense = collection.query(
@@ -55,7 +113,12 @@ class QueryService:
                     candidate = candidates.setdefault(chunk_id, Candidate(chunk_id, document, metadata or {}))
                     candidate.keyword_score = score
 
-        selected = fuse(candidates.values(), self._settings.retrieval_min_score, top_k)
+        candidate_list = _focus_candidates(
+            query,
+            list(candidates.values()),
+            self._settings.retrieval_min_score,
+        )
+        selected = fuse(candidate_list, self._settings.retrieval_min_score, top_k)
         if not selected:
             logger.info("No relevant chunks for the question; skipping LLM call")
             return ChatQueryResponse(answer=NO_ANSWER, sources=[])
@@ -77,7 +140,9 @@ class QueryService:
                 )
             )
 
-        answer = self._chat_client.chat_answer(question, "\n\n".join(context_parts))
+        answer = self._chat_client.chat_answer(
+            question, "\n\n".join(context_parts), history or []
+        )
         if answer.lower().startswith("i don't know"):
             return ChatQueryResponse(answer=answer, sources=[])
         return ChatQueryResponse(answer=answer, sources=sources)

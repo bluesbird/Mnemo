@@ -43,4 +43,4 @@ def chat_query(
     query: Annotated[QueryService, Depends(get_query_service)],
 ) -> ChatQueryResponse:
     top_k = request.top_k or get_settings().retrieval_top_k_default
-    return query.answer_query(request.question, top_k=top_k)
+    return query.answer_query(request.question, top_k=top_k, history=request.history)

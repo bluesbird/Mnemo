@@ -4,6 +4,7 @@ import httpx
 
 from app.clients.chat_client import chat_messages
 from app.core.config import Settings
+from app.schemas import ChatHistoryMessage
 
 
 class GroqClient:
@@ -15,7 +16,12 @@ class GroqClient:
             timeout=60.0,
         )
 
-    def chat_answer(self, question: str, context: str) -> str:
+    def chat_answer(
+        self,
+        question: str,
+        context: str,
+        history: list[ChatHistoryMessage] | None = None,
+    ) -> str:
         if not context.strip():
             return "I don't know based on the provided notes."
 
@@ -23,7 +29,7 @@ class GroqClient:
             "chat/completions",
             json={
                 "model": self._settings.groq_model,
-                "messages": chat_messages(question, context),
+                "messages": chat_messages(question, context, history),
                 "temperature": self._settings.chat_temperature,
                 "max_completion_tokens": self._settings.chat_num_predict,
                 "reasoning_effort": "none",

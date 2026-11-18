@@ -30,16 +30,20 @@ class FakeOllama:
         self.embed_calls = 0
         self.chat_calls = 0
         self.query_vector = [1.0, 0.0]
+        self.last_query = ""
+        self.last_context = ""
 
     def embed_documents(self, texts):
         self.embed_calls += 1
         return [[1.0, 0.0] for _ in texts]
 
     def embed_query(self, question):
+        self.last_query = question
         return self.query_vector
 
-    def chat_answer(self, question, context):
+    def chat_answer(self, question, context, history=None):
         self.chat_calls += 1
+        self.last_context = context
         return "fake answer"
 
 

@@ -65,7 +65,7 @@ export function ChatWorkspace({
 
     onMessagesChange(nextMessages);
     setQuestion("");
-    await runQuery(trimmed, nextMessages);
+    await runQuery(trimmed, nextMessages, messages);
   }
 
   async function retryLast() {
@@ -74,14 +74,22 @@ export function ChatWorkspace({
     if (isAsking || !last?.isError || lastUser?.role !== "user") return;
     const base = messages.slice(0, -1);
     onMessagesChange(base);
-    await runQuery(lastUser.text, base);
+    await runQuery(lastUser.text, base, base.slice(0, -1));
   }
 
-  async function runQuery(trimmed: string, nextMessages: ChatMessage[]) {
+  async function runQuery(
+    trimmed: string,
+    nextMessages: ChatMessage[],
+    historyMessages: ChatMessage[],
+  ) {
     setIsAsking(true);
 
     try {
-      const response = await queryChat({ question: trimmed });
+      const history = historyMessages
+        .filter((message) => !message.isError)
+        .slice(-10)
+        .map(({ role, text }) => ({ role, content: text }));
+      const response = await queryChat({ question: trimmed, history });
       const assistantMessage: ChatMessage = {
         id: crypto.randomUUID(),
         role: "assistant",

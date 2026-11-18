@@ -9,7 +9,13 @@ export type ChatSourceReference = {
 
 export type ChatQueryRequest = {
   question: string;
+  history?: ChatHistoryMessage[];
   top_k?: number;
+};
+
+export type ChatHistoryMessage = {
+  role: "user" | "assistant";
+  content: string;
 };
 
 export type ChatQueryResponse = {
