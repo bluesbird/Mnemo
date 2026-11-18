@@ -17,6 +17,7 @@ afterEach(() => {
 });
 beforeEach(() => {
   vi.clearAllMocks();
+  sessionStorage.clear();
   window.history.replaceState(null, "", "#/notes");
   vi.mocked(notesApi.listNotes).mockResolvedValue([]);
 });
@@ -111,4 +112,39 @@ it("shows the shared-data warning and expandable privacy notice", async () => {
   expect(screen.getByRole("link", { name: "Groq's data information" }).getAttribute("href"))
     .toBe("https://console.groq.com/docs/your-data");
   await screen.findByText("No notes yet. Create one to get started.");
+});
+
+it("opens the cited note and highlights its retrieved chunk", async () => {
+  const note = {
+    id: 1,
+    title: "Bluebird",
+    content: "The bluebird sings on a telephone line.",
+    summary: null,
+    createdAt: "2026-10-20T00:00:00",
+    updatedAt: "2026-10-20T00:00:00",
+  };
+  vi.mocked(notesApi.listNotes).mockResolvedValue([note]);
+  sessionStorage.setItem("pkh.chat", JSON.stringify([{
+    id: "answer",
+    role: "assistant",
+    text: "It is on a telephone line.",
+    sources: [{
+      note_id: note.id,
+      note_title: note.title,
+      chunk_index: 0,
+      source_hash: "hash",
+      score: 0.9,
+      excerpt: note.content,
+      chunk_text: `${note.title}\n\n${note.content}`,
+    }],
+  }]));
+  window.history.replaceState(null, "", "#/chat");
+  render(<App />);
+
+  fireEvent.click(await screen.findByRole("button", { name: note.title }));
+
+  await screen.findByLabelText("Note content");
+  expect(document.querySelector("mark")?.textContent).toBe(note.content);
+  expect((screen.getByLabelText("Note content") as HTMLTextAreaElement).value)
+    .toBe(note.content);
 });

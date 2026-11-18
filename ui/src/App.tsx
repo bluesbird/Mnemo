@@ -40,6 +40,10 @@ function App() {
   const [summarizing, setSummarizing] = useState(false);
   const [error, setError] = useState("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(loadChatMessages);
+  const [sourceHighlight, setSourceHighlight] = useState<{
+    noteId: number;
+    passages: string[];
+  } | null>(null);
 
   const [suggestionSeed, setSuggestionSeed] = useState(0);
   const chatIsEmpty = chatMessages.length === 0;
@@ -121,6 +125,7 @@ function App() {
     setSelectedId(note.id);
     setDraft({ title: note.title, content: note.content });
     setIsNew(false);
+    setSourceHighlight(null);
     setError("");
   }
 
@@ -230,6 +235,7 @@ function App() {
       draft.content !== selectedNote.content);
 
   function goToNotes() {
+    setView("notes");
     window.location.hash = "#/notes";
   }
 
@@ -245,12 +251,13 @@ function App() {
     window.location.hash = "#/chat";
   }
 
-  async function openNoteFromChat(noteId: number) {
+  async function openNoteFromChat(noteId: number, passages: string[]) {
     if (selectedId !== noteId && !confirmDiscardChanges()) return;
 
     const current = notes.find((note) => note.id === noteId);
     if (current) {
-      selectNote(current);
+      if (selectedId !== noteId) selectNote(current);
+      setSourceHighlight({ noteId, passages });
       goToNotes();
       return;
     }
@@ -262,6 +269,7 @@ function App() {
       const match = result.find((note) => note.id === noteId);
       if (match) {
         selectNote(match);
+        setSourceHighlight({ noteId, passages });
       } else {
         setError(`Source note #${noteId} is no longer available.`);
       }
@@ -359,6 +367,11 @@ function App() {
           onSave={(event) => void saveNote(event)}
           onDelete={() => void deleteNote()}
           onSummarize={() => void summarizeNote()}
+          sourcePassages={
+            sourceHighlight?.noteId === selectedId
+              ? sourceHighlight.passages
+              : []
+          }
         />
       </div>
       <div className={view === "chat" ? "view" : "view is-hidden"}>
@@ -367,7 +380,9 @@ function App() {
           onMessagesChange={setChatMessages}
           suggestions={chatSuggestions}
           onClear={() => setSuggestionSeed((seed) => seed + 1)}
-          onOpenNote={(noteId) => void openNoteFromChat(noteId)}
+          onOpenNote={(noteId, passages) =>
+            void openNoteFromChat(noteId, passages)
+          }
         />
       </div>
 

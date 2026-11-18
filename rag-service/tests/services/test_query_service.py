@@ -13,6 +13,7 @@ def test_query_returns_sources_above_threshold(indexing, query, knowledge, ollam
     response = query.answer_query("Where?", top_k=4)
     assert response.answer == "fake answer"
     assert [s.note_id for s in response.sources] == [1]
+    assert "Quokkas live on Rottnest Island." in response.sources[0].chunk_text
 
 
 def test_named_note_focus_keeps_semantic_matches_and_drops_weak_keyword_matches():

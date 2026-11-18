@@ -26,6 +26,65 @@ function renderChat(
 }
 
 describe("ChatWorkspace input", () => {
+  it("opens a note with each distinct retrieved passage for that note", () => {
+    const onOpenNote = vi.fn();
+    const messages: ChatMessage[] = [{
+      id: "answer",
+      role: "assistant",
+      text: "Here is the answer.",
+      sources: [
+        {
+          note_id: 1,
+          note_title: "Bluebird",
+          chunk_index: 0,
+          source_hash: "hash",
+          score: 0.9,
+          excerpt: "First passage",
+          chunk_text: "First passage",
+        },
+        {
+          note_id: 1,
+          note_title: "Bluebird",
+          chunk_index: 1,
+          source_hash: "hash",
+          score: 0.8,
+          excerpt: "Second passage",
+          chunk_text: "Second passage",
+        },
+        {
+          note_id: 1,
+          note_title: "Bluebird",
+          chunk_index: 2,
+          source_hash: "hash",
+          score: 0.7,
+          excerpt: "First passage",
+          chunk_text: "First passage",
+        },
+        {
+          note_id: 2,
+          note_title: "Other note",
+          chunk_index: 0,
+          source_hash: "hash",
+          score: 0.6,
+          excerpt: "Other passage",
+          chunk_text: "Other passage",
+        },
+      ],
+    }];
+    render(
+      <ChatWorkspace
+        messages={messages}
+        onMessagesChange={vi.fn()}
+        onOpenNote={onOpenNote}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Bluebird" }));
+
+    expect(onOpenNote).toHaveBeenCalledWith(1, ["First passage", "Second passage"]);
+    expect(screen.getByText("2 text chunks")).toBeTruthy();
+  });
+
   it("shows a hint at the question limit and removes it after shortening", () => {
     const { box } = renderChat();
     expect(box.getAttribute("maxlength")).toBe("500");

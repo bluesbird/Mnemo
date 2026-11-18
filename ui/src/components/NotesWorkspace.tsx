@@ -16,6 +16,7 @@ type NotesWorkspaceProps = {
   summarizing: boolean;
   error: string;
   hasUnsavedChanges: boolean;
+  sourcePassages?: string[];
   onSearchChange: (value: string) => void;
   onSelect: (note: Note) => void;
   onCreate: () => void;
@@ -38,6 +39,7 @@ export function NotesWorkspace({
   summarizing,
   error,
   hasUnsavedChanges,
+  sourcePassages = [],
   onSearchChange,
   onSelect,
   onCreate,
@@ -65,6 +67,7 @@ export function NotesWorkspace({
         saving={saving}
         summarizing={summarizing}
         hasUnsavedChanges={hasUnsavedChanges}
+        sourcePassages={sourcePassages}
         error={error}
         onDraftChange={onDraftChange}
         onSave={onSave}

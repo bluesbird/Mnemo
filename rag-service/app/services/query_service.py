@@ -147,6 +147,7 @@ class QueryService:
                     source_hash=str(metadata.get("source_hash", "")),
                     score=candidate.dense_score,
                     excerpt=candidate.document[:300].strip(),
+                    chunk_text=candidate.document,
                 )
             )
 

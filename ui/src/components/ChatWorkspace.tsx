@@ -2,12 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import type { FormEvent, KeyboardEvent } from "react";
 import { queryChat, rebuildIndex, reconcileIndex } from "../api/chat";
 import type { ChatMessage, IndexOperationResponse } from "../types/chat";
-import { shortExcerpt, uniqueSources } from "../utils/sources";
+import {
+  shortExcerpt,
+  sourcePassagesForNote,
+  uniqueSources,
+} from "../utils/sources";
 
 type ChatWorkspaceProps = {
   messages: ChatMessage[];
   onMessagesChange: (messages: ChatMessage[]) => void;
-  onOpenNote: (noteId: number) => void;
+  onOpenNote: (noteId: number, passages: string[]) => void;
   suggestions?: string[];
   onClear?: () => void;
 };
@@ -276,20 +280,31 @@ export function ChatWorkspace({
               <div className="chat-sources">
                 <p className="chat-sources-label">Sources</p>
                 <ul>
-                  {uniqueSources(message.sources).map((source) => (
-                    <li key={`${message.id}-${source.note_id}`}>
-                      <button
-                        type="button"
-                        className="text-button"
-                        onClick={() => onOpenNote(source.note_id)}
-                      >
-                        {source.note_title}
-                      </button>
-                      <p className="chat-source-excerpt">
-                        {shortExcerpt(source.excerpt)}
-                      </p>
-                    </li>
-                  ))}
+                  {uniqueSources(message.sources).map((source) => {
+                    const passages = sourcePassagesForNote(
+                      message.sources,
+                      source.note_id,
+                    );
+                    return (
+                      <li key={`${message.id}-${source.note_id}`}>
+                        <button
+                          type="button"
+                          className="text-button"
+                          onClick={() => onOpenNote(source.note_id, passages)}
+                        >
+                          {source.note_title}
+                        </button>
+                        {passages.length > 1 && (
+                          <span className="chat-source-count">
+                            {passages.length} text chunks
+                          </span>
+                        )}
+                        <p className="chat-source-excerpt">
+                          {shortExcerpt(source.excerpt)}
+                        </p>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             )}

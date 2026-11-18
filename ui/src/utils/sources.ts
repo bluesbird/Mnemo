@@ -16,6 +16,18 @@ export function uniqueSources(
   return [...byNote.values()];
 }
 
+export function sourcePassagesForNote(
+  sources: ChatSourceReference[],
+  noteId: number,
+): string[] {
+  return [...new Set(
+    sources
+      .filter((source) => source.note_id === noteId)
+      .map((source) => source.chunk_text?.trim() || source.excerpt.trim())
+      .filter((passage): passage is string => Boolean(passage)),
+  )];
+}
+
 export function shortExcerpt(text: string): string {
   const flat = text.replace(/\s+/g, " ").trim();
   return flat.length > EXCERPT_LIMIT

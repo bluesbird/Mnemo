@@ -59,6 +59,7 @@ class ChatSourceReference(BaseModel):
     source_hash: str
     score: float
     excerpt: str
+    chunk_text: str
 
 
 class ChatQueryResponse(BaseModel):

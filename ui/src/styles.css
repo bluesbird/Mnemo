@@ -416,6 +416,17 @@ button {
   text-decoration: underline;
   text-underline-offset: 2px;
 }
+.chat-source-count {
+  display: inline-flex;
+  margin-left: 8px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: #dce9e1;
+  color: #64746a;
+  font-size: 10px;
+  line-height: 1.4;
+  vertical-align: middle;
+}
 .chat-source-excerpt {
   margin-top: 4px !important;
   color: #68756d !important;
@@ -701,16 +712,67 @@ kbd {
   color: #98a19a;
   font-size: 10px;
 }
+.note-content-editor {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
 .note-form textarea {
   flex: 1;
   width: 100%;
+  height: 100%;
   min-height: 0;
   resize: none;
   border: 0;
   outline: 0;
+  padding: 0;
   color: #47534c;
+  font-family: inherit;
   font-size: 14px;
   line-height: 1.8;
+}
+.note-content-highlight-overlay {
+  position: absolute;
+  inset: 0 16px 0 0;
+  z-index: 1;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  color: #47534c;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  pointer-events: none;
+  transition: opacity 500ms ease;
+}
+.note-content-highlight-overlay.is-fading {
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .note-content-highlight-overlay {
+    transition: none;
+  }
+}
+.note-content-editor.has-source-highlight textarea {
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  caret-color: var(--ink);
+  background: transparent;
+}
+.source-chunk-highlight {
+  border-radius: 2px;
+  background: #ffe39a;
+  box-shadow: 0 0 0 1px #f4ce69;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.source-match-notice {
+  margin-top: 6px;
+  color: #7b6540;
+  font-size: 11px;
 }
 .note-form textarea::placeholder {
   color: #b5beb8;

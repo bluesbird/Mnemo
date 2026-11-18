@@ -5,6 +5,7 @@ export type ChatSourceReference = {
   source_hash: string;
   score: number;
   excerpt: string;
+  chunk_text?: string;
 };
 
 export type ChatQueryRequest = {
