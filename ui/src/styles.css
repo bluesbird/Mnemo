@@ -136,16 +136,18 @@ button {
 .topbar-nav {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
 }
 .topbar-nav-button {
-  padding: 7px 11px;
+  min-height: 38px;
+  padding: 10px 14px;
   border: 1px solid #dfe6e0;
-  border-radius: 4px;
+  border-radius: 8px;
   background: #fff;
   color: #6e7a72;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 13px;
+  line-height: 1;
   font-weight: 600;
 }
 .topbar-nav-button.is-active {
@@ -157,10 +159,14 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   color: var(--ink);
   border-radius: 4px;
+}
+.topbar-repo-link svg {
+  width: 24px;
+  height: 24px;
 }
 .topbar-repo-link:hover {
   color: var(--green);
@@ -855,8 +861,9 @@ kbd {
     font-size: 24px;
   }
   .topbar-nav-button {
-    padding: 6px 9px;
-    font-size: 11px;
+    min-height: 36px;
+    padding: 9px 11px;
+    font-size: 12px;
   }
   .topbar-label {
     font-size: 9px;
