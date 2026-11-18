@@ -76,3 +76,22 @@ def test_local_summary_includes_early_and_late_topics_without_retrieval(local_ch
     assert result.sources == []
     assert any(word in result.answer.lower() for word in ("shipment", "inventory", "codes"))
     assert "bluebird" in result.answer.lower()
+    assert "updating the recap" not in result.answer.lower()
+
+
+def test_local_summary_returns_summary_instead_of_process_narration(local_chat):
+    history = [
+        ChatHistoryMessage(role="user", content="What does the bluebird mean in the poem?"),
+        ChatHistoryMessage(role="assistant", content="It is a symbol of hidden feelings."),
+        ChatHistoryMessage(role="user", content="Where is the other bluebird?"),
+        ChatHistoryMessage(role="assistant", content="The other note says it is on a telephone line."),
+    ]
+    query = QueryService(Settings(), local_chat, Mock())
+
+    result = query.answer_query("recap chat", top_k=4, history=history)
+
+    answer = result.answer.lower()
+    assert "bluebird" in answer
+    assert "telephone line" in answer
+    assert "updating the recap" not in answer
+    assert "write the complete summary" not in answer

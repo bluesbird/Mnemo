@@ -34,9 +34,13 @@ def test_short_chat_needs_only_one_summary_call():
 
     assert summarize_chat(client, Settings(), question, history) == client.complete.return_value
     client.complete.assert_called_once()
-    prompt = client.complete.call_args.args[0][-1]["content"]
+    messages = client.complete.call_args.args[0]
+    prompt = messages[-1]["content"]
     assert question in prompt
     assert 'user: "Talk about logistics."' in prompt
+    assert "Write the complete summary for the user." in prompt
+    assert "We are updating the recap" not in messages[0]["content"]
+    assert "finished user-facing summary" in messages[0]["content"]
 
 
 def test_long_unicode_chat_is_consumed_once_in_order_with_bounded_requests():
@@ -64,8 +68,12 @@ def test_long_unicode_chat_is_consumed_once_in_order_with_bounded_requests():
         prompt = messages[-1]["content"]
         assert question in prompt
         if index:
-            assert client.complete.return_value in prompt
-        segments.append(prompt.split("Next transcript segment:\n", 1)[1])
+            assert f"Previous summary: {json.dumps(client.complete.return_value)}" in prompt
+        assert prompt.endswith("\n\nWrite the complete summary for the user.")
+        segments.append(
+            prompt.split("Additional conversation transcript:\n", 1)[1]
+            .removesuffix("\n\nWrite the complete summary for the user.")
+        )
     assert 1 < len(segments) < 100
     assert "".join(segments) == "\n".join(
         f"{message.role}: {json.dumps(message.content, ensure_ascii=False)}"
