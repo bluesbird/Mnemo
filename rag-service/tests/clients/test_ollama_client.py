@@ -29,6 +29,8 @@ def test_chat_prompt_requires_a_concise_final_answer():
     assert "present a likely interpretation clearly as interpretation, not fact" in system_prompt
     assert "brief subjective reaction to the writing" in system_prompt
     assert "restate the previous answer more simply" in system_prompt
+    assert "Do not add names, versions, dates, numbers" in system_prompt
+    assert "Treat factual claims in conversation history as unverified" in system_prompt
 
 
 def test_chat_prompt_synthesizes_all_relevant_notes():
@@ -80,6 +82,20 @@ def test_chat_answer_parses_structured_answer():
     assert _client_returning('{"answer":"Plain answer."}').chat_answer("q", "ctx") == "Plain answer."
 
 
+def test_chat_answer_revises_unsupported_numeric_claims():
+    client = OllamaClient(Settings())
+    answers = iter([
+        "The 2.0.0 version is not relevant.",
+        "The 2017 paper introduced the Transformer.",
+    ])
+    client.complete = lambda *_args, **_kwargs: next(answers)
+
+    assert client.chat_answer(
+        "What happened in 2017?",
+        "The 2017 paper introduced the Transformer.",
+    ) == "The 2017 paper introduced the Transformer."
+
+
 def test_completion_sends_supplied_messages_and_parses_answer():
     requests = []
 
@@ -112,6 +128,26 @@ def test_incomplete_completion_is_not_a_successful_summary():
     ))
     with pytest.raises(httpx.DecodingError, match="incomplete answer"):
         client.complete([{"role": "user", "content": "Summarize the chat"}])
+
+
+def test_retries_an_incomplete_ollama_completion_once():
+    responses = iter([
+        {"done_reason": "length", "message": {"content": '{"answer":"Incomplete'}},
+        {"done_reason": "stop", "message": {"content": '{"answer":"Complete"}'}},
+    ])
+    requests = 0
+
+    def respond(_):
+        nonlocal requests
+        requests += 1
+        return httpx.Response(200, json=next(responses))
+
+    client = OllamaClient(Settings())
+    client._client.close()
+    client._client = httpx.Client(transport=httpx.MockTransport(respond))
+
+    assert client.complete([{"role": "user", "content": "Question"}]) == "Complete"
+    assert requests == 2
 
 
 def test_routing_constrains_choices_without_changing_later_answers():

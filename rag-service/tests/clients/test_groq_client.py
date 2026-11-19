@@ -55,6 +55,15 @@ def test_groq_request_and_answer():
     assert "think" not in payload
 
 
+def test_groq_rejects_repeated_unsupported_numeric_claims(monkeypatch):
+    client = GroqClient(Settings(groq_api_key="key"))
+    responses = iter(["Version 2.0 is irrelevant.", "Model 2.1 is separate."])
+    monkeypatch.setattr(client, "complete", lambda *_args, **_kwargs: next(responses))
+
+    with pytest.raises(RuntimeError, match="unsupported numeric claims"):
+        client.chat_answer("Question", "The 2017 paper introduced the Transformer.")
+
+
 def test_completion_sends_supplied_messages_without_note_context():
     requests = []
 

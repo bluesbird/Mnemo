@@ -2,7 +2,11 @@ import json
 
 import httpx
 
-from app.clients.chat_client import chat_messages
+from app.clients.chat_client import (
+    chat_messages,
+    has_unsupported_numbers,
+    numeric_revision_messages,
+)
 from app.core.config import Settings
 from app.schemas import ChatHistoryMessage
 
@@ -25,7 +29,15 @@ class GroqClient:
         if not context.strip():
             return "I don't know based on the provided notes."
 
-        return self.complete(chat_messages(question, context, history))
+        messages = chat_messages(question, context, history)
+        answer = self.complete(messages)
+        if not has_unsupported_numbers(answer, context):
+            return answer
+
+        answer = self.complete(numeric_revision_messages(messages, answer))
+        if has_unsupported_numbers(answer, context):
+            raise RuntimeError("Groq returned unsupported numeric claims.")
+        return answer
 
     def complete(
         self, messages: list[dict[str, str]], *, choices: list[str] | None = None,

@@ -3,7 +3,11 @@ import logging
 
 import httpx
 
-from app.clients.chat_client import chat_messages
+from app.clients.chat_client import (
+    chat_messages,
+    has_unsupported_numbers,
+    numeric_revision_messages,
+)
 from app.core.config import Settings
 from app.schemas import ChatHistoryMessage
 
@@ -49,7 +53,16 @@ class OllamaClient:
         if context.strip() == "":
             return "I don't know based on the provided notes."
 
-        return self.complete(chat_messages(question, context, history))
+        messages = chat_messages(question, context, history)
+        answer = self.complete(messages)
+        if not has_unsupported_numbers(answer, context):
+            return answer
+
+        logger.warning("Ollama added unsupported numeric claims; requesting a correction")
+        answer = self.complete(numeric_revision_messages(messages, answer))
+        if has_unsupported_numbers(answer, context):
+            raise RuntimeError("Ollama returned unsupported numeric claims.")
+        return answer
 
     def complete(
         self, messages: list[dict[str, str]], *, choices: list[str] | None = None,
@@ -72,10 +85,18 @@ class OllamaClient:
                 "num_predict": 32 if choices else self._settings.chat_num_predict,
             },
         }
-        response = self._client.post(f"{self._base_url}/api/chat", json=payload)
-        response.raise_for_status()
-        data = response.json()
+        response: httpx.Response | None = None
+        data: dict = {}
+        for attempt in range(2):
+            response = self._client.post(f"{self._base_url}/api/chat", json=payload)
+            response.raise_for_status()
+            data = response.json()
+            if data.get("done_reason") != "length":
+                break
+            if attempt == 0:
+                logger.warning("Ollama reached its output limit; retrying once")
         if data.get("done_reason") == "length":
+            assert response is not None
             raise httpx.DecodingError("Ollama returned an incomplete answer.", request=response.request)
         content = data.get("message", {}).get("content")
         if isinstance(content, str) and "</think>" in content:
