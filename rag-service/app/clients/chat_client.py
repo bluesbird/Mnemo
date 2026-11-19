@@ -18,6 +18,10 @@ class ChatClient(Protocol):
         history: list[ChatHistoryMessage] | None = None,
     ) -> str: ...
 
+    def complete(
+        self, messages: list[dict[str, str]], *, choices: list[str] | None = None,
+    ) -> str: ...
+
 
 def has_unsupported_numbers(answer: str, context: str) -> bool:
     supported = set(_NUMBER.findall(context))
@@ -39,10 +43,6 @@ def numeric_revision_messages(
             ),
         },
     ]
-
-    def complete(
-        self, messages: list[dict[str, str]], *, choices: list[str] | None = None,
-    ) -> str: ...
 
 
 def chat_messages(
