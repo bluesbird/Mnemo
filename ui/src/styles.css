@@ -47,9 +47,6 @@ button {
   display: flex;
   flex-direction: column;
 }
-.is-hidden {
-  display: none;
-}
 .topbar {
   width: 100%;
   max-width: 1240px;

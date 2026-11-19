@@ -20,7 +20,7 @@ beforeEach(() => {
   sessionStorage.clear();
   localStorage.removeItem("mnemo.theme.v1");
   document.documentElement.dataset.theme = "light";
-  window.history.replaceState(null, "", "#/notes");
+  window.history.replaceState(null, "", "/");
   vi.mocked(notesApi.listNotes).mockResolvedValue([]);
 });
 
@@ -72,13 +72,15 @@ it.each([false, true])("confirms and discards changes before opening chat (new n
 
   fireEvent.click(screen.getByRole("button", { name: "Ask Chatbot" }));
   expect(confirm).toHaveBeenCalledWith("You have unsaved changes. Discard them?");
-  expect(window.location.hash).toBe("#/notes");
+  expect(window.location.pathname).toBe("/");
+  expect(window.location.hash).toBe("");
   expect((screen.getByLabelText("Note content") as HTMLTextAreaElement).value).toBe("Unsaved content");
 
   confirm.mockReturnValue(true);
   fireEvent.click(screen.getByRole("button", { name: "Ask Chatbot" }));
   await screen.findByRole("heading", { name: "Ask your notes anything." });
-  expect(window.location.hash).toBe("#/notes");
+  expect(window.location.pathname).toBe("/");
+  expect(window.location.hash).toBe("");
   if (isNew) {
     expect(screen.queryByLabelText("Note content")).toBeNull();
   } else {
@@ -161,7 +163,6 @@ it("opens the cited note and highlights its retrieved chunk", async () => {
       chunk_text: `${note.title}\n\n${note.content}`,
     }],
   }]));
-  window.history.replaceState(null, "", "#/chat");
   render(<App />);
 
   fireEvent.click(await screen.findByRole("button", { name: note.title }));

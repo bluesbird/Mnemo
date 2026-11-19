@@ -27,11 +27,9 @@ def check_static():
         status, _, data = fetch("http://ui" + asset.decode())
         assert status == 200 and data, (asset, status)
         assert b"RAG_ADMIN_API_KEY" not in data, asset
-    # Hash routes remain browser-side; nginx only sees "/".
-    assert fetch("http://ui/#/chat")[0] == 200
     for path in ("/.env", "/docker/default.conf.template", "/missing.js"):
         assert fetch("http://ui" + path)[0] == 404, path
-    print("PASS: static HTML/assets, hash route and no exposed runtime config", flush=True)
+    print("PASS: static HTML/assets and no exposed runtime config", flush=True)
     return True
 
 

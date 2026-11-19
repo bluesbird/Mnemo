@@ -11,8 +11,6 @@ import { NotesWorkspace } from "./components/NotesWorkspace";
 import type { ChatMessage } from "./types/chat";
 import type { Note, NoteDraft } from "./types/note";
 
-type AppView = "notes" | "chat";
-
 const CHAT_STORAGE_KEY = "pkh.chat";
 const THEME_STORAGE_KEY = "mnemo.theme.v1";
 
@@ -36,12 +34,7 @@ function loadChatMessages(): ChatMessage[] {
   }
 }
 
-function parseViewFromHash(): AppView {
-  return window.location.hash === "#/chat" ? "chat" : "notes";
-}
-
 function App() {
-  const [view, setView] = useState<AppView>(() => parseViewFromHash());
   const [notes, setNotes] = useState<Note[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [draft, setDraft] = useState<NoteDraft>({ title: "", content: "" });
@@ -126,15 +119,6 @@ function App() {
   }, []);
 
   useEffect(() => {
-    function onHashChange() {
-      setView(parseViewFromHash());
-    }
-
-    window.addEventListener("hashchange", onHashChange);
-    return () => window.removeEventListener("hashchange", onHashChange);
-  }, []);
-
-  useEffect(() => {
     if (typeof window.matchMedia !== "function") return;
     const preference = window.matchMedia("(prefers-color-scheme: dark)");
     const updateSystemTheme = () => setSystemDarkMode(preference.matches);
@@ -147,8 +131,12 @@ function App() {
   }, [darkMode]);
 
   useEffect(() => {
-    if (!window.location.hash) {
-      window.location.hash = "#/notes";
+    if (window.location.hash) {
+      window.history.replaceState(
+        null,
+        "",
+        `${window.location.pathname}${window.location.search}`,
+      );
     }
   }, []);
 
@@ -265,11 +253,6 @@ function App() {
     (draft.title !== selectedNote.title ||
       draft.content !== selectedNote.content);
 
-  function goToNotes() {
-    setView("notes");
-    window.location.hash = "#/notes";
-  }
-
   function openEmbeddedChat() {
     if (!confirmDiscardChanges()) return;
     setSelectedId(null);
@@ -297,7 +280,6 @@ function App() {
     if (current) {
       if (selectedId !== noteId) selectNote(current);
       setSourceHighlight({ noteId, passages });
-      goToNotes();
       return;
     }
 
@@ -318,8 +300,6 @@ function App() {
           ? cause.message
           : "Could not load the source note.",
       );
-    } finally {
-      goToNotes();
     }
   }
 
@@ -328,7 +308,7 @@ function App() {
       <header className="topbar">
         <a
           className="brand"
-          href="#/notes"
+          href="/"
           aria-label="Mnemo notes"
         >
           <img
@@ -394,61 +374,47 @@ function App() {
         </p>
       )}
 
-      {view === "notes" ? (
-        <div className="view">
-          <NotesWorkspace
-            notes={notes}
-            filteredNotes={filteredNotes}
-            selectedId={selectedId}
-            selectedNote={selectedNote}
-            draft={draft}
-            isNew={isNew}
-            search={search}
-            loading={loading}
-            saving={saving}
-            summarizing={summarizing}
-            error={error}
-            hasUnsavedChanges={hasUnsavedChanges}
-            onSearchChange={setSearch}
-            onSelect={selectNoteGuarded}
-            onCreate={startNewNoteGuarded}
-            onAskChat={openEmbeddedChat}
-            onDraftChange={setDraft}
-            onSave={(event) => void saveNote(event)}
-            onDelete={() => void deleteNote()}
-            onSummarize={() => void summarizeNote()}
-            sourcePassages={
-              sourceHighlight?.noteId === selectedId
-                ? sourceHighlight.passages
-                : []
-            }
-            chatWorkspace={
-              <ChatWorkspace
-                embedded
-                messages={chatMessages}
-                onMessagesChange={setChatMessages}
-                suggestions={chatSuggestions}
-                onClear={() => setSuggestionSeed((seed) => seed + 1)}
-                onOpenNote={(noteId, passages) =>
-                  void openNoteFromChat(noteId, passages)
-                }
-              />
-            }
-          />
-        </div>
-      ) : (
-        <div className="view">
-          <ChatWorkspace
-            messages={chatMessages}
-            onMessagesChange={setChatMessages}
-            suggestions={chatSuggestions}
-            onClear={() => setSuggestionSeed((seed) => seed + 1)}
-            onOpenNote={(noteId, passages) =>
-              void openNoteFromChat(noteId, passages)
-            }
-          />
-        </div>
-      )}
+      <div className="view">
+        <NotesWorkspace
+          notes={notes}
+          filteredNotes={filteredNotes}
+          selectedId={selectedId}
+          selectedNote={selectedNote}
+          draft={draft}
+          isNew={isNew}
+          search={search}
+          loading={loading}
+          saving={saving}
+          summarizing={summarizing}
+          error={error}
+          hasUnsavedChanges={hasUnsavedChanges}
+          onSearchChange={setSearch}
+          onSelect={selectNoteGuarded}
+          onCreate={startNewNoteGuarded}
+          onAskChat={openEmbeddedChat}
+          onDraftChange={setDraft}
+          onSave={(event) => void saveNote(event)}
+          onDelete={() => void deleteNote()}
+          onSummarize={() => void summarizeNote()}
+          sourcePassages={
+            sourceHighlight?.noteId === selectedId
+              ? sourceHighlight.passages
+              : []
+          }
+          chatWorkspace={
+            <ChatWorkspace
+              embedded
+              messages={chatMessages}
+              onMessagesChange={setChatMessages}
+              suggestions={chatSuggestions}
+              onClear={() => setSuggestionSeed((seed) => seed + 1)}
+              onOpenNote={(noteId, passages) =>
+                void openNoteFromChat(noteId, passages)
+              }
+            />
+          }
+        />
+      </div>
 
       <footer className="page-footer">
         <span>MNEMO</span>
@@ -509,7 +475,7 @@ function App() {
             </p>
           </div>
         </details>
-        <span>{view === "notes" ? "NOTES" : "CHAT"}</span>
+        <span>NOTES</span>
       </footer>
     </main>
   );
