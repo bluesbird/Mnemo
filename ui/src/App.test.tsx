@@ -154,16 +154,27 @@ it("requests a summary only on demand and clears it after saving edits", async (
   expect(screen.queryByRole("region", { name: "AI summary" })).toBeNull();
 });
 
-it("shows the shared-data warning and expandable privacy notice", async () => {
+it("shows the shared-data warning and links to the about page", async () => {
   render(<App />);
 
-  expect(screen.getByText(/Public demo: notes are shared/)).toBeTruthy();
-  const summary = screen.getByText("Privacy");
-  expect(summary.closest("details")).not.toBeNull();
-  expect(screen.getByText(/Chat history is saved in your browser/)).toBeTruthy();
+  expect(screen.getByText("Public demo:").closest(".demo-notice")?.textContent)
+    .toMatch(/Public demo: notes are shared/);
+  expect(screen.getByRole("link", { name: "About Mnemo" }).getAttribute("href"))
+    .toBe("/about");
+  await screen.findByText("No notes yet. Create one to get started.");
+});
+
+it("shows privacy and imprint information on the about page", () => {
+  window.history.replaceState(null, "", "/about");
+
+  render(<App />);
+
+  expect(screen.getByRole("heading", { name: "About Mnemo", level: 1 })).toBeTruthy();
+  expect(screen.getByRole("heading", { name: "Privacy" })).toBeTruthy();
+  expect(screen.getByRole("heading", { name: "Imprint" })).toBeTruthy();
   expect(screen.getByRole("link", { name: "Groq's data information" }).getAttribute("href"))
     .toBe("https://console.groq.com/docs/your-data");
-  await screen.findByText("No notes yet. Create one to get started.");
+  expect(notesApi.listNotes).not.toHaveBeenCalled();
 });
 
 it("opens the cited note and highlights its retrieved chunk", async () => {

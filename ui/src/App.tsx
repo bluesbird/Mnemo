@@ -42,7 +42,66 @@ function loadChatMessages(): ChatMessage[] {
   }
 }
 
+function AboutPage() {
+  return (
+    <div className="about-view">
+      <article className="about-page">
+        <h1>About Mnemo</h1>
+        <p className="about-lead">
+          Mnemo is a personal knowledge hub for storing notes, generating AI
+          summaries, and finding grounded answers from your own content.
+        </p>
+
+        <section aria-labelledby="about-privacy-title">
+          <h2 id="about-privacy-title">Privacy</h2>
+          <p>
+            This is a public, shared demo. Anyone can read, edit or delete its
+            notes. Do not enter personal, confidential or sensitive information.
+            Notes, summaries and search-index entries remain on the server until
+            deleted or reset.
+          </p>
+          <p>
+            The server processes IP addresses, request paths and timestamps to
+            deliver the app, apply rate limits and diagnose problems.
+          </p>
+          <p>
+            Chat history stays in your browser&apos;s session storage and is sent
+            with chat requests. Relevant note excerpts and content you summarize
+            are sent to GroqCloud. Search embeddings run locally on the server
+            using Ollama and Chroma. The app uses no analytics or advertising
+            trackers.
+          </p>
+          <p>
+            Groq may temporarily log inference data and retains usage metadata.
+            Zero Data Retention is disabled for this deployment. See{" "}
+            <a href="https://console.groq.com/docs/your-data">
+              Groq&apos;s data information
+            </a>.
+          </p>
+          <p>
+            For privacy requests or your applicable data-protection rights,
+            contact the operator below.
+          </p>
+        </section>
+
+        <section aria-labelledby="about-imprint-title">
+          <h2 id="about-imprint-title">Imprint</h2>
+          <p>
+            <strong>Operator and privacy contact:</strong> Lorenz Moser
+            <br />
+            <a href="mailto:lorenz.moser.bw@gmail.com">
+              lorenz.moser.bw@gmail.com
+            </a>
+          </p>
+          <p>Hosting is provided by Contabo.</p>
+        </section>
+      </article>
+    </div>
+  );
+}
+
 function App() {
+  const isAboutPage = window.location.pathname === "/about";
   const [notes, setNotes] = useState<Note[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [draft, setDraft] = useState<NoteDraft>({ title: "", content: "" });
@@ -123,8 +182,8 @@ function App() {
   }
 
   useEffect(() => {
-    void loadNotes();
-  }, []);
+    if (!isAboutPage) void loadNotes();
+  }, [isAboutPage]);
 
   useEffect(() => {
     if (typeof window.matchMedia !== "function") return;
@@ -374,118 +433,66 @@ function App() {
         </nav>
       </header>
 
-      <p className="demo-notice">
-        Public demo: notes are shared and anyone can change or delete them.
-        Use fictional data only. AI requests send note content to Groq; answers may be wrong.
-      </p>
       {themeError && (
         <p className="theme-storage-error" role="status">
           {themeError}
         </p>
       )}
 
-      <div className="view">
-        <NotesWorkspace
-          notes={notes}
-          filteredNotes={filteredNotes}
-          selectedId={selectedId}
-          selectedNote={selectedNote}
-          draft={draft}
-          isNew={isNew}
-          search={search}
-          loading={loading}
-          saving={saving}
-          summarizing={summarizing}
-          error={error}
-          hasUnsavedChanges={hasUnsavedChanges}
-          onSearchChange={setSearch}
-          onSelect={selectNoteGuarded}
-          onCreate={startNewNoteGuarded}
-          onAskChat={openEmbeddedChat}
-          onDraftChange={setDraft}
-          onSave={(event) => void saveNote(event)}
-          onDelete={() => void deleteNote()}
-          onSummarize={() => void summarizeNote()}
-          sourcePassages={
-            sourceHighlight?.noteId === selectedId
-              ? sourceHighlight.passages
-              : []
-          }
-          chatWorkspace={
-            <ChatWorkspace
-              embedded
-              messages={chatMessages}
-              onMessagesChange={setChatMessages}
-              suggestions={chatSuggestions}
-              onClear={() => setSuggestionSeed((seed) => seed + 1)}
-              onOpenNote={(noteId, passages) =>
-                void openNoteFromChat(noteId, passages)
-              }
-            />
-          }
-        />
-      </div>
+      {isAboutPage ? (
+        <AboutPage />
+      ) : (
+        <div className="view">
+          <NotesWorkspace
+            notes={notes}
+            filteredNotes={filteredNotes}
+            selectedId={selectedId}
+            selectedNote={selectedNote}
+            draft={draft}
+            isNew={isNew}
+            search={search}
+            loading={loading}
+            saving={saving}
+            summarizing={summarizing}
+            error={error}
+            hasUnsavedChanges={hasUnsavedChanges}
+            onSearchChange={setSearch}
+            onSelect={selectNoteGuarded}
+            onCreate={startNewNoteGuarded}
+            onAskChat={openEmbeddedChat}
+            onDraftChange={setDraft}
+            onSave={(event) => void saveNote(event)}
+            onDelete={() => void deleteNote()}
+            onSummarize={() => void summarizeNote()}
+            sourcePassages={
+              sourceHighlight?.noteId === selectedId
+                ? sourceHighlight.passages
+                : []
+            }
+            chatWorkspace={
+              <ChatWorkspace
+                embedded
+                messages={chatMessages}
+                onMessagesChange={setChatMessages}
+                suggestions={chatSuggestions}
+                onClear={() => setSuggestionSeed((seed) => seed + 1)}
+                onOpenNote={(noteId, passages) =>
+                  void openNoteFromChat(noteId, passages)
+                }
+              />
+            }
+          />
+        </div>
+      )}
 
       <footer className="page-footer">
-        <span>MNEMO</span>
-        <details className="privacy-notice">
-          <summary>Privacy</summary>
-          <div className="privacy-content">
-            <h2>Privacy notice</h2>
-            <p>
-              <strong>Operator and privacy contact:</strong> Lorenz Moser,{" "}
-              <a href="mailto:lorenz.moser.bw@gmail.com">lorenz.moser.bw@gmail.com</a>.
-            </p>
-            <p>
-              This is a public, shared demo, not private storage. Notes and summaries
-              are stored on the server; anyone can read, edit or delete
-              them. A derived search index is also stored there. Do not enter
-              personal, confidential or sensitive information. Notes and their
-              index entries remain until deleted or the demo is reset.
-            </p>
-            <p>
-              The server processes request information, including IP addresses,
-              request paths and timestamps, to deliver the app, apply rate limits
-              and diagnose problems. Hosting is provided by Contabo in
-              Lauterbourg, France.
-            </p>
-            <p>
-              Chat history is saved in your browser&apos;s session storage.
-              Up to 500 messages are sent to the chat service with each request.
-              Note answers use the 10 latest messages, while chat summaries use
-              all submitted messages. Clearing the chat
-              removes it from that storage. The app does not use analytics or
-              advertising trackers.
-            </p>
-            <p>
-              When you summarize a note, the note title and content are sent
-              to GroqCloud. Chat sends your question to GroqCloud to identify
-              whether you want a conversation summary.
-              Note answers send recent messages and relevant note excerpts;
-              summaries send the submitted conversation without retrieving
-              notes. Embeddings and search run on the server using Ollama and Chroma.
-            </p>
-            <p>
-              Groq states that inference inputs and outputs are not retained by
-              default, but may be logged for reliability or abuse investigations
-              for up to 30 days, unless legally required for longer. Usage metadata
-              is retained. Retained customer data is stored in the United States.
-              Zero Data Retention is disabled for this deployment, including
-              inference APIs. See{" "}
-              <a href="https://console.groq.com/docs/your-data">
-                Groq&apos;s data information
-              </a>.
-            </p>
-            <p>
-              Where applicable, you may request access, correction, deletion,
-              restriction or portability of your personal data, object to
-              processing, withdraw consent if processing relies on it, and
-              complain to a data-protection authority. Contact the operator
-              above for privacy requests.
-            </p>
-          </div>
-        </details>
-        <span>NOTES</span>
+        <p className="demo-notice">
+          <strong>Public demo:</strong> notes are shared and anyone can change or delete them.
+          Use fictional data only. AI requests send note content to Groq; answers may be wrong.
+        </p>
+        <a className="about-link" href="/about">
+          About Mnemo
+        </a>
       </footer>
     </main>
   );

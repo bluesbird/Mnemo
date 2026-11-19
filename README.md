@@ -1,10 +1,10 @@
 # Mnemo
 
-**A self-hosted knowledge hub for notes, on-demand AI summaries, and RAG-based grounded answers.**
+**A personal knowledge hub for storing notes, generating AI summaries, and finding grounded answers from your own content.**
 
-Mnemo is a polyglot microservice app: the Knowledge service manages source
-data, the RAG service builds a derived vector index, and the UI provides note
-management and source-backed chat.
+Mnemo is a self-hosted polyglot microservice application: the Knowledge service
+manages source data, the RAG service builds a derived vector index, and the UI
+provides note management and source-backed chat.
 
 **Open the live demo**: https://mnemo-hub.duckdns.org
 
