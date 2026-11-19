@@ -392,6 +392,13 @@ button {
   border-radius: 6px;
   box-shadow: 0 8px 24px #283a2d14;
 }
+.index-menu-hint {
+  max-width: 190px;
+  margin: 2px 0 7px;
+  color: #7b8580;
+  font-size: 10px;
+  line-height: 1.4;
+}
 .chat-index-feedback {
   margin: 8px 0 0;
   color: #647169;
@@ -1183,6 +1190,9 @@ kbd {
   border-color: #484e58;
   background: #25282e;
   color: #d4d7de;
+}
+:root[data-theme="dark"] .index-menu-hint {
+  color: #aeb4bf;
 }
 :root[data-theme="dark"] .search-box input {
   color: #e7e9ed;

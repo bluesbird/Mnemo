@@ -26,6 +26,16 @@ function renderChat(
 }
 
 describe("ChatWorkspace input", () => {
+  it("explains that index operations are manual recovery tools", () => {
+    renderChat();
+
+    fireEvent.click(screen.getByText("Index ▾"));
+
+    expect(screen.getByText(
+      "Note changes sync automatically. These are manual recovery tools.",
+    )).toBeTruthy();
+  });
+
   it("opens a note with each distinct retrieved passage for that note", () => {
     const onOpenNote = vi.fn();
     const messages: ChatMessage[] = [{

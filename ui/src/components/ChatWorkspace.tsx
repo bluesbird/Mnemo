@@ -21,7 +21,7 @@ function summarizeIndexResult(
   operation: "reconcile" | "rebuild",
   result: IndexOperationResponse,
 ): string {
-  return `${operation === "reconcile" ? "Reconcile" : "Rebuild"} complete · indexed ${result.indexed_note_ids.length}, deleted ${result.deleted_note_ids.length}, skipped ${result.skipped_note_ids.length}, total notes ${result.total_knowledge_notes}.`;
+  return `${operation === "reconcile" ? "Index check and repair" : "Full index rebuild"} complete · indexed ${result.indexed_note_ids.length}, deleted ${result.deleted_note_ids.length}, skipped ${result.skipped_note_ids.length}, total notes ${result.total_knowledge_notes}.`;
 }
 
 export function ChatWorkspace({
@@ -134,7 +134,7 @@ export function ChatWorkspace({
     if (
       operation === "rebuild" &&
       !window.confirm(
-        "Rebuild the whole index? This re-embeds every note and can take a while.",
+        "Rebuild the entire index? This re-embeds every note and can take a while.",
       )
     ) {
       return;
@@ -142,8 +142,8 @@ export function ChatWorkspace({
     setIsIndexOperationRunning(true);
     setIndexFeedback(
       operation === "rebuild"
-        ? "Rebuilding index… this may take a while."
-        : "Reconciling index…",
+        ? "Rebuilding the entire index… this may take a while."
+        : "Checking and repairing index…",
     );
     try {
       const result =
@@ -201,13 +201,16 @@ export function ChatWorkspace({
             <details className="index-menu" ref={indexMenu}>
               <summary className="outline-button">Index ▾</summary>
               <div className="index-menu-items">
+                <p className="index-menu-hint">
+                  Note changes sync automatically. These are manual recovery tools.
+                </p>
                 <button
                   type="button"
                   className="text-button"
                   disabled={isAsking || isIndexOperationRunning}
                   onClick={() => void runIndexOperation("reconcile")}
                 >
-                  Reconcile (sync changes)
+                  Check & repair index
                 </button>
                 <button
                   type="button"
@@ -215,7 +218,7 @@ export function ChatWorkspace({
                   disabled={isAsking || isIndexOperationRunning}
                   onClick={() => void runIndexOperation("rebuild")}
                 >
-                  Rebuild (re-embed all)
+                  Rebuild entire index
                 </button>
               </div>
             </details>
