@@ -59,10 +59,10 @@ for summaries and RAG answers.
 ## See it in action
 
 <p align="center">
-  <img src="docs/assets/notes_wide.png" width="100%" alt="Mnemo notes view with a selected note and its AI summary">
+  <img src="docs/assets/notes-light.png" width="100%" alt="Mnemo notes view with a selected note and its AI summary">
 </p>
 <p align="center">
-  <img src="docs/assets/chat_2_wide.png" width="100%" alt="Mnemo chat showing grounded answers and linked source notes">
+  <img src="docs/assets/chat-light.png" width="100%" alt="Mnemo chat showing grounded answers and linked source notes">
 </p>
 
 ## Production scope
