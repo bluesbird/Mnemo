@@ -12,6 +12,7 @@ import jakarta.persistence.PersistenceContext;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
@@ -49,6 +50,38 @@ class NoteRepositoryTests {
             noteRepository.deleteAll(created);
             noteRepository.deleteAll(fixtures);
         }
+    }
+
+    @Test
+    @Transactional
+    void ordersNotesByUpdatedTimeThenIdDescending() {
+        var oldest = new Note("Oldest", "Content");
+        oldest.setUpdatedAt(LocalDateTime.of(2026, 1, 1, 0, 0));
+        var tiedLowerId = new Note("Tied lower id", "Content");
+        tiedLowerId.setUpdatedAt(LocalDateTime.of(2026, 1, 2, 0, 0));
+        var tiedHigherId = new Note("Tied higher id", "Content");
+        tiedHigherId.setUpdatedAt(LocalDateTime.of(2026, 1, 2, 0, 0));
+        var newest = new Note("Newest", "Content");
+        newest.setUpdatedAt(LocalDateTime.of(2026, 1, 3, 0, 0));
+        noteRepository.saveAll(java.util.List.of(oldest, tiedLowerId, tiedHigherId, newest));
+
+        var fixtureIds = java.util.Set.of(
+                oldest.getId(),
+                tiedLowerId.getId(),
+                tiedHigherId.getId(),
+                newest.getId()
+        );
+        var orderedIds = noteRepository.findAllByOrderByUpdatedAtDescIdDesc().stream()
+                .map(Note::getId)
+                .filter(fixtureIds::contains)
+                .toList();
+
+        assertEquals(java.util.List.of(
+                newest.getId(),
+                tiedHigherId.getId(),
+                tiedLowerId.getId(),
+                oldest.getId()
+        ), orderedIds);
     }
 
     @Test

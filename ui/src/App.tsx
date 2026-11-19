@@ -16,6 +16,14 @@ const THEME_STORAGE_KEY = "mnemo.theme.v1";
 
 type ThemeOverride = "light" | "dark" | null;
 
+function sortNotesNewestFirst(notes: Note[]): Note[] {
+  return [...notes].sort(
+    (a, b) =>
+      b.updatedAt.localeCompare(a.updatedAt) ||
+      b.id - a.id,
+  );
+}
+
 function loadThemeOverride(): ThemeOverride {
   try {
     const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
@@ -97,7 +105,7 @@ function App() {
     setError("");
     try {
       const result = await listNotes();
-      setNotes(result);
+      setNotes(sortNotesNewestFirst(result));
       if (
         selectedId !== null &&
         !result.some((note) => note.id === selectedId)
@@ -192,9 +200,9 @@ function App() {
         return;
       }
       setNotes((current) =>
-        isNew
+        sortNotesNewestFirst(isNew
           ? [saved, ...current]
-          : current.map((note) => (note.id === saved.id ? saved : note)),
+          : current.map((note) => (note.id === saved.id ? saved : note))),
       );
       setSelectedId(saved.id);
       setDraft({ title: saved.title, content: saved.content });
@@ -237,7 +245,9 @@ function App() {
     try {
       const summarized = await summarizeNoteRequest(selectedNote.id);
       setNotes((current) =>
-        current.map((note) => (note.id === summarized.id ? summarized : note)),
+        sortNotesNewestFirst(
+          current.map((note) => (note.id === summarized.id ? summarized : note)),
+        ),
       );
     } catch (cause) {
       setError(
@@ -286,7 +296,7 @@ function App() {
     setError("");
     try {
       const result = await listNotes();
-      setNotes(result);
+      setNotes(sortNotesNewestFirst(result));
       const match = result.find((note) => note.id === noteId);
       if (match) {
         selectNote(match);

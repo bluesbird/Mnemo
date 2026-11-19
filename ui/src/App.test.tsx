@@ -44,6 +44,33 @@ it("restores a saved dark theme", async () => {
   expect(screen.getByRole("button", { name: "Switch to light mode" })).toBeTruthy();
 });
 
+it("orders notes by updated date and id, newest first", async () => {
+  vi.mocked(notesApi.listNotes).mockResolvedValue([
+    {
+      id: 2, title: "Same date, lower id", content: "Content", summary: null,
+      createdAt: "2026-10-20T00:00:00", updatedAt: "2026-10-21T00:00:00",
+    },
+    {
+      id: 1, title: "Oldest", content: "Content", summary: null,
+      createdAt: "2026-10-20T00:00:00", updatedAt: "2026-10-20T00:00:00",
+    },
+    {
+      id: 3, title: "Same date, higher id", content: "Content", summary: null,
+      createdAt: "2026-10-20T00:00:00", updatedAt: "2026-10-21T00:00:00",
+    },
+  ]);
+
+  render(<App />);
+
+  await screen.findByText("Same date, higher id");
+  const rows = Array.from(document.querySelectorAll(".note-row"));
+  expect(rows.map((row) => row.textContent)).toEqual([
+    expect.stringContaining("Same date, higher id"),
+    expect.stringContaining("Same date, lower id"),
+    expect.stringContaining("Oldest"),
+  ]);
+});
+
 it("explains the collection limit and disables creation at 100 notes", async () => {
   vi.mocked(notesApi.listNotes).mockResolvedValue(Array.from({ length: 100 }, (_, id) => ({
     id, title: `Note ${id}`, content: "Content", summary: null,

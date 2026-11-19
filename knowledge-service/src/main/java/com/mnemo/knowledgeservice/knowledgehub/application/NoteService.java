@@ -35,7 +35,7 @@ public class NoteService {
     }
 
     public List<Note> getAllNotes() {
-        List<Note> notes = noteRepository.findAll();
+        List<Note> notes = noteRepository.findAllByOrderByUpdatedAtDescIdDesc();
         logger.info("Retrieved {} notes", notes.size());
         return notes;
     }

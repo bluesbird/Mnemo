@@ -10,6 +10,7 @@ import java.util.Optional;
 
 public interface NoteRepository extends JpaRepository<Note, Long> {
     java.util.List<Note> findAllByOrderByIdAsc();
+    java.util.List<Note> findAllByOrderByUpdatedAtDescIdDesc();
 
     @Modifying
     @Query(value = "LOCK TABLE note IN EXCLUSIVE MODE", nativeQuery = true)
