@@ -21,6 +21,9 @@ def check_static():
     status, headers, body = fetch("http://ui/")
     assert status == 200 and "text/html" in headers["Content-Type"], (status, body)
     assert b'<div id="root">' in body, body
+    status, headers, about = fetch("http://ui/about")
+    assert status == 200 and "text/html" in headers["Content-Type"], (status, about)
+    assert b'<div id="root">' in about, about
     assets = re.findall(rb'(?:src|href)="(/assets/[^"]+)"', body)
     assert assets, body
     for asset in assets:
