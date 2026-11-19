@@ -78,7 +78,7 @@ it.each([false, true])("confirms and discards changes before opening chat (new n
 
   confirm.mockReturnValue(true);
   fireEvent.click(screen.getByRole("button", { name: "Ask Chatbot" }));
-  await screen.findByRole("heading", { name: "Ask your notes anything." });
+  await screen.findByRole("heading", { name: "Ask anything about your notes." });
   expect(window.location.pathname).toBe("/");
   expect(window.location.hash).toBe("");
   if (isNew) {

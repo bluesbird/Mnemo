@@ -188,7 +188,7 @@ export function ChatWorkspace({
     >
       <header className="chat-header">
         <div className="chat-title-row">
-          <h1>Ask your knowledge base</h1>
+          <h1>Chatbot</h1>
           <div className="chat-header-actions">
             <button
               type="button"
@@ -237,9 +237,7 @@ export function ChatWorkspace({
       <div className="chat-thread" aria-live="polite">
         {messages.length === 0 && (
           <div className="chat-empty">
-            <span className="chat-empty-icon" aria-hidden="true">?</span>
-            <h2>Ask your notes anything.</h2>
-            <p>Answers come only from what you have written.</p>
+            <h2>Ask anything about your notes.</h2>
             {suggestions.length > 0 && (
               <div className="chat-suggestions">
                 {suggestions.map((suggestion) => (
@@ -255,9 +253,6 @@ export function ChatWorkspace({
                 ))}
               </div>
             )}
-            <p className="chat-empty-hint">
-              Note changes may take a moment to appear in answers.
-            </p>
           </div>
         )}
         {messages.map((message) => (
@@ -267,9 +262,6 @@ export function ChatWorkspace({
               message.isError ? " chat-message-error" : ""
             }`}
           >
-            <p className="chat-message-label">
-              {message.role === "user" ? "You" : "Assistant"}
-            </p>
             <p>{message.text}</p>
             {message.isError && message === messages[messages.length - 1] && (
               <button

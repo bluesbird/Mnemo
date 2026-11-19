@@ -320,7 +320,7 @@ function App() {
           />
           <span className="brand-copy">
             <span className="brand-name">Mnemo</span>
-            <span className="brand-subtitle">Your personal knowledge hub</span>
+            <span className="brand-subtitle">Personal Knowledge Hub</span>
           </span>
         </a>
         <nav className="topbar-nav" aria-label="Primary navigation">

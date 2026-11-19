@@ -233,23 +233,25 @@ export function NoteEditor({
             </div>
           </div>
           <form id="note-form" className="note-form" onSubmit={onSave}>
-            <input
-              className="title-input"
-              aria-label="Note title"
-              maxLength={70}
-              aria-describedby={draft.title.length >= 70 ? "title-limit" : undefined}
-              placeholder="Untitled note"
-              value={draft.title}
-              onChange={(event) =>
-                onDraftChange({ ...draft, title: event.target.value })
-              }
-              required
-            />
-            {draft.title.length >= 70 && (
-              <span id="title-limit" className="limit-hint" role="status">
-                Title limit reached (70 characters).
-              </span>
-            )}
+            <div className="note-title-card">
+              <input
+                className="title-input"
+                aria-label="Note title"
+                maxLength={70}
+                aria-describedby={draft.title.length >= 70 ? "title-limit" : undefined}
+                placeholder="Untitled note"
+                value={draft.title}
+                onChange={(event) =>
+                  onDraftChange({ ...draft, title: event.target.value })
+                }
+                required
+              />
+              {draft.title.length >= 70 && (
+                <span id="title-limit" className="limit-hint" role="status">
+                  Title limit reached (70 characters).
+                </span>
+              )}
+            </div>
             <div className="editor-meta">
               <span>
                 {note
@@ -258,40 +260,42 @@ export function NoteEditor({
               </span>
               <span>{draft.content.length} characters</span>
             </div>
-            <div className={`note-content-editor${showSourceHighlight && ranges.length ? " has-source-highlight" : ""}`}>
-              {showSourceHighlight && ranges.length > 0 && (
-                <pre
-                  ref={overlay}
-                  className={`note-content-highlight-overlay${isSourceHighlightFading ? " is-fading" : ""}`}
-                  aria-hidden="true"
-                >
-                  {renderHighlightedContent()}
-                </pre>
+            <div className="note-body-card">
+              <div className={`note-content-editor${showSourceHighlight && ranges.length ? " has-source-highlight" : ""}`}>
+                {showSourceHighlight && ranges.length > 0 && (
+                  <pre
+                    ref={overlay}
+                    className={`note-content-highlight-overlay${isSourceHighlightFading ? " is-fading" : ""}`}
+                    aria-hidden="true"
+                  >
+                    {renderHighlightedContent()}
+                  </pre>
+                )}
+                <textarea
+                  ref={contentArea}
+                  aria-label="Note content"
+                  maxLength={5000}
+                  aria-describedby={draft.content.length >= 5000 ? "content-limit" : undefined}
+                  placeholder="Start writing…"
+                  value={draft.content}
+                  onScroll={syncOverlayScroll}
+                  onChange={(event) =>
+                    onDraftChange({ ...draft, content: event.target.value })
+                  }
+                  required
+                />
+              </div>
+              {sourcePassages.length > 0 && ranges.length === 0 && (
+                <span className="source-match-notice" role="status">
+                  The indexed passage no longer matches this note.
+                </span>
               )}
-              <textarea
-                ref={contentArea}
-                aria-label="Note content"
-                maxLength={5000}
-                aria-describedby={draft.content.length >= 5000 ? "content-limit" : undefined}
-                placeholder="Start writing…"
-                value={draft.content}
-                onScroll={syncOverlayScroll}
-                onChange={(event) =>
-                  onDraftChange({ ...draft, content: event.target.value })
-                }
-                required
-              />
+              {draft.content.length >= 5000 && (
+                <span id="content-limit" className="limit-hint" role="status">
+                  Note limit reached (5,000 characters).
+                </span>
+              )}
             </div>
-            {sourcePassages.length > 0 && ranges.length === 0 && (
-              <span className="source-match-notice" role="status">
-                The indexed passage no longer matches this note.
-              </span>
-            )}
-            {draft.content.length >= 5000 && (
-              <span id="content-limit" className="limit-hint" role="status">
-                Note limit reached (5,000 characters).
-              </span>
-            )}
           </form>
           {note?.summary && !hasUnsavedChanges && (
             <section className="note-summary" aria-label="AI summary">

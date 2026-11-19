@@ -28,7 +28,6 @@ export function NoteList({
     <aside className="note-sidebar">
       <div className="sidebar-heading">
         <div>
-          <p className="eyebrow">COLLECTION</p>
           <h1>
             Notes <span>{totalCount}</span>
           </h1>
