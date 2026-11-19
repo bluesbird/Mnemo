@@ -270,16 +270,13 @@ function App() {
     window.location.hash = "#/notes";
   }
 
-  function goToChat() {
-    if (view === "chat" || !confirmDiscardChanges()) return;
-    if (selectedNote) {
-      selectNote(selectedNote);
-    } else {
-      setDraft({ title: "", content: "" });
-      setIsNew(false);
-      setError("");
-    }
-    window.location.hash = "#/chat";
+  function openEmbeddedChat() {
+    if (!confirmDiscardChanges()) return;
+    setSelectedId(null);
+    setDraft({ title: "", content: "" });
+    setIsNew(false);
+    setSourceHighlight(null);
+    setError("");
   }
 
   function toggleTheme() {
@@ -349,20 +346,6 @@ function App() {
         <nav className="topbar-nav" aria-label="Primary navigation">
           <button
             type="button"
-            className={`topbar-nav-button${view === "notes" ? " is-active" : ""}`}
-            onClick={goToNotes}
-          >
-            Notes
-          </button>
-          <button
-            type="button"
-            className={`topbar-nav-button${view === "chat" ? " is-active" : ""}`}
-            onClick={goToChat}
-          >
-            Chat
-          </button>
-          <button
-            type="button"
             className="topbar-theme-button"
             onClick={toggleTheme}
             aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
@@ -411,45 +394,61 @@ function App() {
         </p>
       )}
 
-      <div className={view === "notes" ? "view" : "view is-hidden"}>
-        <NotesWorkspace
-          notes={notes}
-          filteredNotes={filteredNotes}
-          selectedId={selectedId}
-          selectedNote={selectedNote}
-          draft={draft}
-          isNew={isNew}
-          search={search}
-          loading={loading}
-          saving={saving}
-          summarizing={summarizing}
-          error={error}
-          hasUnsavedChanges={hasUnsavedChanges}
-          onSearchChange={setSearch}
-          onSelect={selectNoteGuarded}
-          onCreate={startNewNoteGuarded}
-          onDraftChange={setDraft}
-          onSave={(event) => void saveNote(event)}
-          onDelete={() => void deleteNote()}
-          onSummarize={() => void summarizeNote()}
-          sourcePassages={
-            sourceHighlight?.noteId === selectedId
-              ? sourceHighlight.passages
-              : []
-          }
-        />
-      </div>
-      <div className={view === "chat" ? "view" : "view is-hidden"}>
-        <ChatWorkspace
-          messages={chatMessages}
-          onMessagesChange={setChatMessages}
-          suggestions={chatSuggestions}
-          onClear={() => setSuggestionSeed((seed) => seed + 1)}
-          onOpenNote={(noteId, passages) =>
-            void openNoteFromChat(noteId, passages)
-          }
-        />
-      </div>
+      {view === "notes" ? (
+        <div className="view">
+          <NotesWorkspace
+            notes={notes}
+            filteredNotes={filteredNotes}
+            selectedId={selectedId}
+            selectedNote={selectedNote}
+            draft={draft}
+            isNew={isNew}
+            search={search}
+            loading={loading}
+            saving={saving}
+            summarizing={summarizing}
+            error={error}
+            hasUnsavedChanges={hasUnsavedChanges}
+            onSearchChange={setSearch}
+            onSelect={selectNoteGuarded}
+            onCreate={startNewNoteGuarded}
+            onAskChat={openEmbeddedChat}
+            onDraftChange={setDraft}
+            onSave={(event) => void saveNote(event)}
+            onDelete={() => void deleteNote()}
+            onSummarize={() => void summarizeNote()}
+            sourcePassages={
+              sourceHighlight?.noteId === selectedId
+                ? sourceHighlight.passages
+                : []
+            }
+            chatWorkspace={
+              <ChatWorkspace
+                embedded
+                messages={chatMessages}
+                onMessagesChange={setChatMessages}
+                suggestions={chatSuggestions}
+                onClear={() => setSuggestionSeed((seed) => seed + 1)}
+                onOpenNote={(noteId, passages) =>
+                  void openNoteFromChat(noteId, passages)
+                }
+              />
+            }
+          />
+        </div>
+      ) : (
+        <div className="view">
+          <ChatWorkspace
+            messages={chatMessages}
+            onMessagesChange={setChatMessages}
+            suggestions={chatSuggestions}
+            onClear={() => setSuggestionSeed((seed) => seed + 1)}
+            onOpenNote={(noteId, passages) =>
+              void openNoteFromChat(noteId, passages)
+            }
+          />
+        </div>
+      )}
 
       <footer className="page-footer">
         <span>MNEMO</span>

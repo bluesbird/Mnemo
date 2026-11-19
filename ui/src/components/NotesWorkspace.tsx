@@ -1,4 +1,4 @@
-import type { FormEvent } from "react";
+import type { FormEvent, ReactNode } from "react";
 import type { Note, NoteDraft } from "../types/note";
 import { NoteEditor } from "./NoteEditor";
 import { NoteList } from "./NoteList";
@@ -20,10 +20,12 @@ type NotesWorkspaceProps = {
   onSearchChange: (value: string) => void;
   onSelect: (note: Note) => void;
   onCreate: () => void;
+  onAskChat: () => void;
   onDraftChange: (draft: NoteDraft) => void;
   onSave: (event: FormEvent<HTMLFormElement>) => void;
   onDelete: () => void;
   onSummarize: () => void;
+  chatWorkspace: ReactNode;
 };
 
 export function NotesWorkspace({
@@ -43,10 +45,12 @@ export function NotesWorkspace({
   onSearchChange,
   onSelect,
   onCreate,
+  onAskChat,
   onDraftChange,
   onSave,
   onDelete,
   onSummarize,
+  chatWorkspace,
 }: NotesWorkspaceProps) {
   return (
     <section className="workspace" aria-label="Notes">
@@ -59,6 +63,7 @@ export function NotesWorkspace({
         onSearchChange={onSearchChange}
         onSelect={onSelect}
         onCreate={onCreate}
+        onAskChat={onAskChat}
       />
       <NoteEditor
         note={selectedNote}
@@ -73,7 +78,7 @@ export function NotesWorkspace({
         onSave={onSave}
         onDelete={onDelete}
         onSummarize={onSummarize}
-        onCreate={onCreate}
+        emptyState={chatWorkspace}
       />
     </section>
   );

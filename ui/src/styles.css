@@ -241,6 +241,14 @@ button {
   border-radius: 7px;
   box-shadow: 0 12px 36px #283a2d0a;
 }
+.chat-workspace-embedded {
+  max-width: none;
+  height: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
 .chat-header {
   padding: 14px 24px;
   border-bottom: 1px solid #e6e3d9;
@@ -513,6 +521,7 @@ button {
   margin: 0 24px 12px;
 }
 .note-sidebar {
+  position: relative;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -544,6 +553,7 @@ h1 span {
   font-weight: 500;
 }
 .new-button,
+.ask-chat-button,
 .save-button {
   border: 0;
   cursor: pointer;
@@ -559,6 +569,18 @@ h1 span {
   background: var(--green);
   color: white;
   font-size: 12px;
+}
+.ask-chat-button {
+  flex: 0 0 auto;
+  padding: 9px 11px;
+  border: 1px solid #b8c2b0;
+  background: transparent;
+  color: var(--green);
+  font-size: 12px;
+}
+.ask-chat-button:hover {
+  background: var(--pale-green);
+  border-color: var(--green);
 }
 .new-button:hover,
 .save-button:not(:disabled):hover {
@@ -612,7 +634,7 @@ kbd {
 .note-list {
   flex: 1;
   overflow-y: auto;
-  padding: 0 9px;
+  padding: 0 9px 76px;
 }
 .list-message {
   margin: 18px 12px;
@@ -665,10 +687,46 @@ kbd {
   font-size: 10px;
 }
 .sidebar-footer {
-  padding: 14px 21px;
-  border-top: 1px solid var(--line);
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 68px;
+  padding: 39px 82px 14px 21px;
+  background: linear-gradient(to bottom, #f1efe700, #f1efe7 18px);
   color: #929b95;
   font-size: 10px;
+  pointer-events: none;
+}
+.create-note-fab {
+  position: absolute;
+  right: 20px;
+  bottom: 18px;
+  z-index: 2;
+  width: 50px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--green);
+  color: #fff;
+  box-shadow: 0 6px 18px #244b392b;
+  cursor: pointer;
+  font-size: 31px;
+  font-weight: 300;
+  line-height: 1;
+  transition: background 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
+}
+.create-note-fab:hover:not(:disabled) {
+  background: #234f3c;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px #244b393b;
+}
+.create-note-fab:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 .editor-panel {
@@ -924,10 +982,16 @@ kbd {
     padding: 18px 16px 14px;
   }
   .note-list {
-    padding-bottom: 7px;
+    padding-bottom: 70px;
   }
   .sidebar-footer {
     display: none;
+  }
+  .create-note-fab {
+    right: 16px;
+    bottom: 14px;
+    width: 46px;
+    height: 46px;
   }
   .editor-toolbar {
     min-height: 53px;
@@ -1149,6 +1213,9 @@ kbd {
   background: #202329;
   border-color: #3b3e45;
 }
+:root[data-theme="dark"] .sidebar-footer {
+  background: linear-gradient(to bottom, #20232900, #202329 18px);
+}
 :root[data-theme="dark"] .note-row:hover {
   background: #292d34;
 }
@@ -1190,11 +1257,13 @@ kbd {
   color: #aeb4bf;
 }
 :root[data-theme="dark"] .new-button,
+:root[data-theme="dark"] .ask-chat-button,
 :root[data-theme="dark"] .save-button {
   background: #46566b;
   color: #fff;
 }
 :root[data-theme="dark"] .new-button:hover,
+:root[data-theme="dark"] .ask-chat-button:hover,
 :root[data-theme="dark"] .save-button:not(:disabled):hover {
   background: #53667c;
 }

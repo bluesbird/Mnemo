@@ -10,6 +10,7 @@ type NoteListProps = {
   onSearchChange: (value: string) => void;
   onSelect: (note: Note) => void;
   onCreate: () => void;
+  onAskChat: () => void;
 };
 
 export function NoteList({
@@ -21,6 +22,7 @@ export function NoteList({
   onSearchChange,
   onSelect,
   onCreate,
+  onAskChat,
 }: NoteListProps) {
   return (
     <aside className="note-sidebar">
@@ -32,14 +34,11 @@ export function NoteList({
           </h1>
         </div>
         <button
-          className="new-button"
+          className="ask-chat-button"
           type="button"
-          onClick={onCreate}
-          aria-label="Create note"
-          disabled={totalCount >= 100}
-          title={totalCount >= 100 ? "Delete a note before adding another (100-note limit)." : undefined}
+          onClick={onAskChat}
         >
-          <span aria-hidden="true">+</span> New note
+          Ask Chatbot
         </button>
       </div>
 
@@ -72,6 +71,18 @@ export function NoteList({
           </button>
         ))}
       </div>
+      <button
+        className="create-note-fab"
+        type="button"
+        onClick={onCreate}
+        aria-label="Create note"
+        disabled={totalCount >= 100}
+        title={totalCount >= 100
+          ? "Delete a note before adding another (100-note limit)."
+          : "Create a new note"}
+      >
+        <span aria-hidden="true">+</span>
+      </button>
       <div className="sidebar-footer">
         {totalCount >= 100
           ? "100-note limit reached. Delete a note to add another."

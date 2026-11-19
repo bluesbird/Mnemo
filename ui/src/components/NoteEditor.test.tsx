@@ -20,7 +20,6 @@ it("shows limit hints only at the title and content boundaries", () => {
     onSave: vi.fn(),
     onDelete: vi.fn(),
     onSummarize: vi.fn(),
-    onCreate: vi.fn(),
   };
   const { rerender } = render(<NoteEditor {...props} />);
   expect(screen.getByLabelText("Note title").getAttribute("maxlength")).toBe("70");
@@ -55,7 +54,6 @@ it("highlights matching retrieved chunks without changing the note", () => {
     onSave: vi.fn(),
     onDelete: vi.fn(),
     onSummarize: vi.fn(),
-    onCreate: vi.fn(),
     sourcePassages: [
       "Bluebird\n\nThe first line is \n here.",
       "The second line is here.",
@@ -99,7 +97,6 @@ it("scrolls the first highlighted passage to the top of the editor", () => {
       onSave={vi.fn()}
       onDelete={vi.fn()}
       onSummarize={vi.fn()}
-      onCreate={vi.fn()}
       sourcePassages={["The matching passage."]}
     />,
   );
@@ -142,7 +139,6 @@ it("does not highlight a retrieved passage that no longer matches", () => {
       onSave={vi.fn()}
       onDelete={vi.fn()}
       onSummarize={vi.fn()}
-      onCreate={vi.fn()}
       sourcePassages={["Old indexed content"]}
     />,
   );
@@ -174,7 +170,6 @@ it("merges overlapping retrieved chunks before rendering highlights", () => {
       onSave={vi.fn()}
       onDelete={vi.fn()}
       onSummarize={vi.fn()}
-      onCreate={vi.fn()}
       sourcePassages={[
         "The bird sat on the",
         "sat on the telephone line.",
@@ -211,7 +206,6 @@ it("fades the source highlight after three seconds", () => {
       onSave={vi.fn()}
       onDelete={vi.fn()}
       onSummarize={vi.fn()}
-      onCreate={vi.fn()}
       sourcePassages={[note.content]}
     />,
   );

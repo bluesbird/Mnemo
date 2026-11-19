@@ -14,6 +14,7 @@ type ChatWorkspaceProps = {
   onOpenNote: (noteId: number, passages: string[]) => void;
   suggestions?: string[];
   onClear?: () => void;
+  embedded?: boolean;
 };
 
 function summarizeIndexResult(
@@ -29,6 +30,7 @@ export function ChatWorkspace({
   onOpenNote,
   suggestions = [],
   onClear,
+  embedded = false,
 }: ChatWorkspaceProps) {
   const [question, setQuestion] = useState("");
   const [isAsking, setIsAsking] = useState(false);
@@ -180,7 +182,10 @@ export function ChatWorkspace({
   }
 
   return (
-    <section className="chat-workspace" aria-label="Chat workspace">
+    <section
+      className={`chat-workspace${embedded ? " chat-workspace-embedded" : ""}`}
+      aria-label="Chat workspace"
+    >
       <header className="chat-header">
         <div className="chat-title-row">
           <h1>Ask your knowledge base</h1>

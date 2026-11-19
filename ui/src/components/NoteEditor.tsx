@@ -14,7 +14,7 @@ type NoteEditorProps = {
   onSave: FormEventHandler<HTMLFormElement>;
   onDelete: () => void;
   onSummarize: () => void;
-  onCreate: () => void;
+  emptyState?: ReactNode;
   sourcePassages?: string[];
 };
 
@@ -88,7 +88,7 @@ export function NoteEditor({
   onSave,
   onDelete,
   onSummarize,
-  onCreate,
+  emptyState = null,
   sourcePassages = EMPTY_PASSAGES,
 }: NoteEditorProps) {
   const hasEditor = isNew || note !== null;
@@ -301,16 +301,7 @@ export function NoteEditor({
           )}
         </>
       ) : (
-        <div className="empty-editor">
-          <div className="empty-mark" aria-hidden="true">
-            ✳
-          </div>
-          <h2>Your thoughts, gathered.</h2>
-          <p>Select a note to read it, or start with a fresh page.</p>
-          <button className="new-button" type="button" onClick={onCreate}>
-            ＋ New note
-          </button>
-        </div>
+        emptyState
       )}
     </section>
   );

@@ -70,19 +70,20 @@ it.each([false, true])("confirms and discards changes before opening chat (new n
   fireEvent.change(screen.getByLabelText("Note title"), { target: { value: "Unsaved title" } });
   fireEvent.change(screen.getByLabelText("Note content"), { target: { value: "Unsaved content" } });
 
-  fireEvent.click(screen.getByRole("button", { name: "Chat" }));
+  fireEvent.click(screen.getByRole("button", { name: "Ask Chatbot" }));
   expect(confirm).toHaveBeenCalledWith("You have unsaved changes. Discard them?");
   expect(window.location.hash).toBe("#/notes");
   expect((screen.getByLabelText("Note content") as HTMLTextAreaElement).value).toBe("Unsaved content");
 
   confirm.mockReturnValue(true);
-  fireEvent.click(screen.getByRole("button", { name: "Chat" }));
-  await waitFor(() => expect(screen.getByRole("button", { name: "Chat" }).className).toContain("is-active"));
-  fireEvent.click(screen.getByRole("button", { name: "Notes" }));
-  await waitFor(() => expect(screen.getByRole("button", { name: "Notes" }).className).toContain("is-active"));
+  fireEvent.click(screen.getByRole("button", { name: "Ask Chatbot" }));
+  await screen.findByRole("heading", { name: "Ask your notes anything." });
+  expect(window.location.hash).toBe("#/notes");
   if (isNew) {
     expect(screen.queryByLabelText("Note content")).toBeNull();
   } else {
+    fireEvent.click(screen.getByText(note.title));
+    await screen.findByLabelText("Note content");
     expect((screen.getByLabelText("Note title") as HTMLInputElement).value).toBe(note.title);
     expect((screen.getByLabelText("Note content") as HTMLTextAreaElement).value).toBe(note.content);
   }
